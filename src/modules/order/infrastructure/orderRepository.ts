@@ -51,6 +51,29 @@ export type OrderRepository = {
   getMarketStats(marketId: string, userId?: string): Promise<MarketStats>;
 };
 
+async function fetchMarketStats(marketId: string, userId?: string) {
+  const where = {
+    marketId,
+    status: { not: "CANCELLED" as const },
+    ...(userId ? { userId } : {}),
+  };
+
+  const [totalBets, totalVolumeAgg] = await Promise.all([
+    prisma.order.count({ where }),
+    prisma.order.aggregate({
+      where,
+      _sum: {
+        amount: true,
+      },
+    }),
+  ]);
+
+  return {
+    totalBets,
+    totalVolume: totalVolumeAgg._sum.amount ?? 0,
+  };
+}
+
 export const orderRepository: OrderRepository = {
   async place(data, tx) {
     const client = tx ?? prisma;
@@ -93,29 +116,13 @@ export const orderRepository: OrderRepository = {
   },
 
   async getMarketStats(marketId, userId) {
-    const [totalBets, totalVolumeAgg] = await Promise.all([
-      prisma.order.count({
-        where: {
-          marketId,
-          status: { not: "CANCELLED" },
-        },
-      }),
-      prisma.order.aggregate({
-        where: {
-          marketId,
-          status: { not: "CANCELLED" },
-        },
-        _sum: {
-          amount: true,
-        },
-      }),
-    ]);
+    const totalStats = await fetchMarketStats(marketId);
 
     if (!userId) {
       return {
         totalMarketStats: {
-          totalBets,
-          totalVolume: totalVolumeAgg._sum.amount ?? 0,
+          totalBets: totalStats.totalBets,
+          totalVolume: totalStats.totalVolume,
         },
         userMarketStats: {
           userBets: 0,
@@ -124,34 +131,16 @@ export const orderRepository: OrderRepository = {
       };
     }
 
-    const [userBets, userVolumeAgg] = await Promise.all([
-      prisma.order.count({
-        where: {
-          marketId,
-          status: { not: "CANCELLED" },
-          userId,
-        },
-      }),
-      prisma.order.aggregate({
-        where: {
-          marketId,
-          status: { not: "CANCELLED" },
-          userId,
-        },
-        _sum: {
-          amount: true,
-        },
-      }),
-    ]);
+    const userStats = await fetchMarketStats(marketId, userId);
 
     return {
       totalMarketStats: {
-        totalBets,
-        totalVolume: totalVolumeAgg._sum.amount ?? 0,
+        totalBets: totalStats.totalBets,
+        totalVolume: totalStats.totalVolume,
       },
       userMarketStats: {
-        userBets,
-        userVolume: userVolumeAgg._sum.amount ?? 0,
+        userBets: userStats.totalBets,
+        userVolume: userStats.totalVolume,
       },
     };
 
