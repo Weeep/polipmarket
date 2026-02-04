@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  role      UserRole @default(USER)
+
+  wallet    Wallet?
+  markets   Market[]
+  orders    Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Wallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  balance   Int      @default(1000)
+  locked    Int      @default(0)
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Market {
+  id          String   @id @default(cuid())
+  question    String
+  description String?
+  status      String
+  closeAt     DateTime
+
+  createdBy String
+  createdAt DateTime @default(now())
+
+  orders Order[]
+
+  creator User @relation(fields: [createdBy], references: [id])
+
+  @@index([status])
+  @@index([closeAt])
+}
+
+model Order {
+  id        String   @id
+  userId    String
+  marketId  String
+  outcomeId String
+  side      String
+  price     Float
+  amount    Float
+  status    String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  market Market @relation(fields: [marketId], references: [id])
+
+  @@index([marketId])
+  @@index([userId])
+}
