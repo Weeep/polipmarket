@@ -51,12 +51,26 @@ model Market {
   createdBy String
   createdAt DateTime @default(now())
 
-  orders Order[]
+  orders     Order[]
+  liquidity  MarketLiquidity?
 
   creator User @relation(fields: [createdBy], references: [id])
 
   @@index([status])
   @@index([closeAt])
+}
+
+model MarketLiquidity {
+  id       String @id @default(cuid())
+  marketId String @unique
+  yesPool  Float  @default(0)
+  noPool   Float  @default(0)
+  feeBps   Int    @default(100)
+
+  market Market @relation(fields: [marketId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Order {
