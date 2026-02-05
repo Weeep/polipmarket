@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { User } from "../domain/User";
 import { UserRepository } from "../infrastructure/UserRepository";
 
@@ -14,7 +15,7 @@ export async function createFakeUser(input: Input) {
       name: input.name,
     });
 
-    const userRepo = new UserRepository(tx as any);
+    const userRepo = new UserRepository(tx as Prisma.TransactionClient);
     const user = await userRepo.create(userEntity);
 
     await tx.wallet.create({
