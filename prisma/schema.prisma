@@ -14,6 +14,22 @@ enum UserRole {
   ADMIN
 }
 
+enum MarketType {
+  BINARY
+  MULTI_CHOICE
+}
+
+enum OutcomeStatus {
+  ACTIVE
+  INACTIVE
+  RESOLVED
+}
+
+enum AmmCurve {
+  CPMM
+  LMSR
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -42,10 +58,11 @@ model Wallet {
 }
 
 model Market {
-  id          String   @id @default(cuid())
+  id          String     @id @default(cuid())
   question    String
   description String?
   status      String
+  type        MarketType @default(BINARY)
   closeAt     DateTime
 
   createdBy String
@@ -53,11 +70,65 @@ model Market {
 
   orders     Order[]
   liquidity  MarketLiquidity?
+  outcomes   Outcome[]
+  ammConfig  MarketAmmConfig?
 
   creator User @relation(fields: [createdBy], references: [id])
 
   @@index([status])
   @@index([closeAt])
+  @@index([type])
+}
+
+model MarketLiquidity {
+  id       String @id @default(cuid())
+  marketId String @unique
+  yesPool  Float  @default(0)
+  noPool   Float  @default(0)
+  feeBps   Int    @default(100)
+
+  market Market @relation(fields: [marketId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Outcome {
+  id        String        @id @default(cuid())
+  marketId  String
+  slug      String
+  label     String
+  position  Int
+  status    OutcomeStatus @default(ACTIVE)
+  createdAt DateTime      @default(now())
+
+  market    Market            @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  liquidity OutcomeLiquidity?
+
+  @@unique([marketId, slug])
+  @@index([marketId, position])
+}
+
+model MarketAmmConfig {
+  id        String   @id @default(cuid())
+  marketId  String   @unique
+  curve     AmmCurve @default(CPMM)
+  feeBps    Int      @default(100)
+  lmsrB     Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  market    Market   @relation(fields: [marketId], references: [id], onDelete: Cascade)
+}
+
+model OutcomeLiquidity {
+  id        String   @id @default(cuid())
+  outcomeId String   @unique
+  yesPool   Float    @default(0)
+  noPool    Float    @default(0)
+  updatedAt DateTime @updatedAt
+
+  outcome   Outcome  @relation(fields: [outcomeId], references: [id], onDelete: Cascade)
 }
 
 model MarketLiquidity {
