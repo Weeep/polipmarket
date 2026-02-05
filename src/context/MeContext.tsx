@@ -2,6 +2,7 @@
 
 import { apiFetch } from "@/lib/apiFetch";
 import { createContext, useContext, useEffect, useState } from "react";
+import type { UserInfoDTO } from "@/modules/user/dto/UserInfoDTO";
 
 type MeContextValue = {
   me: UserInfoDTO | null;
@@ -23,7 +24,11 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    refreshMe();
+    const timer = setTimeout(() => {
+      void refreshMe();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (

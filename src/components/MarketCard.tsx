@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Market, MarketStats } from "@/modules/market/domain/Market";
 
 type Props = {
   market: Market;
-  marketStats: MarketStats | null;
+  marketStats?: MarketStats | null;
 };
 
 export function MarketCard({ market, marketStats }: Props) {

@@ -4,6 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 export default function NewMarketPage() {
   const router = useRouter();
 
@@ -34,10 +38,9 @@ export default function NewMarketPage() {
         throw new Error(data.error ?? "Failed to create market");
       }
 
-      // siker → vissza a listára (majd ide csináljuk)
       router.push("/markets");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Failed to create market"));
     } finally {
       setLoading(false);
     }
