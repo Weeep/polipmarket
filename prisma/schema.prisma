@@ -30,6 +30,11 @@ enum AmmCurve {
   LMSR
 }
 
+enum OrderPosition {
+  YES
+  NO
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -137,6 +142,7 @@ model Order {
   marketId  String
   outcomeId String
   side      String
+  position  OrderPosition?
   price     Float
   amount    Float
   status    String

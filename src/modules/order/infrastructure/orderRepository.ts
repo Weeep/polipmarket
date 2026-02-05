@@ -21,12 +21,25 @@ function parseOrderStatus(status: string): OrderStatus {
   throw new Error(`Invalid order status: ${status}`);
 }
 
+function parseOrderPosition(position: string | null): OrderPosition | undefined {
+  if (position == null) {
+    return undefined;
+  }
+
+  if (position === "YES" || position === "NO") {
+    return position;
+  }
+
+  throw new Error(`Invalid order position: ${position}`);
+}
+
 function toDomain(order: {
   id: string;
   userId: string;
   marketId: string;
   outcomeId: string;
   side: string;
+  position: string | null;
   price: number;
   amount: number;
   status: string;
@@ -35,6 +48,7 @@ function toDomain(order: {
   return {
     ...order,
     side: parseOrderSide(order.side),
+    position: parseOrderPosition(order.position),
     status: parseOrderStatus(order.status),
   };
 }
