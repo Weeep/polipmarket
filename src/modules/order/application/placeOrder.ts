@@ -5,7 +5,7 @@ import { Order, OrderPosition } from "../domain/Order";
 import { orderRepository } from "../infrastructure/orderRepository";
 import { quoteOrder } from "./quoteOrder";
 
-interface PlaceOrderInput {
+export interface PlaceOrderInput {
   userId: string;
   marketId: string;
   outcomeId: string;
@@ -16,18 +16,24 @@ interface PlaceOrderInput {
 }
 
 export async function placeOrder(input: PlaceOrderInput) {
-  const quote = await quoteOrder({
-    marketId: input.marketId,
-    outcomeId: input.outcomeId,
-    position: input.position,
-    amount: input.amount,
-  });
-
-  if (input.maxSlippageBps != null && quote.slippageBps > input.maxSlippageBps) {
-    throw new Error("Slippage too high");
-  }
-
   return prisma.$transaction(async (tx) => {
+    const quote = await quoteOrder(
+      {
+        marketId: input.marketId,
+        outcomeId: input.outcomeId,
+        position: input.position,
+        amount: input.amount,
+      },
+      tx,
+    );
+
+    if (
+      input.maxSlippageBps != null &&
+      quote.slippageBps > input.maxSlippageBps
+    ) {
+      throw new Error("Slippage too high");
+    }
+
     const wallet = await tx.wallet.findUnique({
       where: { userId: input.userId },
     });

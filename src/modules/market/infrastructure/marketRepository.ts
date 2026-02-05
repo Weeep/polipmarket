@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import {
   AmmCurve,
   Market,
@@ -90,14 +91,18 @@ function parseAmmCurve(curve: string): AmmCurve {
   throw new Error(`Invalid AMM curve: ${curve}`);
 }
 
-function mapOutcomeToDomain(outcome: NonNullable<MarketRecord["outcomes"]>[number]): Outcome {
+function mapOutcomeToDomain(
+  outcome: NonNullable<MarketRecord["outcomes"]>[number],
+): Outcome {
   return {
     ...outcome,
     status: parseOutcomeStatus(outcome.status),
   };
 }
 
-function mapAmmConfigToDomain(config: NonNullable<MarketRecord["ammConfig"]>): MarketAmmConfig {
+function mapAmmConfigToDomain(
+  config: NonNullable<MarketRecord["ammConfig"]>,
+): MarketAmmConfig {
   return {
     ...config,
     curve: parseAmmCurve(config.curve),
@@ -120,14 +125,15 @@ function toDomain(market: MarketRecord): Market {
 }
 
 export type MarketRepository = {
-  create(data: CreateMarketData): Promise<Market>;
-  findAll(): Promise<Market[]>;
-  findById(id: string): Promise<Market | null>;
+  create(data: CreateMarketData, tx?: Prisma.TransactionClient): Promise<Market>;
+  findAll(tx?: Prisma.TransactionClient): Promise<Market[]>;
+  findById(id: string, tx?: Prisma.TransactionClient): Promise<Market | null>;
 };
 
 export const marketRepository: MarketRepository = {
-  async create(data: CreateMarketData): Promise<Market> {
-    const created = await prisma.market.create({
+  async create(data: CreateMarketData, tx): Promise<Market> {
+    const client = tx ?? prisma;
+    const created = await client.market.create({
       data: {
         question: data.question,
         description: data.description ?? null,
@@ -167,8 +173,9 @@ export const marketRepository: MarketRepository = {
     return toDomain(created);
   },
 
-  async findAll(): Promise<Market[]> {
-    const markets = await prisma.market.findMany({
+  async findAll(tx): Promise<Market[]> {
+    const client = tx ?? prisma;
+    const markets = await client.market.findMany({
       include: {
         outcomes: {
           orderBy: { position: "asc" },
@@ -181,8 +188,9 @@ export const marketRepository: MarketRepository = {
     return markets.map(toDomain);
   },
 
-  async findById(id: string): Promise<Market | null> {
-    const market = await prisma.market.findUnique({
+  async findById(id: string, tx): Promise<Market | null> {
+    const client = tx ?? prisma;
+    const market = await client.market.findUnique({
       where: { id },
       include: {
         outcomes: {

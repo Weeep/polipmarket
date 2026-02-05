@@ -17,10 +17,12 @@ function parsePosition(value: unknown): OrderPosition {
 
 export const POST = withAuth(async (user, req) => {
   try {
-    const body = await req.json();
-    const { marketId, outcomeId, amount, position, maxSlippageBps } = body;
+    const body = (await req.json()) as Record<string, unknown>;
+    const amount = Number(body.amount);
+    const maxSlippageBps =
+      body.maxSlippageBps == null ? undefined : Number(body.maxSlippageBps);
 
-    if (!marketId || !outcomeId || amount == null || position == null) {
+    if (!body.marketId || !body.outcomeId || !Number.isFinite(amount)) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
@@ -29,10 +31,10 @@ export const POST = withAuth(async (user, req) => {
 
     const order = await placeOrder({
       userId: user.id,
-      marketId,
-      outcomeId,
+      marketId: String(body.marketId),
+      outcomeId: String(body.outcomeId),
       side: "BUY",
-      position: parsePosition(position),
+      position: parsePosition(body.position),
       amount,
       maxSlippageBps,
     });

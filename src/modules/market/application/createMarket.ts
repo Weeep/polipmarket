@@ -6,20 +6,20 @@ import {
 } from "../domain/Market";
 import { MarketRepository } from "../infrastructure/marketRepository";
 
-type CreateMarketOutcomeInput = {
+export type CreateMarketOutcomeInput = {
   slug: string;
   label: string;
   position: number;
   status?: OutcomeStatus;
 };
 
-type CreateMarketAmmConfigInput = {
+export type CreateMarketAmmConfigInput = {
   curve?: AmmCurve;
   feeBps?: number;
   lmsrB?: number | null;
 };
 
-type CreateMarketInput = {
+export type CreateMarketInput = {
   question: string;
   description?: string | null;
   closeAt: Date;
@@ -60,11 +60,42 @@ function normalizeOutcomes(
     throw new Error("Outcome slugs must be unique within a market");
   }
 
+  const uniquePositions = new Set(normalized.map((outcome) => outcome.position));
+  if (uniquePositions.size !== normalized.length) {
+    throw new Error("Outcome positions must be unique within a market");
+  }
+
   if (type === "MULTI_CHOICE" && normalized.length < 2) {
     throw new Error("MULTI_CHOICE market requires at least 2 outcomes");
   }
 
-  return normalized;
+  if (type === "BINARY" && normalized.length > 2) {
+    throw new Error("BINARY market supports at most 2 outcomes");
+  }
+
+  return normalized.sort((a, b) => a.position - b.position);
+}
+
+function normalizeAmmConfig(
+  ammConfig?: CreateMarketAmmConfigInput | null,
+): Required<CreateMarketAmmConfigInput> {
+  const curve = ammConfig?.curve ?? "CPMM";
+  const feeBps = ammConfig?.feeBps ?? 100;
+  const lmsrB = ammConfig?.lmsrB ?? null;
+
+  if (feeBps < 0 || feeBps > 1000) {
+    throw new Error("feeBps must be between 0 and 1000");
+  }
+
+  if (curve === "LMSR" && (lmsrB == null || lmsrB <= 0)) {
+    throw new Error("LMSR requires a positive lmsrB");
+  }
+
+  return {
+    curve,
+    feeBps,
+    lmsrB,
+  };
 }
 
 export async function createMarket(
@@ -89,10 +120,6 @@ export async function createMarket(
     closeAt: input.closeAt,
     createdBy: input.createdBy,
     outcomes: normalizeOutcomes(type, input.outcomes),
-    ammConfig: input.ammConfig ?? {
-      curve: "CPMM",
-      feeBps: 100,
-      lmsrB: null,
-    },
+    ammConfig: normalizeAmmConfig(input.ammConfig),
   });
 }

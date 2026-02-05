@@ -1,7 +1,14 @@
+import { Prisma } from "@prisma/client";
 import { marketRepository } from "@/modules/market/infrastructure/marketRepository";
 import { ammRepository } from "@/modules/market/infrastructure/ammRepository";
 import { outcomeRepository } from "@/modules/market/infrastructure/outcomeRepository";
 import { OrderPosition } from "../domain/Order";
+import {
+  applyNetAmountToPool,
+  calcExecutionPrice,
+  calcFee,
+  calcSlippageBps,
+} from "../domain/ammQuote";
 
 export type QuoteOrderInput = {
   marketId: string;
@@ -24,12 +31,15 @@ export type QuoteOrderResult = {
 
 const DEFAULT_POOL = 100;
 
-export async function quoteOrder(input: QuoteOrderInput): Promise<QuoteOrderResult> {
+export async function quoteOrder(
+  input: QuoteOrderInput,
+  tx?: Prisma.TransactionClient,
+): Promise<QuoteOrderResult> {
   if (input.amount <= 0) {
     throw new Error("Amount must be greater than 0");
   }
 
-  const market = await marketRepository.findById(input.marketId);
+  const market = await marketRepository.findById(input.marketId, tx);
   if (!market) {
     throw new Error("Market not found");
   }
@@ -42,45 +52,35 @@ export async function quoteOrder(input: QuoteOrderInput): Promise<QuoteOrderResu
     throw new Error("Market is closed");
   }
 
-  await outcomeRepository.ensureBelongsToMarket(input.marketId, input.outcomeId);
+  await outcomeRepository.ensureBelongsToMarket(input.marketId, input.outcomeId, tx);
 
   const [ammConfig, liquidity] = await Promise.all([
-    ammRepository.findConfigByMarketId(input.marketId),
-    ammRepository.findLiquidityByOutcomeId(input.outcomeId),
+    ammRepository.findConfigByMarketId(input.marketId, tx),
+    ammRepository.findLiquidityByOutcomeId(input.outcomeId, tx),
   ]);
 
   const feeBps = ammConfig?.feeBps ?? 100;
-  const feeRate = feeBps / 10_000;
-  const fee = input.amount * feeRate;
+  const fee = calcFee(input.amount, feeBps);
   const netAmount = input.amount - fee;
 
   if (netAmount <= 0) {
     throw new Error("Amount too low after fees");
   }
 
-  const yesPool = liquidity?.yesPool ?? DEFAULT_POOL;
-  const noPool = liquidity?.noPool ?? DEFAULT_POOL;
-  const totalPool = yesPool + noPool;
+  const beforePool = {
+    yesPool: liquidity?.yesPool ?? DEFAULT_POOL,
+    noPool: liquidity?.noPool ?? DEFAULT_POOL,
+  };
 
-  if (totalPool <= 0) {
-    throw new Error("Invalid AMM liquidity state");
-  }
-
-  const yesProbability = yesPool / totalPool;
-  const executionPrice = input.position === "YES" ? yesProbability : 1 - yesProbability;
+  const executionPrice = calcExecutionPrice(beforePool, input.position);
 
   if (executionPrice <= 0 || executionPrice >= 1) {
     throw new Error("Invalid quote price");
   }
 
-  const afterYesPool = input.position === "YES" ? yesPool + netAmount : yesPool;
-  const afterNoPool = input.position === "NO" ? noPool + netAmount : noPool;
-  const afterPrice =
-    input.position === "YES"
-      ? afterYesPool / (afterYesPool + afterNoPool)
-      : 1 - afterYesPool / (afterYesPool + afterNoPool);
-
-  const slippageBps = Math.abs(afterPrice - executionPrice) / executionPrice * 10_000;
+  const afterPool = applyNetAmountToPool(beforePool, input.position, netAmount);
+  const afterPrice = calcExecutionPrice(afterPool, input.position);
+  const slippageBps = calcSlippageBps(executionPrice, afterPrice);
 
   return {
     marketId: input.marketId,
