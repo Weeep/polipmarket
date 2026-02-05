@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { cancelOrder } from "@/modules/order/application/cancelOrder";
 import { withAuth } from "@/lib/withAuth";
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 export const DELETE = withAuth<{ params: Promise<{ id: string }> }>(
   async (user, _req, { params }) => {
     try {
@@ -13,9 +17,9 @@ export const DELETE = withAuth<{ params: Promise<{ id: string }> }>(
       });
 
       return NextResponse.json(order);
-    } catch (error: any) {
+    } catch (error: unknown) {
       return NextResponse.json(
-        { error: error.message ?? "Internal server error" },
+        { error: getErrorMessage(error, "Internal server error") },
         { status: 400 },
       );
     }

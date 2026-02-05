@@ -1,3 +1,4 @@
+import type { UserInfoDTO } from "@/modules/user/dto/UserInfoDTO";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/withAuth";

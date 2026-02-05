@@ -1,15 +1,15 @@
 import { withAuth } from "next-auth/middleware";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequestWithAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
-const RATE_LIMIT = 60; // requests
-const WINDOW_MS = 60_000; // 1 minute
+const RATE_LIMIT = 60;
+const WINDOW_MS = 60_000;
 
 const rateLimitStore = new Map<string, { count: number; expiresAt: number }>();
 
-function rateLimit(req: NextRequest) {
+function rateLimit(req: NextRequestWithAuth) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
-
-  const userId = (req as any).nextauth?.token?.sub ?? "anonymous";
+  const userId = req.nextauth.token?.sub ?? "anonymous";
 
   const key = `${ip}:${userId}`;
   const now = Date.now();
@@ -42,7 +42,6 @@ export default withAuth(
   function middleware(req) {
     const { pathname } = req.nextUrl;
 
-    // 👉 Rate limit CSAK API route-okra
     if (pathname.startsWith("/api")) {
       const rateLimitResponse = rateLimit(req);
       if (rateLimitResponse) {
@@ -50,8 +49,6 @@ export default withAuth(
       }
     }
 
-    // Page route-ok esetén nincs extra logika,
-    // withAuth intézi a redirectet
     return NextResponse.next();
   },
   {
@@ -62,12 +59,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: [
-    // Blocked for unauthenticated users
-    "/",
-    "/markets/new",
-
-    // API protection + rate limit
-    "/api/(.*)",
-  ],
+  matcher: ["/", "/markets/new", "/api/(.*)"],
 };

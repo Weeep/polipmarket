@@ -17,6 +17,10 @@ type Props = {
   onUpdate: (updatedMarket: MyMarketBetDTO | null) => void;
 };
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 export function MarketRow({ market, onUpdate }: Props) {
   const { refreshMe } = useMe();
 
@@ -35,11 +39,7 @@ export function MarketRow({ market, onUpdate }: Props) {
         throw new Error(body.error ?? "Cancel failed");
       }
 
-      const cancelResponse = await res.json();
-
-      const remainingBets = market.bets.filter(
-        (b) => b.orderId !== bet.orderId,
-      );
+      const remainingBets = market.bets.filter((b) => b.orderId !== bet.orderId);
 
       if (remainingBets.length === 0) {
         onUpdate(null);
@@ -51,8 +51,8 @@ export function MarketRow({ market, onUpdate }: Props) {
       }
 
       await refreshMe();
-    } catch (err: any) {
-      alert(err.message); // TODO
+    } catch (err: unknown) {
+      alert(getErrorMessage(err, "Cancel failed"));
     }
   }
 
