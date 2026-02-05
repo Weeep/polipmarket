@@ -1,5 +1,26 @@
 import { prisma } from "@/lib/prisma";
-import { Market, MarketStatus, MarketType } from "../domain/Market";
+import {
+  AmmCurve,
+  Market,
+  MarketAmmConfig,
+  MarketStatus,
+  MarketType,
+  Outcome,
+  OutcomeStatus,
+} from "../domain/Market";
+
+type CreateOutcomeData = {
+  slug: string;
+  label: string;
+  position: number;
+  status?: OutcomeStatus;
+};
+
+type CreateAmmConfigData = {
+  curve?: AmmCurve;
+  feeBps?: number;
+  lmsrB?: number | null;
+};
 
 type CreateMarketData = {
   question: string;
@@ -8,9 +29,11 @@ type CreateMarketData = {
   type?: MarketType;
   closeAt: Date;
   createdBy: string;
+  outcomes?: CreateOutcomeData[];
+  ammConfig?: CreateAmmConfigData | null;
 };
 
-function toDomain(market: {
+type MarketRecord = {
   id: string;
   question: string;
   description: string | null;
@@ -19,23 +42,80 @@ function toDomain(market: {
   closeAt: Date;
   createdBy: string;
   createdAt: Date;
-}): Market {
-  if (
-    market.status !== "OPEN" &&
-    market.status !== "CLOSED" &&
-    market.status !== "RESOLVED"
-  ) {
-    throw new Error(`Invalid market status: ${market.status}`);
-  }
+  outcomes?: {
+    id: string;
+    marketId: string;
+    slug: string;
+    label: string;
+    position: number;
+    status: string;
+    createdAt: Date;
+  }[];
+  ammConfig?: {
+    id: string;
+    marketId: string;
+    curve: string;
+    feeBps: number;
+    lmsrB: number | null;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null;
+};
 
-  if (market.type !== "BINARY" && market.type !== "MULTI_CHOICE") {
-    throw new Error(`Invalid market type: ${market.type}`);
+function parseMarketStatus(status: string): MarketStatus {
+  if (status === "OPEN" || status === "CLOSED" || status === "RESOLVED") {
+    return status;
   }
+  throw new Error(`Invalid market status: ${status}`);
+}
 
+function parseMarketType(type: string): MarketType {
+  if (type === "BINARY" || type === "MULTI_CHOICE") {
+    return type;
+  }
+  throw new Error(`Invalid market type: ${type}`);
+}
+
+function parseOutcomeStatus(status: string): OutcomeStatus {
+  if (status === "ACTIVE" || status === "INACTIVE" || status === "RESOLVED") {
+    return status;
+  }
+  throw new Error(`Invalid outcome status: ${status}`);
+}
+
+function parseAmmCurve(curve: string): AmmCurve {
+  if (curve === "CPMM" || curve === "LMSR") {
+    return curve;
+  }
+  throw new Error(`Invalid AMM curve: ${curve}`);
+}
+
+function mapOutcomeToDomain(outcome: NonNullable<MarketRecord["outcomes"]>[number]): Outcome {
   return {
-    ...market,
-    status: market.status as MarketStatus,
-    type: market.type as MarketType,
+    ...outcome,
+    status: parseOutcomeStatus(outcome.status),
+  };
+}
+
+function mapAmmConfigToDomain(config: NonNullable<MarketRecord["ammConfig"]>): MarketAmmConfig {
+  return {
+    ...config,
+    curve: parseAmmCurve(config.curve),
+  };
+}
+
+function toDomain(market: MarketRecord): Market {
+  return {
+    id: market.id,
+    question: market.question,
+    description: market.description,
+    status: parseMarketStatus(market.status),
+    type: parseMarketType(market.type),
+    closeAt: market.closeAt,
+    createdBy: market.createdBy,
+    createdAt: market.createdAt,
+    outcomes: market.outcomes?.map(mapOutcomeToDomain),
+    ammConfig: market.ammConfig ? mapAmmConfigToDomain(market.ammConfig) : null,
   };
 }
 
@@ -49,8 +129,38 @@ export const marketRepository: MarketRepository = {
   async create(data: CreateMarketData): Promise<Market> {
     const created = await prisma.market.create({
       data: {
-        ...data,
+        question: data.question,
+        description: data.description ?? null,
+        status: data.status,
         type: data.type ?? "BINARY",
+        closeAt: data.closeAt,
+        createdBy: data.createdBy,
+        outcomes:
+          data.outcomes && data.outcomes.length > 0
+            ? {
+                create: data.outcomes.map((outcome) => ({
+                  slug: outcome.slug,
+                  label: outcome.label,
+                  position: outcome.position,
+                  status: outcome.status ?? "ACTIVE",
+                })),
+              }
+            : undefined,
+        ammConfig: data.ammConfig
+          ? {
+              create: {
+                curve: data.ammConfig.curve ?? "CPMM",
+                feeBps: data.ammConfig.feeBps ?? 100,
+                lmsrB: data.ammConfig.lmsrB ?? null,
+              },
+            }
+          : undefined,
+      },
+      include: {
+        outcomes: {
+          orderBy: { position: "asc" },
+        },
+        ammConfig: true,
       },
     });
 
@@ -59,6 +169,12 @@ export const marketRepository: MarketRepository = {
 
   async findAll(): Promise<Market[]> {
     const markets = await prisma.market.findMany({
+      include: {
+        outcomes: {
+          orderBy: { position: "asc" },
+        },
+        ammConfig: true,
+      },
       orderBy: { createdAt: "desc" },
     });
 
@@ -68,6 +184,12 @@ export const marketRepository: MarketRepository = {
   async findById(id: string): Promise<Market | null> {
     const market = await prisma.market.findUnique({
       where: { id },
+      include: {
+        outcomes: {
+          orderBy: { position: "asc" },
+        },
+        ammConfig: true,
+      },
     });
 
     if (!market) return null;
