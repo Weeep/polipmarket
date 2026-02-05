@@ -1,8 +1,9 @@
+import { User as PrismaUser } from "@prisma/client";
 import { User } from "../domain/User";
 import { UserRole } from "../domain/UserRole";
 
 export const userMapper = {
-  toDomain(raw: any): User {
+  toDomain(raw: PrismaUser): User {
     return User.fromPersistence({
       id: raw.id,
       email: raw.email,
