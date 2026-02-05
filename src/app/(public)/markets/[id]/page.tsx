@@ -8,13 +8,16 @@ import { redirect } from "next/navigation";
 import { useMe } from "@/context/MeContext";
 import { apiFetch } from "@/lib/apiFetch";
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 export default function MarketDetailPage() {
   const { id } = useParams<{ id: string }>();
 
   const [market, setMarket] = useState<Market | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // trading state
   const [price, setPrice] = useState(0.5);
   const [amount, setAmount] = useState(10);
   const [submitting, setSubmitting] = useState(false);
@@ -62,13 +65,13 @@ export default function MarketDetailPage() {
       }
 
       await refreshMe();
-
       setSuccess(`Order placed: BUY ${outcomeId}`);
-    } catch (err: any) {
-      if (err.message === "Unauthorized") {
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, "Order failed");
+      if (message === "Unauthorized") {
         redirect("/login");
       } else {
-        setError(err.message);
+        setError(message);
       }
     } finally {
       setSubmitting(false);
@@ -91,17 +94,14 @@ export default function MarketDetailPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
-      {/* Market header */}
       <MarketCard market={market} marketStats={stats} />
 
-      {/* Trading UI */}
       <div className="bg-blue-900 rounded-xl p-6 text-white space-y-4">
         <h2 className="text-lg font-bold">Place Order</h2>
 
         <div className="flex gap-4">
           <label className="flex flex-col text-sm">
             Price (0–1)
-            {/* TEMP: price is manual, will be AMM-calculated */}
             <input
               type="number"
               step="0.01"
