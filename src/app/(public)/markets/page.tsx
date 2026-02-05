@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Market } from "@/modules/market/domain/Market";
 import { apiFetch } from "@/lib/apiFetch";
@@ -23,9 +24,9 @@ export default function MarketsPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-white">Markets</h1>
 
-        <a href="/markets/new" className="button-gold">
+        <Link href="/markets/new" className="button-gold">
           New market
-        </a>
+        </Link>
       </div>
 
       <div className="space-y-4">
