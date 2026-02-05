@@ -1,38 +1,49 @@
-import { NextRequest, NextResponse } from "next/server";
-import { placeOrder } from "@/modules/order/application/placeOrder";
-import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/withAuth";
+import { placeOrder } from "@/modules/order/application/placeOrder";
+import { OrderPosition } from "@/modules/order/domain/Order";
 
-export const POST = withAuth<{ params: Promise<{ id: string }> }>(
-  async (user, _req, { params }) => {
-    try {
-      const body = await _req.json();
-      const { marketId, outcomeId, price, amount } = body;
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
 
-      if (!marketId || !outcomeId || price == null || amount == null) {
-        return NextResponse.json(
-          { error: "Missing required fields" },
-          { status: 400 },
-        );
-      }
+function parsePosition(value: unknown): OrderPosition {
+  if (value === "YES" || value === "NO") {
+    return value;
+  }
 
-      const order = await placeOrder({
-        userId: user.id,
-        marketId,
-        outcomeId,
-        side: "BUY",
-        price,
-        amount,
-      });
+  throw new Error("Invalid position");
+}
 
-      return NextResponse.json(order, { status: 201 });
-    } catch (error: any) {
-      console.error("[POST /api/orders]", error);
+export const POST = withAuth(async (user, req) => {
+  try {
+    const body = await req.json();
+    const { marketId, outcomeId, amount, position, maxSlippageBps } = body;
 
+    if (!marketId || !outcomeId || amount == null || position == null) {
       return NextResponse.json(
-        { error: error.message ?? "Internal server error" },
-        { status: 500 },
+        { error: "Missing required fields" },
+        { status: 400 },
       );
     }
-  },
-);
+
+    const order = await placeOrder({
+      userId: user.id,
+      marketId,
+      outcomeId,
+      side: "BUY",
+      position: parsePosition(position),
+      amount,
+      maxSlippageBps,
+    });
+
+    return NextResponse.json(order, { status: 201 });
+  } catch (error: unknown) {
+    console.error("[POST /api/orders]", error);
+
+    return NextResponse.json(
+      { error: getErrorMessage(error, "Internal server error") },
+      { status: 500 },
+    );
+  }
+});
