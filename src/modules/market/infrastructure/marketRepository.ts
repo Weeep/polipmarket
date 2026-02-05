@@ -1,13 +1,21 @@
 import { prisma } from "@/lib/prisma";
-import { Market, MarketStatus } from "../domain/Market";
+import { Market, MarketStatus, MarketType } from "../domain/Market";
 
-type CreateMarketData = Omit<Market, "id" | "createdAt">;
+type CreateMarketData = {
+  question: string;
+  description?: string | null;
+  status: MarketStatus;
+  type?: MarketType;
+  closeAt: Date;
+  createdBy: string;
+};
 
 function toDomain(market: {
   id: string;
   question: string;
   description: string | null;
   status: string;
+  type: string;
   closeAt: Date;
   createdBy: string;
   createdAt: Date;
@@ -20,9 +28,14 @@ function toDomain(market: {
     throw new Error(`Invalid market status: ${market.status}`);
   }
 
+  if (market.type !== "BINARY" && market.type !== "MULTI_CHOICE") {
+    throw new Error(`Invalid market type: ${market.type}`);
+  }
+
   return {
     ...market,
     status: market.status as MarketStatus,
+    type: market.type as MarketType,
   };
 }
 
@@ -35,7 +48,10 @@ export type MarketRepository = {
 export const marketRepository: MarketRepository = {
   async create(data: CreateMarketData): Promise<Market> {
     const created = await prisma.market.create({
-      data,
+      data: {
+        ...data,
+        type: data.type ?? "BINARY",
+      },
     });
 
     return toDomain(created);
