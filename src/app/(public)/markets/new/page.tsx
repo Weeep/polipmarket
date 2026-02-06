@@ -14,6 +14,10 @@ export default function NewMarketPage() {
   const [question, setQuestion] = useState("");
   const [description, setDescription] = useState("");
   const [closeAt, setCloseAt] = useState("");
+  const [outcomes, setOutcomes] = useState([
+    { label: "Yes", slug: "yes" },
+    { label: "No", slug: "no" },
+  ]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -23,6 +27,13 @@ export default function NewMarketPage() {
     setLoading(true);
 
     try {
+      const payloadOutcomes = outcomes
+        .map((outcome) => ({
+          label: outcome.label.trim(),
+          slug: outcome.slug.trim(),
+        }))
+        .filter((outcome) => outcome.label && outcome.slug);
+
       const res = await apiFetch("/api/markets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -30,6 +41,7 @@ export default function NewMarketPage() {
           question,
           description,
           closeAt,
+          outcomes: payloadOutcomes.length > 0 ? payloadOutcomes : undefined,
         }),
       });
 
@@ -84,6 +96,82 @@ export default function NewMarketPage() {
               required
             />
           </label>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold">Outcomes</span>
+              <button
+                type="button"
+                className="button-gold"
+                onClick={() =>
+                  setOutcomes((prev) => [
+                    ...prev,
+                    { label: "", slug: "" },
+                  ])
+                }
+              >
+                Add outcome
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {outcomes.map((outcome, index) => (
+                <div
+                  key={`${outcome.slug}-${index}`}
+                  className="flex flex-col gap-2 rounded-lg border border-blue-800/60 bg-blue-950/40 p-3"
+                >
+                  <label className="text-sm">
+                    Label
+                    <input
+                      className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                      value={outcome.label}
+                      onChange={(e) =>
+                        setOutcomes((prev) =>
+                          prev.map((item, idx) =>
+                            idx === index
+                              ? { ...item, label: e.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                      required
+                    />
+                  </label>
+                  <label className="text-sm">
+                    Slug
+                    <input
+                      className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                      value={outcome.slug}
+                      onChange={(e) =>
+                        setOutcomes((prev) =>
+                          prev.map((item, idx) =>
+                            idx === index
+                              ? { ...item, slug: e.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                      required
+                    />
+                  </label>
+
+                  {outcomes.length > 2 && (
+                    <button
+                      type="button"
+                      className="text-sm text-red-300 hover:text-red-200 self-start"
+                      onClick={() =>
+                        setOutcomes((prev) =>
+                          prev.filter((_, idx) => idx !== index),
+                        )
+                      }
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
 
           {error && <p style={{ color: "red" }}>{error}</p>}
 
