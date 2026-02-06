@@ -35,7 +35,7 @@ export function MarketCard({ market, marketStats }: Props) {
   const { refreshMe } = useMe();
 
   const stats = marketStats ?? market.marketStats;
-  const outcomes = market.outcomes ?? [];
+  const outcomes: OutcomeWithPrices[] = market.outcomes ?? [];
   const shouldShowOutcomes = market.outcomes != null;
 
   async function placeOrder(outcomeId: string, position: "YES" | "NO") {
@@ -82,23 +82,7 @@ export function MarketCard({ market, marketStats }: Props) {
             <p className="marketcard-description">{market.description}</p>
           )}
         </div>
-
-        <Link href={`/markets/${market.id}`} className="button-gold">
-          View market
-        </Link>
       </div>
-
-      <div className="marketcard-statusbar">
-        <span>Status: {market.status}</span>
-        <span>Closes: {new Date(market.closeAt).toLocaleString()}</span>
-      </div>
-
-      {stats && (
-        <div className="marketcard-statusbar">
-          Bets: {stats.totalMarketStats.totalBets} · Volume:{" "}
-          {stats.totalMarketStats.totalVolume}
-        </div>
-      )}
 
       <div className="flex flex-wrap items-center gap-3 text-sm text-white">
         <label className="flex items-center gap-2">
@@ -108,7 +92,7 @@ export function MarketCard({ market, marketStats }: Props) {
             min="1"
             value={amount}
             onChange={(e) => setAmount(Number(e.target.value))}
-            className="w-24 px-2 py-1 rounded bg-blue-800 border border-blue-700"
+            className="w-24 px-2 py-1 rounded border"
           />
         </label>
       </div>
@@ -118,7 +102,7 @@ export function MarketCard({ market, marketStats }: Props) {
           {outcomes.map((outcome) => (
             <div
               key={outcome.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-blue-800/60 bg-blue-950/40 px-3 py-2"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-lg border px-3 py-2"
             >
               <span className="text-white">{outcome.label}</span>
               <div className="flex flex-wrap gap-2">
@@ -132,10 +116,12 @@ export function MarketCard({ market, marketStats }: Props) {
                   }
                   onClick={() => placeOrder(outcome.id, "YES")}
                 >
-                  YES{" "}
-                  {outcome.yesPrice != null
-                    ? `(${outcome.yesPrice.toFixed(4)})`
-                    : "(—)"}
+                  <span>YES&nbsp;</span>
+                  <span className="text-xs text-stone-700">
+                    {outcome.yesPrice != null
+                      ? `(${outcome.yesPrice.toFixed(2)})`
+                      : "(—)"}
+                  </span>
                 </button>
                 <button
                   className="button-gold disabled:opacity-50"
@@ -147,10 +133,12 @@ export function MarketCard({ market, marketStats }: Props) {
                   }
                   onClick={() => placeOrder(outcome.id, "NO")}
                 >
-                  NO{" "}
-                  {outcome.noPrice != null
-                    ? `(${outcome.noPrice.toFixed(4)})`
-                    : "(—)"}
+                  <span>NO&nbsp;</span>
+                  <span className="text-xs text-stone-700">
+                    {outcome.noPrice != null
+                      ? `(${outcome.noPrice.toFixed(2)})`
+                      : "(—)"}
+                  </span>
                 </button>
               </div>
             </div>
@@ -160,6 +148,18 @@ export function MarketCard({ market, marketStats }: Props) {
           )}
         </div>
       )}
+
+      {stats && (
+        <div className="marketcard-statusbar justify-center">
+          Bets: {stats.totalMarketStats.totalBets} · Volume:{" "}
+          {stats.totalMarketStats.totalVolume}
+        </div>
+      )}
+
+      <div className="marketcard-statusbar">
+        <span>Status: {market.status}</span>
+        <span>Closes: {new Date(market.closeAt).toLocaleString()}</span>
+      </div>
 
       {error && <p className="text-red-400 text-sm">{error}</p>}
       {success && <p className="text-green-400 text-sm">{success}</p>}
