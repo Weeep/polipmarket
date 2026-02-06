@@ -38,11 +38,14 @@ export function Header() {
         <span>{me?.name}</span>
 
         {me.image ? (
-          <Image
-            alt="profile image"
-            src={me.image}
-            className="w-8 h-8 rounded-full border-2 border-stone-200"
-          />
+          <div className="relative w-8 h-8">
+            <Image
+              src={me.image}
+              alt="profile image"
+              fill
+              className="rounded-full border-2 border-stone-200 object-cover"
+            />
+          </div>
         ) : (
           <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center text-sm">
             {me.name?.[0] ?? "U"}
