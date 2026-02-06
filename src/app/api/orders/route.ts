@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/withAuth";
 import { placeOrder } from "@/modules/order/application/placeOrder";
 import { OrderPosition } from "@/modules/order/domain/Order";
+import { DEFAULT_MAX_SLIPPAGE_BPS } from "@/config/economy";
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -20,7 +21,9 @@ export const POST = withAuth(async (user, req) => {
     const body = (await req.json()) as Record<string, unknown>;
     const amount = Number(body.amount);
     const maxSlippageBps =
-      body.maxSlippageBps == null ? undefined : Number(body.maxSlippageBps);
+      body.maxSlippageBps == null
+        ? DEFAULT_MAX_SLIPPAGE_BPS
+        : Number(body.maxSlippageBps);
 
     if (maxSlippageBps != null && !Number.isFinite(maxSlippageBps)) {
       return NextResponse.json(

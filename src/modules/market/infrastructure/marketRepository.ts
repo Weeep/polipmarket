@@ -9,6 +9,7 @@ import {
   Outcome,
   OutcomeStatus,
 } from "../domain/Market";
+import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
 
 type CreateOutcomeData = {
   slug: string;
@@ -125,7 +126,10 @@ function toDomain(market: MarketRecord): Market {
 }
 
 export type MarketRepository = {
-  create(data: CreateMarketData, tx?: Prisma.TransactionClient): Promise<Market>;
+  create(
+    data: CreateMarketData,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Market>;
   findAll(tx?: Prisma.TransactionClient): Promise<Market[]>;
   findById(id: string, tx?: Prisma.TransactionClient): Promise<Market | null>;
 };
@@ -149,6 +153,12 @@ export const marketRepository: MarketRepository = {
                   label: outcome.label,
                   position: outcome.position,
                   status: outcome.status ?? "ACTIVE",
+                  liquidity: {
+                    create: {
+                      yesPool: DEFAULT_OUTCOME_POOL,
+                      noPool: DEFAULT_OUTCOME_POOL,
+                    },
+                  },
                 })),
               }
             : undefined,

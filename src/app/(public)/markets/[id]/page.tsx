@@ -8,6 +8,7 @@ import { OrderPosition } from "@/modules/order/domain/Order";
 import { useMe } from "@/context/MeContext";
 import { apiFetch } from "@/lib/apiFetch";
 import { QuoteOrderResult } from "@/modules/order/application/quoteOrder";
+import { DEFAULT_MAX_SLIPPAGE_BPS } from "@/config/economy";
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -24,7 +25,9 @@ export default function MarketDetailPage() {
   const [selectedOutcomeId, setSelectedOutcomeId] = useState<string>("");
   const [position, setPosition] = useState<OrderPosition>("YES");
   const [amount, setAmount] = useState(10);
-  const [maxSlippageBps, setMaxSlippageBps] = useState(500);
+  const [maxSlippageBps, setMaxSlippageBps] = useState(
+    DEFAULT_MAX_SLIPPAGE_BPS,
+  );
   const [quote, setQuote] = useState<QuoteOrderResult | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
 
@@ -232,7 +235,9 @@ export default function MarketDetailPage() {
             </>
           )}
           {!quoteLoading && !quote && (
-            <p className="text-blue-200">Quote unavailable for current input.</p>
+            <p className="text-blue-200">
+              Quote unavailable for current input.
+            </p>
           )}
         </div>
 

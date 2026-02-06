@@ -9,6 +9,7 @@ import {
   calcFee,
   calcSlippageBps,
 } from "../domain/ammQuote";
+import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
 
 export type QuoteOrderInput = {
   marketId: string;
@@ -28,8 +29,6 @@ export type QuoteOrderResult = {
   estimatedShares: number;
   slippageBps: number;
 };
-
-const DEFAULT_POOL = 100;
 
 export async function quoteOrder(
   input: QuoteOrderInput,
@@ -52,7 +51,11 @@ export async function quoteOrder(
     throw new Error("Market is closed");
   }
 
-  await outcomeRepository.ensureBelongsToMarket(input.marketId, input.outcomeId, tx);
+  await outcomeRepository.ensureBelongsToMarket(
+    input.marketId,
+    input.outcomeId,
+    tx,
+  );
 
   const [ammConfig, liquidity] = await Promise.all([
     ammRepository.findConfigByMarketId(input.marketId, tx),
@@ -68,8 +71,8 @@ export async function quoteOrder(
   }
 
   const beforePool = {
-    yesPool: liquidity?.yesPool ?? DEFAULT_POOL,
-    noPool: liquidity?.noPool ?? DEFAULT_POOL,
+    yesPool: liquidity?.yesPool ?? DEFAULT_OUTCOME_POOL,
+    noPool: liquidity?.noPool ?? DEFAULT_OUTCOME_POOL,
   };
 
   const executionPrice = calcExecutionPrice(beforePool, input.position);

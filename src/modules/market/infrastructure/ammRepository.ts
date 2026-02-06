@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { OrderPosition } from "@/modules/order/domain/Order";
 import { AmmCurve, MarketAmmConfig } from "../domain/Market";
+import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
 
 export type OutcomeLiquidity = {
   id: string;
@@ -85,8 +86,10 @@ export const ammRepository: AmmRepository = {
           : { noPool: { increment: input.amount } },
       create: {
         outcomeId: input.outcomeId,
-        yesPool: input.position === "YES" ? input.amount : 0,
-        noPool: input.position === "NO" ? input.amount : 0,
+        yesPool:
+          DEFAULT_OUTCOME_POOL + (input.position === "YES" ? input.amount : 0),
+        noPool:
+          DEFAULT_OUTCOME_POOL + (input.position === "NO" ? input.amount : 0),
       },
     });
   },
