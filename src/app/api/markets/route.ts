@@ -4,9 +4,14 @@ import {
   createMarket,
   CreateMarketInput,
 } from "@/modules/market/application/createMarket";
+import { getMarketStats } from "@/modules/market/application/getMarketStats";
 import { getMarkets } from "@/modules/market/application/getMarkets";
 import { MarketType } from "@/modules/market/domain/Market";
 import { marketRepository } from "@/modules/market/infrastructure/marketRepository";
+import { outcomeRepository } from "@/modules/market/infrastructure/outcomeRepository";
+import { ammRepository } from "@/modules/market/infrastructure/ammRepository";
+import { calcExecutionPrice } from "@/modules/order/domain/ammQuote";
+import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -95,10 +100,64 @@ export const POST = withAuth(async (user, req) => {
   }
 });
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const markets = await getMarkets(marketRepository);
-    return NextResponse.json(markets);
+    const { searchParams } = new URL(req.url);
+    const include = new Set(
+      (searchParams.get("include") ?? "")
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean),
+    );
+
+    const includeOutcomes = include.has("outcomes") || include.has("prices");
+    const includePrices = include.has("prices");
+    const includeStats =
+      include.has("stats") || include.has("prices") || include.has("outcomes");
+
+    if (!includeOutcomes && !includeStats) {
+      return NextResponse.json(markets);
+    }
+
+    const marketsWithExtras = await Promise.all(
+      markets.map(async (market) => {
+        const [outcomes, marketStats] = await Promise.all([
+          includeOutcomes
+            ? outcomeRepository.findByMarketId(market.id)
+            : Promise.resolve(undefined),
+          includeStats ? getMarketStats(market.id) : Promise.resolve(undefined),
+        ]);
+
+        const outcomesWithPrices = includePrices && outcomes
+          ? await Promise.all(
+              outcomes.map(async (outcome) => {
+                const liquidity = await ammRepository.findLiquidityByOutcomeId(
+                  outcome.id,
+                );
+                const pool = {
+                  yesPool: liquidity?.yesPool ?? DEFAULT_OUTCOME_POOL,
+                  noPool: liquidity?.noPool ?? DEFAULT_OUTCOME_POOL,
+                };
+
+                return {
+                  ...outcome,
+                  yesPrice: calcExecutionPrice(pool, "YES"),
+                  noPrice: calcExecutionPrice(pool, "NO"),
+                };
+              }),
+            )
+          : outcomes;
+
+        return {
+          ...market,
+          outcomes: outcomesWithPrices,
+          marketStats: marketStats ?? null,
+        };
+      }),
+    );
+
+    return NextResponse.json(marketsWithExtras);
   } catch (error: unknown) {
     console.error("[GET /api/markets]", error);
 
