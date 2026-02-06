@@ -74,7 +74,7 @@ export function MarketCard({ market, marketStats }: Props) {
   }
 
   return (
-    <div key={market.id} className="marketcard-base space-y-4">
+    <div key={market.id} className="marketcard-base space-y-4 mb-16">
       <div className="flex items-start justify-between gap-4">
         <div>
           <Link href={`/markets/${market.id}`} className="block">
@@ -126,10 +126,7 @@ export function MarketCard({ market, marketStats }: Props) {
       {shouldShowOutcomes && (
         <div className="space-y-2">
           {outcomes.map((outcome) => (
-            <div
-              key={outcome.id}
-              className="marketcard-outcome"
-            >
+            <div key={outcome.id} className="marketcard-outcome">
               <span className="marketcard-outcome-label">{outcome.label}</span>
               <div className="flex flex-wrap gap-3">
                 <button
