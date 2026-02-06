@@ -2,18 +2,28 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Market } from "@/modules/market/domain/Market";
+import { Market, MarketStats, Outcome } from "@/modules/market/domain/Market";
 import { apiFetch } from "@/lib/apiFetch";
 import { MarketCard } from "@/components/MarketCard";
 
+type OutcomeWithPrices = Outcome & {
+  yesPrice?: number;
+  noPrice?: number;
+};
+
+type MarketSummary = Market & {
+  outcomes?: OutcomeWithPrices[];
+  marketStats?: MarketStats | null;
+};
+
 export default function MarketsPage() {
-  const [markets, setMarkets] = useState<Market[]>([]);
+  const [markets, setMarkets] = useState<MarketSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiFetch("/api/markets")
+    apiFetch("/api/markets?include=outcomes,prices")
       .then((res) => res.json())
-      .then(setMarkets)
+      .then((data) => setMarkets(data as MarketSummary[]))
       .finally(() => setLoading(false));
   }, []);
 
@@ -31,7 +41,7 @@ export default function MarketsPage() {
 
       <div className="space-y-4">
         {markets.map((m) => (
-          <MarketCard key={m.id} market={m} />
+          <MarketCard key={m.id} market={m} marketStats={m.marketStats} />
         ))}
       </div>
     </div>
