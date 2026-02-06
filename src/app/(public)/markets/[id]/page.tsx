@@ -17,9 +17,17 @@ function getErrorMessage(error: unknown, fallback: string) {
 export default function MarketDetailPage() {
   const { id } = useParams<{ id: string }>();
 
-  const [market, setMarket] = useState<Market | null>(null);
-  const [stats, setStats] = useState<MarketStats | null>(null);
-  const [outcomes, setOutcomes] = useState<Outcome[]>([]);
+  type OutcomeWithPrices = Outcome & {
+    yesPrice?: number;
+    noPrice?: number;
+  };
+  type MarketWithExtras = Market & {
+    outcomes?: OutcomeWithPrices[];
+    marketStats?: MarketStats | null;
+  };
+
+  const [market, setMarket] = useState<MarketWithExtras | null>(null);
+  const [outcomes, setOutcomes] = useState<OutcomeWithPrices[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [selectedOutcomeId, setSelectedOutcomeId] = useState<string>("");
@@ -40,18 +48,11 @@ export default function MarketDetailPage() {
   useEffect(() => {
     setLoading(true);
 
-    Promise.all([
-      apiFetch(`/api/markets/${id}`).then((r) => r.json() as Promise<Market>),
-      apiFetch(`/api/markets/${id}/stats`).then(
-        (r) => r.json() as Promise<MarketStats>,
-      ),
-      apiFetch(`/api/markets/${id}/outcomes`).then(
-        (r) => r.json() as Promise<Outcome[]>,
-      ),
-    ])
-      .then(([marketData, statsData, outcomesData]) => {
+    apiFetch(`/api/markets/${id}?include=outcomes,prices,stats`)
+      .then((r) => r.json() as Promise<MarketWithExtras>)
+      .then((marketData) => {
         setMarket(marketData);
-        setStats(statsData);
+        const outcomesData = marketData.outcomes ?? [];
         setOutcomes(outcomesData);
         if (outcomesData.length > 0) {
           setSelectedOutcomeId(outcomesData[0].id);
@@ -163,7 +164,7 @@ export default function MarketDetailPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
-      <MarketCard market={market} marketStats={stats} />
+      <MarketCard market={market} marketStats={market.marketStats} />
 
       <div className="bg-blue-900 rounded-xl p-6 text-white space-y-4">
         <h2 className="text-lg font-bold">Place Order</h2>
