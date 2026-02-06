@@ -28,7 +28,10 @@ function getErrorMessage(error: unknown, fallback: string) {
 }
 
 export function MarketCard({ market, marketStats }: Props) {
+  const presetAmounts = [10, 50, 100, 200];
   const [amount, setAmount] = useState(10);
+  const [customAmount, setCustomAmount] = useState("");
+  const [isCustomAmount, setIsCustomAmount] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -71,7 +74,7 @@ export function MarketCard({ market, marketStats }: Props) {
   }
 
   return (
-    <div key={market.id} className="marketcard-base space-y-3">
+    <div key={market.id} className="marketcard-base space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div>
           <Link href={`/markets/${market.id}`} className="block">
@@ -84,17 +87,40 @@ export function MarketCard({ market, marketStats }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 text-sm text-white">
-        <label className="flex items-center gap-2">
-          Amount
+      <div className="marketcard-amount">
+        <span className="marketcard-amount-label">Amount</span>
+        <div className="marketcard-amount-bar">
+          {presetAmounts.map((value) => (
+            <button
+              key={value}
+              type="button"
+              data-active={!isCustomAmount && amount === value}
+              className="marketcard-amount-option"
+              onClick={() => {
+                setAmount(value);
+                setIsCustomAmount(false);
+                setCustomAmount("");
+              }}
+            >
+              {value}
+            </button>
+          ))}
           <input
             type="number"
             min="1"
-            value={amount}
-            onChange={(e) => setAmount(Number(e.target.value))}
-            className="w-24 px-2 py-1 rounded border"
+            value={customAmount}
+            placeholder="Custom"
+            onFocus={() => setIsCustomAmount(true)}
+            onChange={(e) => {
+              const nextValue = e.target.value;
+              setCustomAmount(nextValue);
+              setIsCustomAmount(true);
+              setAmount(Number(nextValue));
+            }}
+            data-active={isCustomAmount}
+            className="marketcard-amount-input"
           />
-        </label>
+        </div>
       </div>
 
       {shouldShowOutcomes && (
@@ -102,12 +128,12 @@ export function MarketCard({ market, marketStats }: Props) {
           {outcomes.map((outcome) => (
             <div
               key={outcome.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-lg border px-3 py-2"
+              className="marketcard-outcome"
             >
-              <span className="text-white">{outcome.label}</span>
-              <div className="flex flex-wrap gap-2">
+              <span className="marketcard-outcome-label">{outcome.label}</span>
+              <div className="flex flex-wrap gap-3">
                 <button
-                  className="button-gold disabled:opacity-50"
+                  className="marketcard-yes-button disabled:opacity-50"
                   disabled={
                     submitting ||
                     amount <= 0 ||
@@ -117,14 +143,14 @@ export function MarketCard({ market, marketStats }: Props) {
                   onClick={() => placeOrder(outcome.id, "YES")}
                 >
                   <span>YES&nbsp;</span>
-                  <span className="text-xs text-stone-700">
+                  <span className="marketcard-price">
                     {outcome.yesPrice != null
                       ? `(${outcome.yesPrice.toFixed(2)})`
                       : "(—)"}
                   </span>
                 </button>
                 <button
-                  className="button-gold disabled:opacity-50"
+                  className="marketcard-no-button disabled:opacity-50"
                   disabled={
                     submitting ||
                     amount <= 0 ||
@@ -134,7 +160,7 @@ export function MarketCard({ market, marketStats }: Props) {
                   onClick={() => placeOrder(outcome.id, "NO")}
                 >
                   <span>NO&nbsp;</span>
-                  <span className="text-xs text-stone-700">
+                  <span className="marketcard-price">
                     {outcome.noPrice != null
                       ? `(${outcome.noPrice.toFixed(2)})`
                       : "(—)"}
