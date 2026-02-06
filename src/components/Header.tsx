@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { useMe } from "@/context/MeContext";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 
 export function Header() {
   const { data: session, update } = useSession();
@@ -38,7 +38,8 @@ export function Header() {
         <span>{me?.name}</span>
 
         {me.image ? (
-          <img
+          <Image
+            alt="profile image"
             src={me.image}
             className="w-8 h-8 rounded-full border-2 border-stone-200"
           />
