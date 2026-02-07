@@ -20,7 +20,8 @@ export default function NewMarketPage() {
 
   const [question, setQuestion] = useState("");
   const [description, setDescription] = useState("");
-  const [closeAt, setCloseAt] = useState("");
+  const [bettingCloseAt, setBettingCloseAt] = useState("");
+  const [resolveAt, setResolveAt] = useState("");
   const [marketType, setMarketType] = useState<"BINARY" | "MULTI_CHOICE">(
     "BINARY",
   );
@@ -56,7 +57,8 @@ export default function NewMarketPage() {
         body: JSON.stringify({
           question,
           description,
-          closeAt,
+          bettingCloseAt,
+          resolveAt: resolveAt || null,
           type: outcomes.length > 2 ? "MULTI_CHOICE" : marketType,
           outcomes: payloadOutcomes.length > 0 ? payloadOutcomes : undefined,
         }),
@@ -104,13 +106,23 @@ export default function NewMarketPage() {
           </label>
 
           <label>
-            Close at
+            Betting closes at
             <input
               className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
               type="datetime-local"
-              value={closeAt}
-              onChange={(e) => setCloseAt(e.target.value)}
+              value={bettingCloseAt}
+              onChange={(e) => setBettingCloseAt(e.target.value)}
               required
+            />
+          </label>
+
+          <label>
+            Event resolves at (optional)
+            <input
+              className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              type="datetime-local"
+              value={resolveAt}
+              onChange={(e) => setResolveAt(e.target.value)}
             />
           </label>
 
