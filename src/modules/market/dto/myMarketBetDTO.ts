@@ -2,6 +2,7 @@ export type MyMarketBetDTO = {
   marketId: string;
   question: string;
   closesAt: string;
+  resolvesAt?: string | null;
   status: string;
   latestBetAt: string;
   bets: {

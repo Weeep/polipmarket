@@ -28,6 +28,7 @@ export async function getMyMarkets(
         marketId: order.market.id,
         question: order.market.question,
         closesAt: order.market.bettingCloseAt.toISOString(),
+        resolvesAt: order.market.resolveAt?.toISOString() ?? null,
         status: order.market.status,
         latestBetAt: order.createdAt.toISOString(),
         bets: [],

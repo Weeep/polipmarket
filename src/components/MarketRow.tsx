@@ -94,7 +94,14 @@ export function MarketRow({ market, onUpdate }: Props) {
 
       <div className="marketcard-statusbar text-stone-400">
         <span>{market.status}</span>
-        <span>closes {new Date(market.closesAt).toLocaleDateString()}</span>
+        <span>
+          Fogadás zár {new Date(market.closesAt).toLocaleDateString()}
+        </span>
+        {market.resolvesAt && (
+          <span>
+            Esemény vége {new Date(market.resolvesAt).toLocaleDateString()}
+          </span>
+        )}
       </div>
     </div>
   );
