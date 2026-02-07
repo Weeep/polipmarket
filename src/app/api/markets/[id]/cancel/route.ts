@@ -8,7 +8,8 @@ function getErrorMessage(error: unknown, fallback: string) {
 
 export const POST = withAuth(async (_user, _req, context) => {
   try {
-    const { id } = context as { params: { id: string } };
+    const { params } = context as { params: { id: string } };
+    const { id } = params;
     const market = await cancelMarket(id);
     return NextResponse.json(market);
   } catch (error: unknown) {
