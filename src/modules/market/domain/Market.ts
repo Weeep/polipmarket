@@ -3,7 +3,7 @@ import {
   UserMarketStats,
 } from "@/modules/order/domain/Order";
 
-export type MarketStatus = "OPEN" | "CLOSED" | "RESOLVED";
+export type MarketStatus = "OPEN" | "CLOSED" | "RESOLVED" | "CANCELLED";
 
 export type MarketType = "BINARY" | "MULTI_CHOICE";
 
@@ -42,7 +42,8 @@ export interface Market {
   description?: string | null;
   status: MarketStatus;
   type: MarketType;
-  closeAt: Date;
+  bettingCloseAt: Date;
+  resolveAt?: Date | null;
   createdBy: string;
   createdAt: Date;
   outcomes?: Outcome[];

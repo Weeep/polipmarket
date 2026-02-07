@@ -181,7 +181,7 @@ export function MarketCard({ market, marketStats }: Props) {
 
       <div className="marketcard-statusbar">
         <span>Status: {market.status}</span>
-        <span>Closes: {new Date(market.closeAt).toLocaleString()}</span>
+        <span>Closes: {new Date(market.bettingCloseAt).toLocaleString()}</span>
       </div>
 
       {error && <p className="text-red-400 text-sm">{error}</p>}
