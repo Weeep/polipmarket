@@ -70,6 +70,8 @@ model Market {
   type        MarketType @default(BINARY)
   bettingCloseAt DateTime
   resolveAt      DateTime?
+  resolvedOutcomeId String?
+  resolvedPosition  OrderPosition?
 
   createdBy String
   createdAt DateTime @default(now())

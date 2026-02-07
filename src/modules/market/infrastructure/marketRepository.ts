@@ -44,6 +44,8 @@ type MarketRecord = {
   type: string;
   bettingCloseAt: Date;
   resolveAt: Date | null;
+  resolvedOutcomeId: string | null;
+  resolvedPosition: string | null;
   createdBy: string;
   createdAt: Date;
   outcomes?: {
@@ -126,6 +128,10 @@ function toDomain(market: MarketRecord): Market {
     type: parseMarketType(market.type),
     bettingCloseAt: market.bettingCloseAt,
     resolveAt: market.resolveAt,
+    resolvedOutcomeId: market.resolvedOutcomeId,
+    resolvedPosition: market.resolvedPosition
+      ? (market.resolvedPosition as "YES" | "NO")
+      : null,
     createdBy: market.createdBy,
     createdAt: market.createdAt,
     outcomes: market.outcomes?.map(mapOutcomeToDomain),

@@ -44,6 +44,8 @@ export interface Market {
   type: MarketType;
   bettingCloseAt: Date;
   resolveAt?: Date | null;
+  resolvedOutcomeId?: string | null;
+  resolvedPosition?: "YES" | "NO" | null;
   createdBy: string;
   createdAt: Date;
   outcomes?: Outcome[];
