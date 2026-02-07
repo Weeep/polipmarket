@@ -47,7 +47,7 @@ export async function quoteOrder(
     throw new Error("Market is not open");
   }
 
-  if (market.closeAt <= new Date()) {
+  if (market.bettingCloseAt <= new Date()) {
     throw new Error("Market is closed");
   }
 

@@ -22,7 +22,8 @@ export type CreateMarketAmmConfigInput = {
 export type CreateMarketInput = {
   question: string;
   description?: string | null;
-  closeAt: Date;
+  bettingCloseAt: Date;
+  resolveAt?: Date | null;
   createdBy: string;
   type?: MarketType;
   outcomes?: CreateMarketOutcomeInput[];
@@ -106,8 +107,12 @@ export async function createMarket(
     throw new Error("Question is required");
   }
 
-  if (input.closeAt <= new Date()) {
-    throw new Error("closeAt must be in the future");
+  if (input.bettingCloseAt <= new Date()) {
+    throw new Error("bettingCloseAt must be in the future");
+  }
+
+  if (input.resolveAt && input.resolveAt <= input.bettingCloseAt) {
+    throw new Error("resolveAt must be after bettingCloseAt");
   }
 
   const type = input.type ?? "BINARY";
@@ -117,7 +122,8 @@ export async function createMarket(
     description: input.description ?? null,
     status: "OPEN",
     type,
-    closeAt: input.closeAt,
+    bettingCloseAt: input.bettingCloseAt,
+    resolveAt: input.resolveAt ?? input.bettingCloseAt,
     createdBy: input.createdBy,
     outcomes: normalizeOutcomes(type, input.outcomes),
     ammConfig: normalizeAmmConfig(input.ammConfig),
