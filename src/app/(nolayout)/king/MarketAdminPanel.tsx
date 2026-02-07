@@ -26,6 +26,8 @@ type MarketSummary = {
   outcomes?: MarketOutcome[];
 };
 
+type MarketSummaryApi = MarketSummary & { marketId?: string };
+
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
@@ -51,9 +53,16 @@ export function MarketAdminPanel() {
 
     apiFetch("/api/markets?include=outcomes")
       .then((res) => res.json())
-      .then((data: MarketSummary[]) => {
+      .then((data: MarketSummaryApi[]) => {
         if (cancelled) return;
-        setMarkets(data);
+        setMarkets(
+          data
+            .map((market) => ({
+              ...market,
+              id: market.id ?? market.marketId ?? "",
+            }))
+            .filter((market) => Boolean(market.id)),
+        );
       })
       .catch((err) => {
         if (cancelled) return;
@@ -92,6 +101,10 @@ export function MarketAdminPanel() {
   };
 
   const handleResolve = async (marketId: string) => {
+    if (!marketId) {
+      setActionError("Missing market id for resolve.");
+      return;
+    }
     const outcomeId = selectedOutcomeByMarket[marketId];
     if (!outcomeId) {
       setActionError("Select an outcome before resolving.");
@@ -116,6 +129,10 @@ export function MarketAdminPanel() {
   };
 
   const handleCancel = async (marketId: string) => {
+    if (!marketId) {
+      setActionError("Missing market id for cancel.");
+      return;
+    }
     setActionError(null);
     setBusyMarketId(marketId);
     try {
@@ -126,6 +143,26 @@ export function MarketAdminPanel() {
       updateMarket(updated);
     } catch (err) {
       setActionError(getErrorMessage(err, "Failed to cancel market"));
+    } finally {
+      setBusyMarketId(null);
+    }
+  };
+
+  const handleClose = async (marketId: string) => {
+    if (!marketId) {
+      setActionError("Missing market id for close.");
+      return;
+    }
+    setActionError(null);
+    setBusyMarketId(marketId);
+    try {
+      const res = await apiFetch(`/api/markets/${marketId}/close`, {
+        method: "POST",
+      });
+      const updated = (await res.json()) as MarketSummary;
+      updateMarket(updated);
+    } catch (err) {
+      setActionError(getErrorMessage(err, "Failed to close market"));
     } finally {
       setBusyMarketId(null);
     }
@@ -165,6 +202,7 @@ export function MarketAdminPanel() {
           </thead>
           <tbody>
             {markets.map((market) => {
+              const canClose = market.status === "OPEN";
               const canCancel =
                 market.status === "OPEN" || market.status === "CLOSED";
               const canResolve = market.status === "CLOSED";
@@ -203,6 +241,13 @@ export function MarketAdminPanel() {
                   </td>
                   <td>
                     <div style={{ display: "flex", gap: 8 }}>
+                      <button
+                        type="button"
+                        onClick={() => handleClose(market.id)}
+                        disabled={!canClose || busy}
+                      >
+                        {busy && canClose ? "Closing…" : "Close"}
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleCancel(market.id)}
