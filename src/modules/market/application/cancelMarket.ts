@@ -17,7 +17,7 @@ export async function cancelMarket(marketId: string) {
     const orders = await tx.order.findMany({
       where: {
         marketId,
-        status: { not: "CANCELLED" },
+        status: { in: ["OPEN", "FILLED"] },
       },
       select: {
         userId: true,
@@ -39,7 +39,7 @@ export async function cancelMarket(marketId: string) {
     await tx.order.updateMany({
       where: {
         marketId,
-        status: { not: "CANCELLED" },
+        status: { in: ["OPEN", "FILLED"] },
       },
       data: { status: "CANCELLED" },
     });
