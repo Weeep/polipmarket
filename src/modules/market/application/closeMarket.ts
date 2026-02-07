@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { marketRepository } from "@/modules/market/infrastructure/marketRepository";
 
-export async function resolveMarket(marketId: string) {
+export async function closeMarket(marketId: string) {
   return prisma.$transaction(async (tx) => {
     const market = await marketRepository.findById(marketId, tx);
 
@@ -9,10 +9,10 @@ export async function resolveMarket(marketId: string) {
       throw new Error("Market not found");
     }
 
-    if (market.status !== "CLOSED") {
-      throw new Error("Only CLOSED markets can be resolved");
+    if (market.status !== "OPEN") {
+      throw new Error("Only OPEN markets can be closed");
     }
 
-    return marketRepository.updateStatus(marketId, "RESOLVED", tx);
+    return marketRepository.updateStatus(marketId, "CLOSED", tx);
   });
 }

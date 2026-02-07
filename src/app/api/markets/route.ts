@@ -29,14 +29,28 @@ function parseMarketType(value: unknown): MarketType | undefined {
   throw new Error("Invalid market type");
 }
 
-function toCreateMarketInput(body: Record<string, unknown>, userId: string): CreateMarketInput {
-  const closeAtValue = body.closeAt;
-  const closeAt = closeAtValue instanceof Date ? closeAtValue : new Date(String(closeAtValue));
+function toCreateMarketInput(
+  body: Record<string, unknown>,
+  userId: string,
+): CreateMarketInput {
+  const bettingCloseValue = body.bettingCloseAt ?? body.closeAt;
+  const bettingCloseAt =
+    bettingCloseValue instanceof Date
+      ? bettingCloseValue
+      : new Date(String(bettingCloseValue));
+  const resolveAtValue = body.resolveAt;
+  const resolveAt =
+    resolveAtValue instanceof Date
+      ? resolveAtValue
+      : resolveAtValue != null
+        ? new Date(String(resolveAtValue))
+        : null;
 
   return {
     question: String(body.question ?? ""),
     description: typeof body.description === "string" ? body.description : null,
-    closeAt,
+    bettingCloseAt,
+    resolveAt,
     createdBy: userId,
     type: parseMarketType(body.type),
     outcomes: Array.isArray(body.outcomes)

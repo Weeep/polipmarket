@@ -29,7 +29,8 @@ type CreateMarketData = {
   description?: string | null;
   status: MarketStatus;
   type?: MarketType;
-  closeAt: Date;
+  bettingCloseAt: Date;
+  resolveAt?: Date | null;
   createdBy: string;
   outcomes?: CreateOutcomeData[];
   ammConfig?: CreateAmmConfigData | null;
@@ -41,7 +42,8 @@ type MarketRecord = {
   description: string | null;
   status: string;
   type: string;
-  closeAt: Date;
+  bettingCloseAt: Date;
+  resolveAt: Date | null;
   createdBy: string;
   createdAt: Date;
   outcomes?: {
@@ -65,7 +67,12 @@ type MarketRecord = {
 };
 
 function parseMarketStatus(status: string): MarketStatus {
-  if (status === "OPEN" || status === "CLOSED" || status === "RESOLVED") {
+  if (
+    status === "OPEN" ||
+    status === "CLOSED" ||
+    status === "RESOLVED" ||
+    status === "CANCELLED"
+  ) {
     return status;
   }
   throw new Error(`Invalid market status: ${status}`);
@@ -117,7 +124,8 @@ function toDomain(market: MarketRecord): Market {
     description: market.description,
     status: parseMarketStatus(market.status),
     type: parseMarketType(market.type),
-    closeAt: market.closeAt,
+    bettingCloseAt: market.bettingCloseAt,
+    resolveAt: market.resolveAt,
     createdBy: market.createdBy,
     createdAt: market.createdAt,
     outcomes: market.outcomes?.map(mapOutcomeToDomain),
@@ -132,6 +140,11 @@ export type MarketRepository = {
   ): Promise<Market>;
   findAll(tx?: Prisma.TransactionClient): Promise<Market[]>;
   findById(id: string, tx?: Prisma.TransactionClient): Promise<Market | null>;
+  updateStatus(
+    id: string,
+    status: MarketStatus,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Market>;
 };
 
 export const marketRepository: MarketRepository = {
@@ -143,7 +156,8 @@ export const marketRepository: MarketRepository = {
         description: data.description ?? null,
         status: data.status,
         type: data.type ?? "BINARY",
-        closeAt: data.closeAt,
+        bettingCloseAt: data.bettingCloseAt,
+        resolveAt: data.resolveAt ?? null,
         createdBy: data.createdBy,
         outcomes:
           data.outcomes && data.outcomes.length > 0
@@ -213,5 +227,21 @@ export const marketRepository: MarketRepository = {
     if (!market) return null;
 
     return toDomain(market);
+  },
+
+  async updateStatus(id, status, tx) {
+    const client = tx ?? prisma;
+    const updated = await client.market.update({
+      where: { id },
+      data: { status },
+      include: {
+        outcomes: {
+          orderBy: { position: "asc" },
+        },
+        ammConfig: true,
+      },
+    });
+
+    return toDomain(updated);
   },
 };
