@@ -4,6 +4,7 @@ import { StopImpersonationButton } from "@/components/StopImpersonationButton";
 import { ensureAdmin } from "@/modules/auth/application/ensureAdmin";
 import { listUsers } from "@/modules/user/application/listUsers";
 import Link from "next/link";
+import { MarketAdminPanel } from "./MarketAdminPanel";
 
 export default async function AdminPage() {
   await ensureAdmin();
@@ -51,6 +52,8 @@ export default async function AdminPage() {
       </table>
 
       <StopImpersonationButton />
+
+      <MarketAdminPanel />
 
       <p style={{ marginTop: 24 }}>
         <Link href="/">Back</Link>
