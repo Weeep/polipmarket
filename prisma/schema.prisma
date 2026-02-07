@@ -68,7 +68,10 @@ model Market {
   description String?
   status      String
   type        MarketType @default(BINARY)
-  closeAt     DateTime
+  bettingCloseAt DateTime
+  resolveAt      DateTime?
+  resolvedOutcomeId String?
+  resolvedPosition  OrderPosition?
 
   createdBy String
   createdAt DateTime @default(now())
@@ -81,7 +84,7 @@ model Market {
   creator User @relation(fields: [createdBy], references: [id])
 
   @@index([status])
-  @@index([closeAt])
+  @@index([bettingCloseAt])
   @@index([type])
 }
 
