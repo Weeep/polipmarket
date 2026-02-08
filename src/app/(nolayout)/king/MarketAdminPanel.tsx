@@ -59,7 +59,7 @@ export function MarketAdminPanel() {
           data
             .map((market) => ({
               ...market,
-              id: market.id ?? market.marketId ?? "",
+              id: market.id ?? market.marketId ?? "", //TODO test without market.marketId
             }))
             .filter((market) => Boolean(market.id)),
         );
