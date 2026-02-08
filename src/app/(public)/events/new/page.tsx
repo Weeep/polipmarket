@@ -4,30 +4,34 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
 
+type DraftMarket = {
+  id: string;
+  name: string;
+  description: string;
+};
+
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
 
-export default function NewMarketPage() {
+export default function NewEventPage() {
   const router = useRouter();
-  const createOutcome = (label = "", slug = "") => ({
-    id: typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random()}`,
-    label,
-    slug,
+  const createMarket = (): DraftMarket => ({
+    id:
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random()}`,
+    name: "",
+    description: "",
   });
 
   const [question, setQuestion] = useState("");
   const [description, setDescription] = useState("");
   const [bettingCloseAt, setBettingCloseAt] = useState("");
   const [resolveAt, setResolveAt] = useState("");
-  const [outcomes, setOutcomes] = useState([
-    createOutcome("Outcome", "outcome"),
-  ]);
+  const [markets, setMarkets] = useState<DraftMarket[]>([createMarket()]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const canAddOutcome = outcomes.length < 2;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,14 +39,18 @@ export default function NewMarketPage() {
     setLoading(true);
 
     try {
-      const payloadOutcomes = outcomes
-        .map((outcome) => ({
-          label: outcome.label.trim(),
-          slug: outcome.slug.trim(),
+      const payloadMarkets = markets
+        .map((market) => ({
+          name: market.name.trim(),
+          description: market.description.trim(),
         }))
-        .filter((outcome) => outcome.label && outcome.slug);
+        .filter((market) => market.name);
 
-      const res = await apiFetch("/api/markets", {
+      if (payloadMarkets.length === 0) {
+        throw new Error("At least one market is required");
+      }
+
+      const res = await apiFetch("/api/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -50,35 +58,34 @@ export default function NewMarketPage() {
           description,
           bettingCloseAt,
           resolveAt: resolveAt || null,
-          type: "BINARY",
-          outcomes: payloadOutcomes.length > 0 ? payloadOutcomes : undefined,
+          markets: payloadMarkets,
         }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error ?? "Failed to create market");
+        throw new Error(data.error ?? "Failed to create event");
       }
 
-      router.push("/markets");
+      router.push("/events");
     } catch (err: unknown) {
-      setError(getErrorMessage(err, "Failed to create market"));
+      setError(getErrorMessage(err, "Failed to create event"));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="max-w-xl mx-auto px-6 py-8">
+    <div className="max-w-3xl mx-auto px-6 py-8">
       <div className="marketcard-base marketcard-question">
-        <h1 className="text-xl font-semibold mb-4">Create market</h1>
+        <h1 className="text-xl font-semibold mb-4">Create event</h1>
 
         <form
           onSubmit={onSubmit}
           style={{ display: "flex", gap: 12, flexDirection: "column" }}
         >
           <label>
-            Question
+            Event question
             <input
               className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
               value={question}
@@ -108,54 +115,44 @@ export default function NewMarketPage() {
           </label>
 
           <label>
-            Event resolves at (optional)
+            Event resolves at
             <input
               className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
               type="datetime-local"
               value={resolveAt}
               onChange={(e) => setResolveAt(e.target.value)}
+              required
             />
           </label>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold">Outcomes</span>
+              <span className="text-sm font-semibold">Markets</span>
               <button
                 type="button"
                 className="button-gold"
-                disabled={!canAddOutcome}
-                onClick={() =>
-                  setOutcomes((prev) => [
-                    ...prev,
-                    createOutcome(),
-                  ])
-                }
+                onClick={() => setMarkets((prev) => [...prev, createMarket()])}
               >
-                Add outcome
+                Add market
               </button>
             </div>
-            {!canAddOutcome && (
-              <p className="text-sm text-stone-300">
-                Binary markets support up to two outcomes.
-              </p>
-            )}
 
             <div className="space-y-3">
-              {outcomes.map((outcome, index) => (
+              {markets.map((market, index) => (
                 <div
-                  key={outcome.id}
+                  key={market.id}
                   className="flex flex-col gap-2 rounded-lg border border-blue-800/60 bg-blue-950/40 p-3"
                 >
                   <label className="text-sm">
-                    Label
+                    Market name
                     <input
                       className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                      value={outcome.label}
+                      value={market.name}
                       onChange={(e) =>
-                        setOutcomes((prev) =>
+                        setMarkets((prev) =>
                           prev.map((item, idx) =>
                             idx === index
-                              ? { ...item, label: e.target.value }
+                              ? { ...item, name: e.target.value }
                               : item,
                           ),
                         )
@@ -164,34 +161,33 @@ export default function NewMarketPage() {
                     />
                   </label>
                   <label className="text-sm">
-                    Slug
-                    <input
+                    Market description (optional)
+                    <textarea
                       className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                      value={outcome.slug}
+                      value={market.description}
                       onChange={(e) =>
-                        setOutcomes((prev) =>
+                        setMarkets((prev) =>
                           prev.map((item, idx) =>
                             idx === index
-                              ? { ...item, slug: e.target.value }
+                              ? { ...item, description: e.target.value }
                               : item,
                           ),
                         )
                       }
-                      required
                     />
                   </label>
 
-                  {outcomes.length > 1 && (
+                  {markets.length > 1 && (
                     <button
                       type="button"
                       className="text-sm text-red-300 hover:text-red-200 self-start"
                       onClick={() =>
-                        setOutcomes((prev) =>
+                        setMarkets((prev) =>
                           prev.filter((_, idx) => idx !== index),
                         )
                       }
                     >
-                      Remove
+                      Remove market
                     </button>
                   )}
                 </div>
@@ -202,7 +198,7 @@ export default function NewMarketPage() {
           {error && <p style={{ color: "red" }}>{error}</p>}
 
           <button className="button-gold" type="submit" disabled={loading}>
-            {loading ? "Creating…" : "Create market"}
+            {loading ? "Creating…" : "Create event"}
           </button>
         </form>
       </div>

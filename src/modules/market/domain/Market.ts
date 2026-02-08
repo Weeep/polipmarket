@@ -5,7 +5,7 @@ import {
 
 export type MarketStatus = "OPEN" | "CLOSED" | "RESOLVED" | "CANCELLED";
 
-export type MarketType = "BINARY" | "MULTI_CHOICE";
+export type MarketType = "BINARY";
 
 export type OutcomeStatus = "ACTIVE" | "INACTIVE" | "RESOLVED";
 
@@ -38,6 +38,7 @@ export type MarketStats = {
 
 export interface Market {
   id: string;
+  eventId?: string | null;
   question: string;
   description?: string | null;
   status: MarketStatus;
