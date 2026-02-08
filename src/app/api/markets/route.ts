@@ -47,6 +47,7 @@ function toCreateMarketInput(
         : null;
 
   return {
+    eventId: typeof body.eventId === "string" ? body.eventId : null,
     question: String(body.question ?? ""),
     description: typeof body.description === "string" ? body.description : null,
     bettingCloseAt,
