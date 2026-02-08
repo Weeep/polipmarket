@@ -41,15 +41,13 @@ export default function HomePage() {
     .filter((market) => market.status === "OPEN")
     .sort(
       (a, b) =>
-        new Date(b.latestBetAt).getTime() -
-        new Date(a.latestBetAt).getTime(),
+        new Date(b.latestBetAt).getTime() - new Date(a.latestBetAt).getTime(),
     );
   const closedMarkets = myMarkets
     .filter((market) => market.status !== "OPEN")
     .sort(
       (a, b) =>
-        new Date(b.latestBetAt).getTime() -
-        new Date(a.latestBetAt).getTime(),
+        new Date(b.latestBetAt).getTime() - new Date(a.latestBetAt).getTime(),
     );
 
   return (
@@ -83,9 +81,7 @@ export default function HomePage() {
           </h2>
 
           {closedMarkets.length === 0 && (
-            <p className="text-stone-400 text-sm">
-              Nincs lezárt fogadásod
-            </p>
+            <p className="text-stone-400 text-sm">Nincs lezárt fogadásod</p>
           )}
 
           <div className="space-y-4">
@@ -103,9 +99,6 @@ export default function HomePage() {
       </div>
 
       {/*<p className="mb-4">Logged in as {session.user.email}</p>*/}
-      <Link href="/markets">
-        <button className="button-gold m-4">Markets</button>
-      </Link>
 
       <button
         onClick={() => signOut({ callbackUrl: "/" })}

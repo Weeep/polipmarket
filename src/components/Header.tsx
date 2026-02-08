@@ -21,9 +21,16 @@ export function Header() {
 
   return (
     <header className="bg-zinc-800 text-white px-6 py-4 flex items-center">
-      <Link href="/">
-        <div className="font-semibold text-lg tracking-tight">Polipmarket</div>
-      </Link>
+      <div className="flex direction-row items-center">
+        <Link href="/">
+          <div className="font-semibold text-lg tracking-tight">
+            Polipmarket
+          </div>
+        </Link>
+        <Link href="/events">
+          <button className="button-gold ml-8">Events</button>
+        </Link>
+      </div>
 
       <div className="ml-auto flex items-center gap-4">
         <div className="text-stone-200 text-sm">
