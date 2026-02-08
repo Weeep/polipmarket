@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/apiFetch";
+import { EventCard } from "@/components/EventCard";
 import { Market, MarketStats, Outcome } from "@/modules/market/domain/Market";
 import { Event } from "@/modules/event/domain/Event";
-import { MarketCard } from "@/components/MarketCard";
 
 type OutcomeWithPrices = Outcome & {
   yesPrice?: number;
@@ -52,38 +52,7 @@ export default function EventsPage() {
 
       <div className="space-y-10">
         {events.map((event) => (
-          <section key={event.id} className="marketcard-base space-y-6">
-            <div className="space-y-2">
-              <h2 className="marketcard-question">{event.question}</h2>
-              {event.description && (
-                <p className="marketcard-description">{event.description}</p>
-              )}
-              <div className="marketcard-statusbar">
-                <span>
-                  Fogadás zár:{" "}
-                  {new Date(event.bettingCloseAt).toLocaleString()}
-                </span>
-                {event.resolveAt && (
-                  <span>
-                    Esemény vége: {new Date(event.resolveAt).toLocaleString()}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              {event.markets.map((market) => (
-                <MarketCard key={market.id} market={market} />
-              ))}
-            </div>
-
-            {event.eventStats && (
-              <div className="marketcard-statusbar justify-center">
-                Bets: {event.eventStats.totalBets} · Volume:{" "}
-                {event.eventStats.totalVolume}
-              </div>
-            )}
-          </section>
+          <EventCard key={event.id} event={event} />
         ))}
       </div>
     </div>
