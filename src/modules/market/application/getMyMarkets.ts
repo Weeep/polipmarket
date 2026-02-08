@@ -9,10 +9,13 @@ export async function getMyMarkets(
   const orders = await prisma.order.findMany({
     where: {
       userId,
-      status: { not: "CANCELLED" },
     },
     include: {
-      market: true,
+      market: {
+        include: {
+          outcomes: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -30,16 +33,25 @@ export async function getMyMarkets(
         closesAt: order.market.bettingCloseAt.toISOString(),
         resolvesAt: order.market.resolveAt?.toISOString() ?? null,
         status: order.market.status,
+        resolvedOutcomeId: order.market.resolvedOutcomeId,
+        resolvedPosition: order.market.resolvedPosition
+          ? (order.market.resolvedPosition as "YES" | "NO")
+          : null,
         latestBetAt: order.createdAt.toISOString(),
         bets: [],
       });
     }
 
     const market = map.get(order.marketId)!;
+    const outcomeLabel =
+      order.market.outcomes.find((outcome) => outcome.id === order.outcomeId)
+        ?.label ?? "Unknown";
 
     market.bets.push({
       orderId: order.id,
-      outcome: order.outcomeId as "YES" | "NO",
+      outcomeId: order.outcomeId,
+      outcomeLabel,
+      position: order.position as "YES" | "NO",
       amount: order.amount,
       price: order.price,
       status: order.status,

@@ -4,10 +4,14 @@ export type MyMarketBetDTO = {
   closesAt: string;
   resolvesAt?: string | null;
   status: string;
+  resolvedOutcomeId?: string | null;
+  resolvedPosition?: "YES" | "NO" | null;
   latestBetAt: string;
   bets: {
     orderId: string;
-    outcome: "YES" | "NO";
+    outcomeId: string;
+    outcomeLabel: string;
+    position: "YES" | "NO";
     amount: number;
     price: number;
     status: string;

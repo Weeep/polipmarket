@@ -37,20 +37,59 @@ export default function HomePage() {
     );
   }
 
+  const openMarkets = myMarkets
+    .filter((market) => market.status === "OPEN")
+    .sort(
+      (a, b) =>
+        new Date(b.latestBetAt).getTime() -
+        new Date(a.latestBetAt).getTime(),
+    );
+  const closedMarkets = myMarkets
+    .filter((market) => market.status !== "OPEN")
+    .sort(
+      (a, b) =>
+        new Date(b.latestBetAt).getTime() -
+        new Date(a.latestBetAt).getTime(),
+    );
+
   return (
     <main className="p-8">
       <div className="max-w-6xl mx-auto px-6 py-10 space-y-10">
         <div className="marketcard-base space-y-4">
           <h2 className="text-lg font-bold text-stone-100">
-            My Active Markets
+            Nyitott marketjeim
           </h2>
 
-          {myMarkets.length === 0 && (
-            <p className="text-stone-400 text-sm">No active bets yet</p>
+          {openMarkets.length === 0 && (
+            <p className="text-stone-400 text-sm">Nincs aktív fogadásod</p>
           )}
 
           <div className="space-y-4">
-            {myMarkets.map((market) => (
+            {openMarkets.map((market) => (
+              <MarketRow
+                key={market.marketId}
+                market={market}
+                onUpdate={(updatedMarket) =>
+                  updateMarket(market.marketId, updatedMarket)
+                }
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="marketcard-base space-y-4">
+          <h2 className="text-lg font-bold text-stone-100">
+            Lezárt marketjeim
+          </h2>
+
+          {closedMarkets.length === 0 && (
+            <p className="text-stone-400 text-sm">
+              Nincs lezárt fogadásod
+            </p>
+          )}
+
+          <div className="space-y-4">
+            {closedMarkets.map((market) => (
               <MarketRow
                 key={market.marketId}
                 market={market}
