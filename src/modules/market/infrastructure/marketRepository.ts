@@ -81,7 +81,7 @@ function parseMarketStatus(status: string): MarketStatus {
 }
 
 function parseMarketType(type: string): MarketType {
-  if (type === "BINARY" || type === "MULTI_CHOICE") {
+  if (type === "BINARY") {
     return type;
   }
   throw new Error(`Invalid market type: ${type}`);

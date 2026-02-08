@@ -66,10 +66,6 @@ function normalizeOutcomes(
     throw new Error("Outcome positions must be unique within a market");
   }
 
-  if (type === "MULTI_CHOICE" && normalized.length < 2) {
-    throw new Error("MULTI_CHOICE market requires at least 2 outcomes");
-  }
-
   if (type === "BINARY" && normalized.length > 2) {
     throw new Error("BINARY market supports at most 2 outcomes");
   }

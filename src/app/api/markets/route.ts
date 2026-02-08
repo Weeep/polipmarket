@@ -22,7 +22,7 @@ function parseMarketType(value: unknown): MarketType | undefined {
     return undefined;
   }
 
-  if (value === "BINARY" || value === "MULTI_CHOICE") {
+  if (value === "BINARY") {
     return value;
   }
 

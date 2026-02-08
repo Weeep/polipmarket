@@ -5,7 +5,7 @@ import {
 
 export type MarketStatus = "OPEN" | "CLOSED" | "RESOLVED" | "CANCELLED";
 
-export type MarketType = "BINARY" | "MULTI_CHOICE";
+export type MarketType = "BINARY";
 
 export type OutcomeStatus = "ACTIVE" | "INACTIVE" | "RESOLVED";
 
