@@ -17,9 +17,15 @@ type MarketOutcome = {
   position: number;
 };
 
+type MarketEvent = {
+  id: string;
+  question: string;
+};
+
 type MarketSummary = {
   id: string;
   question: string;
+  event?: MarketEvent | null;
   status: MarketStatus;
   resolvedOutcomeId?: string | null;
   resolvedPosition?: "YES" | "NO" | null;
@@ -38,8 +44,8 @@ function statusLabel(status: MarketStatus) {
 
 export function MarketAdminPanel() {
   const [markets, setMarkets] = useState<MarketSummary[]>([]);
-  const [selectedOutcomeByMarket, setSelectedOutcomeByMarket] = useState<
-    Record<string, string>
+  const [selectedPositionByMarket, setSelectedPositionByMarket] = useState<
+    Record<string, "YES" | "NO">
   >({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,16 +85,15 @@ export function MarketAdminPanel() {
   }, []);
 
   useEffect(() => {
-    setSelectedOutcomeByMarket((prev) => {
+    setSelectedPositionByMarket((prev) => {
       const next = { ...prev };
       for (const market of markets) {
-        if (!next[market.id]) {
-          const defaultOutcomeId =
-            market.resolvedOutcomeId ?? market.outcomes?.[0]?.id;
-          if (defaultOutcomeId) {
-            next[market.id] = defaultOutcomeId;
-          }
+        if (next[market.id]) continue;
+        if (market.resolvedPosition === "YES" || market.resolvedPosition === "NO") {
+          next[market.id] = market.resolvedPosition;
+          continue;
         }
+        next[market.id] = "YES";
       }
       return next;
     });
@@ -105,11 +110,14 @@ export function MarketAdminPanel() {
       setActionError("Missing market id for resolve.");
       return;
     }
-    const outcomeId = selectedOutcomeByMarket[marketId];
+
+    const market = markets.find((item) => item.id === marketId);
+    const outcomeId = market?.resolvedOutcomeId ?? market?.outcomes?.[0]?.id;
     if (!outcomeId) {
-      setActionError("Select an outcome before resolving.");
+      setActionError("No outcome available to resolve.");
       return;
     }
+    const position = selectedPositionByMarket[marketId] ?? "YES";
 
     setActionError(null);
     setBusyMarketId(marketId);
@@ -117,7 +125,7 @@ export function MarketAdminPanel() {
       const res = await apiFetch(`/api/markets/${marketId}/resolve`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ outcomeId, position: "YES" }),
+        body: JSON.stringify({ outcomeId, position }),
       });
       const updated = (await res.json()) as MarketSummary;
       updateMarket(updated);
@@ -193,10 +201,11 @@ export function MarketAdminPanel() {
         <table border={1} cellPadding={8} style={{ width: "100%" }}>
           <thead>
             <tr>
+              <th>Event</th>
               <th>Question</th>
               <th>Status</th>
               <th>Resolved outcome</th>
-              <th>Resolve outcome</th>
+              <th>Winning position</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -209,34 +218,25 @@ export function MarketAdminPanel() {
               const busy = busyMarketId === market.id;
               return (
                 <tr key={market.id}>
+                  <td>{market.event?.question ?? "-"}</td>
                   <td>{market.question}</td>
                   <td>{statusLabel(market.status)}</td>
                   <td>{renderResolvedOutcome(market)}</td>
                   <td>
                     <select
-                      value={selectedOutcomeByMarket[market.id] ?? ""}
+                      value={selectedPositionByMarket[market.id] ?? "YES"}
                       onChange={(event) => {
-                        const value = event.target.value;
-                        setSelectedOutcomeByMarket((prev) => ({
+                        const value =
+                          event.target.value === "NO" ? "NO" : "YES";
+                        setSelectedPositionByMarket((prev) => ({
                           ...prev,
                           [market.id]: value,
                         }));
                       }}
                       disabled={!market.outcomes?.length}
                     >
-                      <option value="" disabled>
-                        {market.outcomes?.length
-                          ? "Select outcome"
-                          : "No outcomes"}
-                      </option>
-                      {(market.outcomes ?? [])
-                        .slice()
-                        .sort((a, b) => a.position - b.position)
-                        .map((outcome) => (
-                          <option key={outcome.id} value={outcome.id}>
-                            {outcome.label}
-                          </option>
-                        ))}
+                      <option value="YES">YES</option>
+                      <option value="NO">NO</option>
                     </select>
                   </td>
                   <td>

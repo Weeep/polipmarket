@@ -40,6 +40,15 @@ type CreateMarketData = {
 type MarketRecord = {
   id: string;
   eventId: string | null;
+  event?: {
+    id: string;
+    question: string;
+    description: string | null;
+    resolveAt: Date | null;
+    createdBy: string;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null;
   question: string;
   description: string | null;
   status: string;
@@ -125,6 +134,17 @@ function toDomain(market: MarketRecord): Market {
   return {
     id: market.id,
     eventId: market.eventId,
+    event: market.event
+      ? {
+          id: market.event.id,
+          question: market.event.question,
+          description: market.event.description,
+          resolveAt: market.event.resolveAt,
+          createdBy: market.event.createdBy,
+          createdAt: market.event.createdAt,
+          updatedAt: market.event.updatedAt,
+        }
+      : null,
     question: market.question,
     description: market.description,
     status: parseMarketStatus(market.status),
@@ -197,6 +217,7 @@ export const marketRepository: MarketRepository = {
           : undefined,
       },
       include: {
+        event: true,
         outcomes: {
           orderBy: { position: "asc" },
         },
@@ -211,6 +232,7 @@ export const marketRepository: MarketRepository = {
     const client = tx ?? prisma;
     const markets = await client.market.findMany({
       include: {
+        event: true,
         outcomes: {
           orderBy: { position: "asc" },
         },
@@ -227,6 +249,7 @@ export const marketRepository: MarketRepository = {
     const market = await client.market.findUnique({
       where: { id },
       include: {
+        event: true,
         outcomes: {
           orderBy: { position: "asc" },
         },
@@ -245,6 +268,7 @@ export const marketRepository: MarketRepository = {
       where: { id },
       data: { status },
       include: {
+        event: true,
         outcomes: {
           orderBy: { position: "asc" },
         },

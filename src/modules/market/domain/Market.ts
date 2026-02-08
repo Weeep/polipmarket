@@ -49,6 +49,7 @@ export interface Event {
 export interface Market {
   id: string;
   eventId?: string | null;
+  event?: Event | null;
   question: string;
   description?: string | null;
   status: MarketStatus;
