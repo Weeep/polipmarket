@@ -25,6 +25,7 @@ type CreateAmmConfigData = {
 };
 
 type CreateMarketData = {
+  eventId?: string | null;
   question: string;
   description?: string | null;
   status: MarketStatus;
@@ -38,6 +39,7 @@ type CreateMarketData = {
 
 type MarketRecord = {
   id: string;
+  eventId: string | null;
   question: string;
   description: string | null;
   status: string;
@@ -81,7 +83,7 @@ function parseMarketStatus(status: string): MarketStatus {
 }
 
 function parseMarketType(type: string): MarketType {
-  if (type === "BINARY" || type === "MULTI_CHOICE") {
+  if (type === "BINARY") {
     return type;
   }
   throw new Error(`Invalid market type: ${type}`);
@@ -122,6 +124,7 @@ function mapAmmConfigToDomain(
 function toDomain(market: MarketRecord): Market {
   return {
     id: market.id,
+    eventId: market.eventId,
     question: market.question,
     description: market.description,
     status: parseMarketStatus(market.status),
@@ -158,6 +161,7 @@ export const marketRepository: MarketRepository = {
     const client = tx ?? prisma;
     const created = await client.market.create({
       data: {
+        eventId: data.eventId ?? null,
         question: data.question,
         description: data.description ?? null,
         status: data.status,
