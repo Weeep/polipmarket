@@ -16,7 +16,6 @@ enum UserRole {
 
 enum MarketType {
   BINARY
-  MULTI_CHOICE
 }
 
 enum OutcomeStatus {
