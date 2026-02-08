@@ -5,6 +5,7 @@ import { Event } from "@/modules/event/domain/Event";
 type CreateEventData = {
   question: string;
   description?: string | null;
+  bettingCloseAt: Date;
   resolveAt?: Date | null;
   createdBy: string;
 };
@@ -13,6 +14,7 @@ type EventRecord = {
   id: string;
   question: string;
   description: string | null;
+  bettingCloseAt: Date;
   resolveAt: Date | null;
   createdBy: string;
   createdAt: Date;
@@ -24,6 +26,7 @@ function toDomain(event: EventRecord): Event {
     id: event.id,
     question: event.question,
     description: event.description,
+    bettingCloseAt: event.bettingCloseAt,
     resolveAt: event.resolveAt,
     createdBy: event.createdBy,
     createdAt: event.createdAt,
@@ -49,6 +52,7 @@ export const eventRepository: EventRepository = {
       data: {
         question: data.question,
         description: data.description ?? null,
+        bettingCloseAt: data.bettingCloseAt,
         resolveAt: data.resolveAt ?? null,
         createdBy: data.createdBy,
       },
@@ -79,6 +83,7 @@ export const eventRepository: EventRepository = {
       data: {
         question: data.question,
         description: data.description ?? null,
+        bettingCloseAt: data.bettingCloseAt,
         resolveAt: data.resolveAt ?? null,
       },
     });

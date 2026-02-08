@@ -4,6 +4,7 @@ import { EventRepository } from "../infrastructure/eventRepository";
 export type CreateEventInput = {
   question: string;
   description?: string | null;
+  bettingCloseAt: Date;
   resolveAt?: Date | null;
   createdBy: string;
 };
@@ -16,13 +17,18 @@ export async function createEvent(
     throw new Error("Question is required");
   }
 
-  if (input.resolveAt && input.resolveAt <= new Date()) {
-    throw new Error("resolveAt must be in the future");
+  if (input.bettingCloseAt <= new Date()) {
+    throw new Error("bettingCloseAt must be in the future");
+  }
+
+  if (input.resolveAt && input.resolveAt <= input.bettingCloseAt) {
+    throw new Error("resolveAt must be after bettingCloseAt");
   }
 
   return repo.create({
     question: input.question.trim(),
     description: input.description ?? null,
+    bettingCloseAt: input.bettingCloseAt,
     resolveAt: input.resolveAt ?? null,
     createdBy: input.createdBy,
   });

@@ -38,6 +38,7 @@ model Event {
   id          String   @id @default(cuid())
   question    String
   description String?
+  bettingCloseAt DateTime
   resolveAt   DateTime?
   createdBy   String
   createdAt   DateTime @default(now())
