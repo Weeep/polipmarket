@@ -16,7 +16,6 @@ enum UserRole {
 
 enum MarketType {
   BINARY
-  MULTI_CHOICE
 }
 
 enum OutcomeStatus {
@@ -35,6 +34,21 @@ enum OrderPosition {
   NO
 }
 
+model Event {
+  id          String   @id @default(cuid())
+  question    String
+  description String?
+  resolveAt   DateTime?
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creator User    @relation(fields: [createdBy], references: [id])
+  markets Market[]
+
+  @@index([createdBy])
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -43,6 +57,7 @@ model User {
   role      UserRole @default(USER)
 
   wallet    Wallet?
+  events    Event[]
   markets   Market[]
   orders    Order[]
 
@@ -64,6 +79,7 @@ model Wallet {
 
 model Market {
   id          String     @id @default(cuid())
+  eventId     String?
   question    String
   description String?
   status      String
@@ -81,11 +97,13 @@ model Market {
   outcomes   Outcome[]
   ammConfig  MarketAmmConfig?
 
-  creator User @relation(fields: [createdBy], references: [id])
+  event   Event? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  creator User   @relation(fields: [createdBy], references: [id])
 
   @@index([status])
   @@index([bettingCloseAt])
   @@index([type])
+  @@index([eventId])
 }
 
 model MarketLiquidity {

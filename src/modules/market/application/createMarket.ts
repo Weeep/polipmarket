@@ -20,6 +20,7 @@ export type CreateMarketAmmConfigInput = {
 };
 
 export type CreateMarketInput = {
+  eventId?: string | null;
   question: string;
   description?: string | null;
   bettingCloseAt: Date;
@@ -64,10 +65,6 @@ function normalizeOutcomes(
   const uniquePositions = new Set(normalized.map((outcome) => outcome.position));
   if (uniquePositions.size !== normalized.length) {
     throw new Error("Outcome positions must be unique within a market");
-  }
-
-  if (type === "MULTI_CHOICE" && normalized.length < 2) {
-    throw new Error("MULTI_CHOICE market requires at least 2 outcomes");
   }
 
   if (type === "BINARY" && normalized.length > 2) {
@@ -118,6 +115,7 @@ export async function createMarket(
   const type = input.type ?? "BINARY";
 
   return repo.create({
+    eventId: input.eventId ?? null,
     question: input.question.trim(),
     description: input.description ?? null,
     status: "OPEN",
