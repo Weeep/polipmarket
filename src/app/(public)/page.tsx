@@ -2,9 +2,30 @@
 
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { MarketRow } from "@/components/MarketRow";
+import { EventMarketGroup } from "@/components/EventMarketGroup";
 import { MyMarketBetDTO } from "@/modules/market/dto/myMarketBetDTO";
 import { apiFetch } from "@/lib/apiFetch";
+
+function groupMarketsByEvent(markets: MyMarketBetDTO[]) {
+  const grouped = new Map<string, MyMarketBetDTO[]>();
+
+  markets.forEach((market) => {
+    const key = market.eventId ?? `market-${market.marketId}`;
+    const current = grouped.get(key) ?? [];
+    grouped.set(key, [...current, market]);
+  });
+
+  return Array.from(grouped.values()).sort((a, b) => {
+    const aLatest = Math.max(
+      ...a.map((market) => new Date(market.latestBetAt).getTime()),
+    );
+    const bLatest = Math.max(
+      ...b.map((market) => new Date(market.latestBetAt).getTime()),
+    );
+
+    return bLatest - aLatest;
+  });
+}
 
 export default function HomePage() {
   const [myMarkets, setMyMarkets] = useState<MyMarketBetDTO[]>([]);
@@ -48,6 +69,8 @@ export default function HomePage() {
       (a, b) =>
         new Date(b.latestBetAt).getTime() - new Date(a.latestBetAt).getTime(),
     );
+  const openMarketGroups = groupMarketsByEvent(openMarkets);
+  const closedMarketGroups = groupMarketsByEvent(closedMarkets);
 
   return (
     <main className="p-8">
@@ -57,18 +80,16 @@ export default function HomePage() {
             Nyitott marketjeim
           </h2>
 
-          {openMarkets.length === 0 && (
+          {openMarketGroups.length === 0 && (
             <p className="text-stone-400 text-sm">Nincs aktív fogadásod</p>
           )}
 
           <div className="space-y-4">
-            {openMarkets.map((market) => (
-              <MarketRow
-                key={market.marketId}
-                market={market}
-                onUpdate={(updatedMarket) =>
-                  updateMarket(market.marketId, updatedMarket)
-                }
+            {openMarketGroups.map((markets) => (
+              <EventMarketGroup
+                key={markets[0].eventId ?? markets[0].marketId}
+                markets={markets}
+                onUpdateMarket={updateMarket}
               />
             ))}
           </div>
@@ -79,18 +100,16 @@ export default function HomePage() {
             Lezárt marketjeim
           </h2>
 
-          {closedMarkets.length === 0 && (
+          {closedMarketGroups.length === 0 && (
             <p className="text-stone-400 text-sm">Nincs lezárt fogadásod</p>
           )}
 
           <div className="space-y-4">
-            {closedMarkets.map((market) => (
-              <MarketRow
-                key={market.marketId}
-                market={market}
-                onUpdate={(updatedMarket) =>
-                  updateMarket(market.marketId, updatedMarket)
-                }
+            {closedMarketGroups.map((markets) => (
+              <EventMarketGroup
+                key={markets[0].eventId ?? markets[0].marketId}
+                markets={markets}
+                onUpdateMarket={updateMarket}
               />
             ))}
           </div>
