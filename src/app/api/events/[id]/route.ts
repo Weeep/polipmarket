@@ -6,7 +6,6 @@ import { calcExecutionPrice } from "@/modules/order/domain/ammQuote";
 import { getMarketStats } from "@/modules/market/application/getMarketStats";
 import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
 
-
 type MarketRecord = Awaited<ReturnType<typeof prisma.market.findMany>>[number];
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -30,7 +29,7 @@ export async function GET(
 
     const markets = await prisma.market.findMany({
       where: { eventId: event.id },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     });
 
     const marketsWithExtras = await Promise.all(
@@ -69,11 +68,18 @@ export async function GET(
     const eventStats = marketsWithExtras.reduce<{
       totalBets: number;
       totalVolume: number;
-    }>((acc: { totalBets: number; totalVolume: number }, market: (typeof marketsWithExtras)[number]) => {
-      acc.totalBets += market.marketStats?.totalMarketStats.totalBets ?? 0;
-      acc.totalVolume += market.marketStats?.totalMarketStats.totalVolume ?? 0;
-      return acc;
-    }, { totalBets: 0, totalVolume: 0 });
+    }>(
+      (
+        acc: { totalBets: number; totalVolume: number },
+        market: (typeof marketsWithExtras)[number],
+      ) => {
+        acc.totalBets += market.marketStats?.totalMarketStats.totalBets ?? 0;
+        acc.totalVolume +=
+          market.marketStats?.totalMarketStats.totalVolume ?? 0;
+        return acc;
+      },
+      { totalBets: 0, totalVolume: 0 },
+    );
 
     return NextResponse.json({
       ...event,

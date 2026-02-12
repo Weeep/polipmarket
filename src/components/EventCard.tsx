@@ -6,6 +6,7 @@ import { apiFetch } from "@/lib/apiFetch";
 import { DEFAULT_MAX_SLIPPAGE_BPS } from "@/config/economy";
 import { useMe } from "@/context/MeContext";
 import type { EventSummary } from "@/modules/event/domain/Event";
+import Link from "next/link";
 
 type Props = {
   event: EventSummary;
@@ -64,7 +65,12 @@ export function EventCard({ event }: Props) {
   return (
     <section className="marketcard-base space-y-6">
       <div className="space-y-2">
-        <h2 className="marketcard-question">{event.question}</h2>
+        <Link
+          href={`/events/${event.id}`}
+          className="block marketcard-question hover:underline"
+        >
+          {event.question}
+        </Link>
         {event.description && (
           <p className="marketcard-description">{event.description}</p>
         )}
@@ -116,7 +122,9 @@ export function EventCard({ event }: Props) {
               className="marketcard-outcome flex flex-wrap items-center justify-between gap-4"
             >
               <div className="space-y-1">
-                <div className="marketcard-outcome-label">{market.question}</div>
+                <div className="marketcard-outcome-label">
+                  {market.question}
+                </div>
                 <div className="text-xs uppercase text-stone-400">
                   {market.status}
                 </div>
@@ -190,7 +198,9 @@ export function EventCard({ event }: Props) {
           Fogadás zár: {new Date(event.bettingCloseAt).toLocaleString()}
         </span>
         {event.resolveAt && (
-          <span>Esemény vége: {new Date(event.resolveAt).toLocaleString()}</span>
+          <span>
+            Esemény vége: {new Date(event.resolveAt).toLocaleString()}
+          </span>
         )}
       </div>
 

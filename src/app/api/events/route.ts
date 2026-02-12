@@ -82,7 +82,7 @@ export async function GET() {
       events.map(async (event) => {
         const markets = await prisma.market.findMany({
           where: { eventId: event.id },
-          orderBy: { createdAt: "desc" },
+          orderBy: [{ createdAt: "asc" }, { id: "asc" }],
         });
 
         const marketsWithExtras = await Promise.all(
@@ -120,7 +120,8 @@ export async function GET() {
 
         const eventStats = marketsWithExtras.reduce(
           (acc, market) => {
-            acc.totalBets += market.marketStats?.totalMarketStats.totalBets ?? 0;
+            acc.totalBets +=
+              market.marketStats?.totalMarketStats.totalBets ?? 0;
             acc.totalVolume +=
               market.marketStats?.totalMarketStats.totalVolume ?? 0;
             return acc;

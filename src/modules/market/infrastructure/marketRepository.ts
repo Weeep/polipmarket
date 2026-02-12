@@ -9,6 +9,7 @@ import {
 } from "../domain/Market";
 import { Outcome, OutcomeStatus } from "../domain/Outcome";
 import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
+import { Event } from "@/modules/event/domain/Event";
 
 type CreateOutcomeData = {
   slug: string;
@@ -39,15 +40,7 @@ type CreateMarketData = {
 type MarketRecord = {
   id: string;
   eventId: string | null;
-  event?: {
-    id: string;
-    question: string;
-    description: string | null;
-    resolveAt: Date | null;
-    createdBy: string;
-    createdAt: Date;
-    updatedAt: Date;
-  } | null;
+  event?: Event | null;
   question: string;
   description: string | null;
   status: string;
@@ -138,6 +131,7 @@ function toDomain(market: MarketRecord): Market {
           id: market.event.id,
           question: market.event.question,
           description: market.event.description,
+          bettingCloseAt: market.event.bettingCloseAt,
           resolveAt: market.event.resolveAt,
           createdBy: market.event.createdBy,
           createdAt: market.event.createdAt,
