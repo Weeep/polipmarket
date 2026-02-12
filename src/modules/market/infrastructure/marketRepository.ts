@@ -162,6 +162,10 @@ export type MarketRepository = {
   ): Promise<Market>;
   findAll(tx?: Prisma.TransactionClient): Promise<Market[]>;
   findById(id: string, tx?: Prisma.TransactionClient): Promise<Market | null>;
+  findByEventId(
+    eventId: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<Market[]>;
   updateStatus(
     id: string,
     status: MarketStatus,
@@ -253,6 +257,23 @@ export const marketRepository: MarketRepository = {
     if (!market) return null;
 
     return toDomain(market);
+  },
+
+  async findByEventId(eventId, tx): Promise<Market[]> {
+    const client = tx ?? prisma;
+    const markets = await client.market.findMany({
+      where: { eventId },
+      include: {
+        event: true,
+        outcomes: {
+          orderBy: { position: "asc" },
+        },
+        ammConfig: true,
+      },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    });
+
+    return markets.map(toDomain);
   },
 
   async updateStatus(id, status, tx) {
