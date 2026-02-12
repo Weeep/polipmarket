@@ -1,9 +1,5 @@
-import {
-  AmmCurve,
-  Market,
-  MarketType,
-  OutcomeStatus,
-} from "../domain/Market";
+import { AmmCurve, Market, MarketType } from "../domain/Market";
+import { OutcomeStatus } from "../domain/Outcome";
 import { MarketRepository } from "../infrastructure/marketRepository";
 
 export type CreateMarketOutcomeInput = {

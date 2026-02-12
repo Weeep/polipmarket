@@ -2,19 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Market, MarketStats, Outcome } from "@/modules/market/domain/Market";
+import { MarketSummary } from "@/modules/market/domain/Market";
 import { apiFetch } from "@/lib/apiFetch";
 import { MarketCard } from "@/components/MarketCard";
 
-type OutcomeWithPrices = Outcome & {
-  yesPrice?: number;
-  noPrice?: number;
-};
-
-type MarketSummary = Market & {
-  outcomes?: OutcomeWithPrices[];
-  marketStats?: MarketStats | null;
-};
 
 export default function MarketsPage() {
   const [markets, setMarkets] = useState<MarketSummary[]>([]);

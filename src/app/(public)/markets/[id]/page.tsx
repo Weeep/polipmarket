@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { redirect, useParams } from "next/navigation";
 import { MarketCard } from "@/components/MarketCard";
-import { Market, MarketStats, Outcome } from "@/modules/market/domain/Market";
+import { MarketSummary } from "@/modules/market/domain/Market";
+import { OutcomeWithPrices } from "@/modules/market/domain/Outcome";
 import { OrderPosition } from "@/modules/order/domain/Order";
 import { useMe } from "@/context/MeContext";
 import { apiFetch } from "@/lib/apiFetch";
@@ -17,14 +18,7 @@ function getErrorMessage(error: unknown, fallback: string) {
 export default function MarketDetailPage() {
   const { id } = useParams<{ id: string }>();
 
-  type OutcomeWithPrices = Outcome & {
-    yesPrice?: number;
-    noPrice?: number;
-  };
-  type MarketWithExtras = Market & {
-    outcomes?: OutcomeWithPrices[];
-    marketStats?: MarketStats | null;
-  };
+  type MarketWithExtras = MarketSummary;
 
   const [market, setMarket] = useState<MarketWithExtras | null>(null);
   const [outcomes, setOutcomes] = useState<OutcomeWithPrices[]>([]);

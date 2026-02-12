@@ -13,6 +13,7 @@ export async function getMyMarkets(
     include: {
       market: {
         include: {
+          event: true,
           outcomes: true,
         },
       },
@@ -30,6 +31,8 @@ export async function getMyMarkets(
       map.set(order.marketId, {
         marketId: order.market.id,
         question: order.market.question,
+        eventId: order.market.event?.id ?? null,
+        eventQuestion: order.market.event?.question ?? null,
         closesAt: order.market.bettingCloseAt.toISOString(),
         resolvesAt: order.market.resolveAt?.toISOString() ?? null,
         status: order.market.status,

@@ -3,20 +3,13 @@
 import Link from "next/link";
 import { useState } from "react";
 import { redirect } from "next/navigation";
-import { Market, MarketStats, Outcome } from "@/modules/market/domain/Market";
+import { MarketStats, MarketSummary } from "@/modules/market/domain/Market";
+import { OutcomeWithPrices } from "@/modules/market/domain/Outcome";
 import { apiFetch } from "@/lib/apiFetch";
 import { DEFAULT_MAX_SLIPPAGE_BPS } from "@/config/economy";
 import { useMe } from "@/context/MeContext";
 
-type OutcomeWithPrices = Outcome & {
-  yesPrice?: number;
-  noPrice?: number;
-};
-
-type MarketCardMarket = Market & {
-  outcomes?: OutcomeWithPrices[];
-  marketStats?: MarketStats | null;
-};
+type MarketCardMarket = MarketSummary;
 
 type Props = {
   market: MarketCardMarket;
