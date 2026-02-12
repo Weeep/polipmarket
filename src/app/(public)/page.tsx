@@ -1,7 +1,6 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { MarketRow } from "@/components/MarketRow";
 import { MyMarketBetDTO } from "@/modules/market/dto/myMarketBetDTO";

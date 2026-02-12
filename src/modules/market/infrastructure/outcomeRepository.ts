@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { Outcome, OutcomeStatus } from "../domain/Market";
+import { Outcome, OutcomeStatus } from "../domain/Outcome";
 
 type CreateOutcomeInput = {
   marketId: string;

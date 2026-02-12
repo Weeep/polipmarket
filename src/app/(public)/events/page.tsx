@@ -4,28 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/apiFetch";
 import { EventCard } from "@/components/EventCard";
-import { Market, MarketStats, Outcome } from "@/modules/market/domain/Market";
-import { Event } from "@/modules/event/domain/Event";
-
-type OutcomeWithPrices = Outcome & {
-  yesPrice?: number;
-  noPrice?: number;
-};
-
-type MarketSummary = Market & {
-  outcomes?: OutcomeWithPrices[];
-  marketStats?: MarketStats | null;
-};
-
-type EventStats = {
-  totalBets: number;
-  totalVolume: number;
-};
-
-type EventSummary = Event & {
-  markets: MarketSummary[];
-  eventStats?: EventStats;
-};
+import { EventSummary } from "@/modules/event/domain/Event";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<EventSummary[]>([]);

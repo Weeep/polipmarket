@@ -6,9 +6,8 @@ import {
   MarketAmmConfig,
   MarketStatus,
   MarketType,
-  Outcome,
-  OutcomeStatus,
 } from "../domain/Market";
+import { Outcome, OutcomeStatus } from "../domain/Outcome";
 import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
 
 type CreateOutcomeData = {

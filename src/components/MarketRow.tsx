@@ -65,12 +65,21 @@ export function MarketRow({ market, onUpdate }: Props) {
 
   return (
     <div className="bg-stone-900 rounded-lg p-4 space-y-3">
-      <Link
-        href={`/markets/${market.marketId}`}
-        className="block marketcard-question hover:underline"
-      >
-        {market.question}
-      </Link>
+      {market.eventId && market.eventQuestion ? (
+        <Link
+          href={`/events/${market.eventId}`}
+          className="block marketcard-question hover:underline"
+        >
+          {market.eventQuestion}
+        </Link>
+      ) : (
+        <Link
+          href={`/markets/${market.marketId}`}
+          className="block marketcard-question hover:underline"
+        >
+          {market.question}
+        </Link>
+      )}
 
       <div className="space-y-2">
         <div className="grid grid-cols-[1.6fr_0.8fr_0.7fr_0.7fr_0.8fr_1fr] text-xs uppercase tracking-wide text-stone-500">

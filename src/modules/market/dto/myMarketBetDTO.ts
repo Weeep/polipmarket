@@ -1,6 +1,8 @@
 export type MyMarketBetDTO = {
   marketId: string;
   question: string;
+  eventId?: string | null;
+  eventQuestion?: string | null;
   closesAt: string;
   resolvesAt?: string | null;
   status: string;

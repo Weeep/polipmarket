@@ -1,25 +1,12 @@
-import {
-  TotalMarketStats,
-  UserMarketStats,
-} from "@/modules/order/domain/Order";
+import type { TotalMarketStats, UserMarketStats } from "@/modules/order/domain/Order";
+import type { Event } from "@/modules/event/domain/Event";
+import type { Outcome, OutcomeWithPrices } from "@/modules/market/domain/Outcome";
 
 export type MarketStatus = "OPEN" | "CLOSED" | "RESOLVED" | "CANCELLED";
 
 export type MarketType = "BINARY";
 
-export type OutcomeStatus = "ACTIVE" | "INACTIVE" | "RESOLVED";
-
 export type AmmCurve = "CPMM" | "LMSR";
-
-export interface Outcome {
-  id: string;
-  marketId: string;
-  slug: string;
-  label: string;
-  position: number;
-  status: OutcomeStatus;
-  createdAt: Date;
-}
 
 export interface MarketAmmConfig {
   id: string;
@@ -35,16 +22,6 @@ export type MarketStats = {
   totalMarketStats: TotalMarketStats;
   userMarketStats: UserMarketStats;
 };
-
-export interface Event {
-  id: string;
-  question: string;
-  description?: string | null;
-  resolveAt?: Date | null;
-  createdBy: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 export interface Market {
   id: string;
@@ -63,3 +40,8 @@ export interface Market {
   outcomes?: Outcome[];
   ammConfig?: MarketAmmConfig | null;
 }
+
+export type MarketSummary = Market & {
+  outcomes?: OutcomeWithPrices[];
+  marketStats?: MarketStats | null;
+};

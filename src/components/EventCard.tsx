@@ -5,28 +5,7 @@ import { redirect } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
 import { DEFAULT_MAX_SLIPPAGE_BPS } from "@/config/economy";
 import { useMe } from "@/context/MeContext";
-import { Event } from "@/modules/event/domain/Event";
-import { Market, MarketStats, Outcome } from "@/modules/market/domain/Market";
-
-type OutcomeWithPrices = Outcome & {
-  yesPrice?: number;
-  noPrice?: number;
-};
-
-type MarketSummary = Market & {
-  outcomes?: OutcomeWithPrices[];
-  marketStats?: MarketStats | null;
-};
-
-type EventStats = {
-  totalBets: number;
-  totalVolume: number;
-};
-
-type EventSummary = Event & {
-  markets: MarketSummary[];
-  eventStats?: EventStats;
-};
+import type { EventSummary } from "@/modules/event/domain/Event";
 
 type Props = {
   event: EventSummary;
