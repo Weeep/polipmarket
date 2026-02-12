@@ -4,12 +4,8 @@ import {
   createEventWithMarkets,
   CreateEventWithMarketsInput,
 } from "@/modules/event/application/createEventWithMarkets";
-import { prisma } from "@/lib/prisma";
-import { outcomeRepository } from "@/modules/market/infrastructure/outcomeRepository";
-import { ammRepository } from "@/modules/market/infrastructure/ammRepository";
-import { calcExecutionPrice } from "@/modules/order/domain/ammQuote";
-import { getMarketStats } from "@/modules/market/application/getMarketStats";
-import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
+import { getEvents } from "@/modules/event/application/getEvents";
+import { getMarketsByEventId } from "@/modules/market/application/getMarketsByEventId";
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -74,49 +70,11 @@ export const POST = withAuth(async (user, req) => {
 
 export async function GET() {
   try {
-    const events = await prisma.event.findMany({
-      orderBy: { createdAt: "desc" },
-    });
+    const events = await getEvents();
 
     const eventsWithMarkets = await Promise.all(
       events.map(async (event) => {
-        const markets = await prisma.market.findMany({
-          where: { eventId: event.id },
-          orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-        });
-
-        const marketsWithExtras = await Promise.all(
-          markets.map(async (market) => {
-            const [outcomes, marketStats] = await Promise.all([
-              outcomeRepository.findByMarketId(market.id),
-              getMarketStats(market.id),
-            ]);
-
-            const outcomesWithPrices = await Promise.all(
-              outcomes.map(async (outcome) => {
-                const liquidity = await ammRepository.findLiquidityByOutcomeId(
-                  outcome.id,
-                );
-                const pool = {
-                  yesPool: liquidity?.yesPool ?? DEFAULT_OUTCOME_POOL,
-                  noPool: liquidity?.noPool ?? DEFAULT_OUTCOME_POOL,
-                };
-
-                return {
-                  ...outcome,
-                  yesPrice: calcExecutionPrice(pool, "YES"),
-                  noPrice: calcExecutionPrice(pool, "NO"),
-                };
-              }),
-            );
-
-            return {
-              ...market,
-              outcomes: outcomesWithPrices,
-              marketStats,
-            };
-          }),
-        );
+        const marketsWithExtras = await getMarketsByEventId(event.id);
 
         const eventStats = marketsWithExtras.reduce(
           (acc, market) => {
