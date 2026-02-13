@@ -34,8 +34,8 @@ export function Header() {
 
       <div className="ml-auto flex items-center gap-4">
         <div className="text-stone-200 text-sm">
-          <div>💰 {me.balance.toLocaleString()}</div>
-          <div>🔒 {me.locked.toLocaleString()}</div>
+          <div>💰 {me.balance.toLocaleString()}ଳ</div>
+          <div>🔒 {me.locked.toLocaleString()}ଳ</div>
         </div>
         {isImpersonating ? (
           <button onClick={stopImpersonation}>Stop impersonation</button>
