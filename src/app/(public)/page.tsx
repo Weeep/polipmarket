@@ -3,11 +3,11 @@
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { EventMarketGroup } from "@/components/EventMarketGroup";
-import { MyMarketBetDTO } from "@/modules/market/dto/myMarketBetDTO";
+import { MyEventMarketBetDTO } from "@/modules/event/dto/myEventMarketBetDTO";
 import { apiFetch } from "@/lib/apiFetch";
 
-function groupMarketsByEvent(markets: MyMarketBetDTO[]) {
-  const grouped = new Map<string, MyMarketBetDTO[]>();
+function groupMarketsByEvent(markets: MyEventMarketBetDTO[]) {
+  const grouped = new Map<string, MyEventMarketBetDTO[]>();
 
   markets.forEach((market) => {
     const key = market.eventId ?? `market-${market.marketId}`;
@@ -28,11 +28,11 @@ function groupMarketsByEvent(markets: MyMarketBetDTO[]) {
 }
 
 export default function HomePage() {
-  const [myMarkets, setMyMarkets] = useState<MyMarketBetDTO[]>([]);
+  const [myMarkets, setMyMarkets] = useState<MyEventMarketBetDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiFetch("/api/markets/my")
+    apiFetch("/api/events/my")
       .then((r) => (r.ok ? r.json() : []))
       .then(setMyMarkets)
       .finally(() => setLoading(false));
@@ -40,7 +40,7 @@ export default function HomePage() {
 
   function updateMarket(
     marketId: string,
-    updatedMarket: MyMarketBetDTO | null,
+    updatedMarket: MyEventMarketBetDTO | null,
   ) {
     setMyMarkets((prev) =>
       updatedMarket === null

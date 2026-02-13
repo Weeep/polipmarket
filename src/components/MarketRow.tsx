@@ -1,4 +1,4 @@
-import { MyMarketBetDTO } from "@/modules/market/dto/myMarketBetDTO";
+import { MyEventMarketBetDTO } from "@/modules/event/dto/myEventMarketBetDTO";
 import Link from "next/link";
 import { useMe } from "@/context/MeContext";
 import { apiFetch } from "@/lib/apiFetch";
@@ -15,8 +15,8 @@ type Bet = {
 };
 
 type Props = {
-  market: MyMarketBetDTO;
-  onUpdate: (updatedMarket: MyMarketBetDTO | null) => void;
+  market: MyEventMarketBetDTO;
+  onUpdate: (updatedMarket: MyEventMarketBetDTO | null) => void;
 };
 
 function getErrorMessage(error: unknown, fallback: string) {

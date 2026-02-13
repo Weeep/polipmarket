@@ -1,4 +1,4 @@
-export type MyMarketBetDTO = {
+export type MyEventMarketBetDTO = {
   marketId: string;
   question: string;
   eventId: string;

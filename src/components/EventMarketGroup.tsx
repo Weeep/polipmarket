@@ -1,16 +1,16 @@
-import { MyMarketBetDTO } from "@/modules/market/dto/myMarketBetDTO";
+import { MyEventMarketBetDTO } from "@/modules/event/dto/myEventMarketBetDTO";
 import Link from "next/link";
 import { useMe } from "@/context/MeContext";
 import { apiFetch } from "@/lib/apiFetch";
 
 type Props = {
-  markets: MyMarketBetDTO[];
-  onUpdateMarket: (marketId: string, updatedMarket: MyMarketBetDTO | null) => void;
+  markets: MyEventMarketBetDTO[];
+  onUpdateMarket: (marketId: string, updatedMarket: MyEventMarketBetDTO | null) => void;
 };
 
 type MarketBet = {
-  market: MyMarketBetDTO;
-  bet: MyMarketBetDTO["bets"][number];
+  market: MyEventMarketBetDTO;
+  bet: MyEventMarketBetDTO["bets"][number];
 };
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -27,7 +27,7 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
     market.bets.map((bet) => ({ market, bet })),
   );
 
-  async function onCancel(market: MyMarketBetDTO, orderId: string) {
+  async function onCancel(market: MyEventMarketBetDTO, orderId: string) {
     const ok = window.confirm("Are you sure you want to cancel this order?");
 
     if (!ok) return;
