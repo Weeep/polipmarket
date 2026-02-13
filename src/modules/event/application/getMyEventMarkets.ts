@@ -1,15 +1,12 @@
-// modules/market/application/getMyMarkets.ts
 import { prisma } from "@/lib/prisma";
-import { MyMarketBetDTO } from "../dto/myMarketBetDTO";
+import { MyEventMarketBetDTO } from "../dto/myEventMarketBetDTO";
 
-export async function getMyMarkets(
+export async function getMyEventMarkets(
   userId: string,
   limit = 5,
-): Promise<MyMarketBetDTO[]> {
+): Promise<MyEventMarketBetDTO[]> {
   const orders = await prisma.order.findMany({
-    where: {
-      userId,
-    },
+    where: { userId },
     include: {
       market: {
         include: {
@@ -24,7 +21,7 @@ export async function getMyMarkets(
     take: 200,
   });
 
-  const map = new Map<string, MyMarketBetDTO>();
+  const map = new Map<string, MyEventMarketBetDTO>();
 
   for (const order of orders) {
     if (!map.has(order.marketId)) {
