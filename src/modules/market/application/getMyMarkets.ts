@@ -31,8 +31,8 @@ export async function getMyMarkets(
       map.set(order.marketId, {
         marketId: order.market.id,
         question: order.market.question,
-        eventId: order.market.event?.id ?? null,
-        eventQuestion: order.market.event?.question ?? null,
+        eventId: order.market.event.id,
+        eventQuestion: order.market.event.question,
         closesAt: order.market.bettingCloseAt.toISOString(),
         resolvesAt: order.market.resolveAt?.toISOString() ?? null,
         status: order.market.status,

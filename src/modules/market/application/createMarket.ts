@@ -16,7 +16,7 @@ export type CreateMarketAmmConfigInput = {
 };
 
 export type CreateMarketInput = {
-  eventId?: string | null;
+  eventId: string;
   question: string;
   description?: string | null;
   bettingCloseAt: Date;
@@ -110,8 +110,12 @@ export async function createMarket(
 
   const type = input.type ?? "BINARY";
 
+  if (!input.eventId.trim()) {
+    throw new Error("eventId is required");
+  }
+
   return repo.create({
-    eventId: input.eventId ?? null,
+    eventId: input.eventId.trim(),
     question: input.question.trim(),
     description: input.description ?? null,
     status: "OPEN",

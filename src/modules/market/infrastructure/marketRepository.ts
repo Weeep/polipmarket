@@ -25,7 +25,7 @@ type CreateAmmConfigData = {
 };
 
 type CreateMarketData = {
-  eventId?: string | null;
+  eventId: string;
   question: string;
   description?: string | null;
   status: MarketStatus;
@@ -39,8 +39,8 @@ type CreateMarketData = {
 
 type MarketRecord = {
   id: string;
-  eventId: string | null;
-  event?: Event | null;
+  eventId: string;
+  event: Event;
   question: string;
   description: string | null;
   status: string;
@@ -126,18 +126,16 @@ function toDomain(market: MarketRecord): Market {
   return {
     id: market.id,
     eventId: market.eventId,
-    event: market.event
-      ? {
-          id: market.event.id,
-          question: market.event.question,
-          description: market.event.description,
-          bettingCloseAt: market.event.bettingCloseAt,
-          resolveAt: market.event.resolveAt,
-          createdBy: market.event.createdBy,
-          createdAt: market.event.createdAt,
-          updatedAt: market.event.updatedAt,
-        }
-      : null,
+    event: {
+      id: market.event.id,
+      question: market.event.question,
+      description: market.event.description,
+      bettingCloseAt: market.event.bettingCloseAt,
+      resolveAt: market.event.resolveAt,
+      createdBy: market.event.createdBy,
+      createdAt: market.event.createdAt,
+      updatedAt: market.event.updatedAt,
+    },
     question: market.question,
     description: market.description,
     status: parseMarketStatus(market.status),
@@ -178,7 +176,7 @@ export const marketRepository: MarketRepository = {
     const client = tx ?? prisma;
     const created = await client.market.create({
       data: {
-        eventId: data.eventId ?? null,
+        eventId: data.eventId,
         question: data.question,
         description: data.description ?? null,
         status: data.status,
