@@ -80,7 +80,7 @@ model Wallet {
 
 model Market {
   id          String     @id @default(cuid())
-  eventId     String?
+  eventId     String
   question    String
   description String?
   status      String
@@ -98,7 +98,7 @@ model Market {
   outcomes   Outcome[]
   ammConfig  MarketAmmConfig?
 
-  event   Event? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   creator User   @relation(fields: [createdBy], references: [id])
 
   @@index([status])

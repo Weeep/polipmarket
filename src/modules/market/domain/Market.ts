@@ -25,8 +25,8 @@ export type MarketStats = {
 
 export interface Market {
   id: string;
-  eventId?: string | null;
-  event?: Event | null;
+  eventId: string;
+  event?: Event;
   question: string;
   description?: string | null;
   status: MarketStatus;

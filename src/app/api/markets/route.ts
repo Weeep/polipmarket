@@ -46,8 +46,12 @@ function toCreateMarketInput(
         ? new Date(String(resolveAtValue))
         : null;
 
+  if (typeof body.eventId !== "string" || !body.eventId.trim()) {
+    throw new Error("eventId is required");
+  }
+
   return {
-    eventId: typeof body.eventId === "string" ? body.eventId : null,
+    eventId: body.eventId.trim(),
     question: String(body.question ?? ""),
     description: typeof body.description === "string" ? body.description : null,
     bettingCloseAt,
