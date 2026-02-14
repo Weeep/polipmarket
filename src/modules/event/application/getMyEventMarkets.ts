@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_AMM_FEE_BPS } from "@/config/economy";
 import { MyEventMarketBetDTO } from "../dto/myEventMarketBetDTO";
 
 function makeKey(input: {
@@ -31,6 +32,15 @@ export async function getMyEventMarkets(
     }),
     prisma.order.findMany({
       where: { userId, side: "SELL" },
+      include: {
+        market: {
+          include: {
+            ammConfig: {
+              select: { feeBps: true },
+            },
+          },
+        },
+      },
       orderBy: {
         createdAt: "desc",
       },
@@ -128,7 +138,12 @@ export async function getMyEventMarkets(
           ? "OPEN"
           : "FILLED";
 
-    const soldAmount = derivedStatus === "FILLED" ? latestSell?.amount : undefined;
+    const soldGrossAmount = derivedStatus === "FILLED" ? latestSell?.amount : undefined;
+    const sellFeeBps = latestSell?.market?.ammConfig?.feeBps ?? DEFAULT_AMM_FEE_BPS;
+    const soldAmount =
+      soldGrossAmount != null
+        ? soldGrossAmount * (1 - sellFeeBps / 10_000)
+        : undefined;
     const soldShares =
       derivedStatus === "FILLED" && latestSell != null && latestSell.price > 0
         ? latestSell.amount / latestSell.price

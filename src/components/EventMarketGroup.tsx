@@ -95,12 +95,12 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
                 ...currentBet,
                 status: "FILLED",
                 soldAmount:
-                  typeof body.amount === "number"
-                    ? body.amount
+                  typeof quote.netAmount === "number"
+                    ? quote.netAmount
                     : currentBet.soldAmount,
                 soldPrice:
-                  typeof body.amount === "number" && quote.shares > 0
-                    ? body.amount / quote.shares
+                  typeof quote.netAmount === "number" && quote.shares > 0
+                    ? quote.netAmount / quote.shares
                     : currentBet.soldPrice,
                 soldAt:
                   typeof body.createdAt === "string"
