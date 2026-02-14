@@ -52,6 +52,8 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
         throw new Error(body.error ?? "Sell failed");
       }
 
+      const feeRate = Math.max(0, Math.min(1, market.feeBps / 10_000));
+
       onUpdateMarket(market.marketId, {
         ...market,
         bets: market.bets.map((currentBet) =>
@@ -61,10 +63,12 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
                 status: "FILLED",
                 soldAmount:
                   typeof body.amount === "number"
-                    ? body.amount
+                    ? body.amount * (1 - feeRate)
                     : currentBet.soldAmount,
                 soldPrice:
-                  typeof body.price === "number" ? body.price : currentBet.soldPrice,
+                  typeof body.price === "number"
+                    ? body.price * (1 - feeRate)
+                    : currentBet.soldPrice,
                 soldAt:
                   typeof body.createdAt === "string"
                     ? body.createdAt
