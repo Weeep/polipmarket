@@ -88,6 +88,7 @@ export type PlaceWithAmmInput = {
   order: Order;
   position: OrderPosition;
   ammStakeAmount: number;
+  side: OrderSide;
 };
 
 export type OrderRepository = {
@@ -122,14 +123,25 @@ export const orderRepository: OrderRepository = {
     const runner = async (client: Prisma.TransactionClient) => {
       await ensureValidOutcome(client, input.order.marketId, input.order.outcomeId);
 
-      await ammRepository.applyBuyToOutcomeLiquidity(
-        {
-          outcomeId: input.order.outcomeId,
-          position: input.position,
-          amount: input.ammStakeAmount,
-        },
-        client,
-      );
+      if (input.side === "BUY") {
+        await ammRepository.applyBuyToOutcomeLiquidity(
+          {
+            outcomeId: input.order.outcomeId,
+            position: input.position,
+            amount: input.ammStakeAmount,
+          },
+          client,
+        );
+      } else {
+        await ammRepository.applySellToOutcomeLiquidity(
+          {
+            outcomeId: input.order.outcomeId,
+            position: input.position,
+            amount: input.ammStakeAmount,
+          },
+          client,
+        );
+      }
 
       const created = await client.order.create({ data: input.order });
       return toDomain(created);

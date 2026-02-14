@@ -31,19 +31,29 @@ export function MarketRow({ market, onUpdate }: Props) {
       ? (market.resolvedPosition as "YES" | "NO")
       : null;
 
-  async function onCancel(bet: Bet) {
-    const ok = window.confirm("Are you sure you want to cancel this order?");
+  async function onSell(bet: Bet) {
+    const shares = bet.amount / bet.price;
+    const ok = window.confirm(
+      `Sell ${shares.toFixed(2)} shares of ${bet.position} at market price?`,
+    );
 
     if (!ok) return;
 
     try {
-      const res = await apiFetch(`/api/orders/${bet.orderId}`, {
-        method: "DELETE",
+      const res = await apiFetch("/api/orders", {
+        method: "POST",
+        body: JSON.stringify({
+          marketId: market.marketId,
+          outcomeId: bet.outcomeId,
+          position: bet.position,
+          side: "SELL",
+          shares,
+        }),
       });
 
       if (!res.ok) {
         const body = await res.json();
-        throw new Error(body.error ?? "Cancel failed");
+        throw new Error(body.error ?? "Sell failed");
       }
 
       const remainingBets = market.bets.filter((b) => b.orderId !== bet.orderId);
@@ -59,7 +69,7 @@ export function MarketRow({ market, onUpdate }: Props) {
 
       await refreshMe();
     } catch (err: unknown) {
-      alert(getErrorMessage(err, "Cancel failed"));
+      alert(getErrorMessage(err, "Sell failed"));
     }
   }
 
@@ -94,9 +104,8 @@ export function MarketRow({ market, onUpdate }: Props) {
         {market.bets.map((bet) => {
           const shares = bet.amount / bet.price;
           const isCancelled = bet.status === "CANCELLED";
-          const isResolved =
-            bet.status === "FILLED" || market.status === "RESOLVED";
-          const isActive = !isCancelled && !isResolved;
+          const isResolved = market.status === "RESOLVED";
+          const isActive = !isCancelled && market.status === "OPEN";
           const statusLabel = isCancelled
             ? "Törölt"
             : isResolved
@@ -122,79 +131,71 @@ export function MarketRow({ market, onUpdate }: Props) {
           const payoutLabel = payout.toFixed(2);
 
           return (
-          <div
-            key={bet.orderId}
-            className="grid grid-cols-[1.6fr_0.8fr_0.7fr_0.7fr_0.8fr_1fr] items-center gap-2 rounded-md border border-stone-800 bg-stone-950/60 px-3 py-2 text-sm text-stone-300"
-          >
-            <span className="font-semibold text-stone-100">
-              {bet.outcomeLabel}
-            </span>
-            <span className="text-stone-200">{bet.position}</span>
-            <span>{bet.amount.toFixed(2)}</span>
-            <span>@ {bet.price.toFixed(2)}</span>
-            <span>{shares.toFixed(2)}</span>
-            <div className="flex flex-col items-end gap-1 text-right">
-              <span
-                className={
-                  isActive
-                    ? "text-emerald-400"
-                    : isCancelled
-                      ? "text-amber-400"
-                      : "text-sky-400"
-                }
-              >
-                {statusLabel}
-              </span>
-              {isActive && (
-                <button
-                  className="button-gold px-3 py-1 text-xs"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onCancel(bet);
-                  }}
+            <div
+              key={bet.orderId}
+              className="grid grid-cols-[1.6fr_0.8fr_0.7fr_0.7fr_0.8fr_1fr] items-center gap-2 rounded-md border border-stone-800 bg-stone-950/60 px-3 py-2 text-sm text-stone-300"
+            >
+              <span className="font-semibold text-stone-100">{bet.outcomeLabel}</span>
+              <span className="text-stone-200">{bet.position}</span>
+              <span>{bet.amount.toFixed(2)}</span>
+              <span>@ {bet.price.toFixed(2)}</span>
+              <span>{shares.toFixed(2)}</span>
+              <div className="flex flex-col items-end gap-1 text-right">
+                <span
+                  className={
+                    isActive
+                      ? "text-emerald-400"
+                      : isCancelled
+                        ? "text-amber-400"
+                        : "text-sky-400"
+                  }
                 >
-                  Sell
-                </button>
-              )}
-              {isCancelled && (
-                <span className="text-xs text-stone-400">
-                  Eladott {bet.amount.toFixed(2)} @ {bet.price.toFixed(2)} ·{" "}
-                  {payoutLabel}
+                  {statusLabel}
                 </span>
-              )}
-              {isResolved && (
-                <span className="text-xs text-stone-400">
-                  Eladott {bet.amount.toFixed(2)} @ {sellPrice.toFixed(2)} ·{" "}
-                  {payoutLabel}{" "}
-                  <span
-                    className={
-                      profit > 0
-                        ? "text-emerald-400"
-                        : profit < 0
-                          ? "text-rose-400"
-                          : "text-stone-400"
-                    }
+                {isActive && (
+                  <button
+                    className="button-gold px-3 py-1 text-xs"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onSell(bet);
+                    }}
                   >
-                    ({profitLabel})
+                    Sell
+                  </button>
+                )}
+                {isCancelled && (
+                  <span className="text-xs text-stone-400">
+                    Eladott {bet.amount.toFixed(2)} @ {bet.price.toFixed(2)} · {payoutLabel}
                   </span>
-                </span>
-              )}
+                )}
+                {isResolved && (
+                  <span className="text-xs text-stone-400">
+                    Eladott {bet.amount.toFixed(2)} @ {sellPrice.toFixed(2)} · {payoutLabel}{" "}
+                    <span
+                      className={
+                        profit > 0
+                          ? "text-emerald-400"
+                          : profit < 0
+                            ? "text-rose-400"
+                            : "text-stone-400"
+                      }
+                    >
+                      ({profitLabel})
+                    </span>
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
           );
         })}
       </div>
 
       <div className="marketcard-statusbar text-stone-400">
         <span>{market.status}</span>
-        <span>
-          Fogadás zár {new Date(market.closesAt).toLocaleDateString()}
-        </span>
+        <span>Fogadás zár {new Date(market.closesAt).toLocaleDateString()}</span>
         {market.resolvesAt && (
-          <span>
-            Esemény vége {new Date(market.resolvesAt).toLocaleDateString()}
-          </span>
+          <span>Esemény vége {new Date(market.resolvesAt).toLocaleDateString()}</span>
         )}
       </div>
     </div>
