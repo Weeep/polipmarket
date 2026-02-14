@@ -22,6 +22,9 @@ export async function getMyEventMarkets(
           include: {
             event: true,
             outcomes: true,
+            ammConfig: {
+              select: { feeBps: true },
+            },
           },
         },
       },
@@ -57,9 +60,12 @@ export async function getMyEventMarkets(
     }),
   ]);
 
-  const latestSellByPositionKey = new Map<string, (typeof sellOrders)[number]>();
+  const sellStatsByPositionKey = new Map<
+    string,
+    { netAmount: number; shares: number; latestAt: Date }
+  >();
   for (const sell of sellOrders) {
-    if (sell.position == null) {
+    if (sell.position == null || sell.price <= 0) {
       continue;
     }
 
@@ -69,9 +75,25 @@ export async function getMyEventMarkets(
       position: sell.position,
     });
 
-    if (!latestSellByPositionKey.has(key)) {
-      latestSellByPositionKey.set(key, sell);
+    const feeBps = sell.market?.ammConfig?.feeBps ?? DEFAULT_AMM_FEE_BPS;
+    const netAmount = sell.amount * (1 - feeBps / 10_000);
+    const shares = sell.amount / sell.price;
+    const current = sellStatsByPositionKey.get(key);
+
+    if (current) {
+      current.netAmount += netAmount;
+      current.shares += shares;
+      if (sell.createdAt > current.latestAt) {
+        current.latestAt = sell.createdAt;
+      }
+      continue;
     }
+
+    sellStatsByPositionKey.set(key, {
+      netAmount,
+      shares,
+      latestAt: sell.createdAt,
+    });
   }
 
   const remainingSharesByPositionKey = new Map<string, number>();
@@ -116,8 +138,10 @@ export async function getMyEventMarkets(
       position: order.position as "YES" | "NO",
     });
     const remainingShares = remainingSharesByPositionKey.get(positionKey) ?? 0;
+    const buyFeeBps = order.market.ammConfig?.feeBps ?? DEFAULT_AMM_FEE_BPS;
+    const netBuyAmount = order.amount * (1 - buyFeeBps / 10_000);
     const estimatedBoughtShares =
-      order.price > 0 ? order.amount / order.price : 0;
+      order.price > 0 ? netBuyAmount / order.price : 0;
     const isStillOpen =
       order.status !== "CANCELLED" && remainingShares > 0;
 
@@ -129,7 +153,7 @@ export async function getMyEventMarkets(
       remainingSharesByPositionKey.set(positionKey, remainingShares - consumedShares);
     }
 
-    const latestSell = latestSellByPositionKey.get(positionKey);
+    const sellStats = sellStatsByPositionKey.get(positionKey);
 
     const derivedStatus =
       order.status === "CANCELLED"
@@ -138,21 +162,17 @@ export async function getMyEventMarkets(
           ? "OPEN"
           : "FILLED";
 
-    const soldGrossAmount = derivedStatus === "FILLED" ? latestSell?.amount : undefined;
-    const sellFeeBps = latestSell?.market?.ammConfig?.feeBps ?? DEFAULT_AMM_FEE_BPS;
+    const averageNetSellPrice =
+      sellStats != null && sellStats.shares > 0
+        ? sellStats.netAmount / sellStats.shares
+        : undefined;
+    const soldShares = derivedStatus === "FILLED" ? estimatedBoughtShares : undefined;
+    const soldPrice = derivedStatus === "FILLED" ? averageNetSellPrice : undefined;
     const soldAmount =
-      soldGrossAmount != null
-        ? soldGrossAmount * (1 - sellFeeBps / 10_000)
+      derivedStatus === "FILLED" && soldShares != null && soldPrice != null
+        ? soldShares * soldPrice
         : undefined;
-    const soldShares =
-      derivedStatus === "FILLED" && latestSell != null && latestSell.price > 0
-        ? latestSell.amount / latestSell.price
-        : undefined;
-    const soldPrice =
-      derivedStatus === "FILLED" && soldAmount != null && soldShares != null && soldShares > 0
-        ? soldAmount / soldShares
-        : undefined;
-    const orderShares = soldShares ?? consumedShares;
+    const orderShares = derivedStatus === "FILLED" ? estimatedBoughtShares : consumedShares;
 
     market.bets.push({
       orderId: order.id,
@@ -166,7 +186,7 @@ export async function getMyEventMarkets(
       createdAt: order.createdAt.toISOString(),
       soldAmount,
       soldPrice,
-      soldAt: derivedStatus === "FILLED" ? latestSell?.createdAt.toISOString() : undefined,
+      soldAt: derivedStatus === "FILLED" ? sellStats?.latestAt.toISOString() : undefined,
     });
 
     if (order.createdAt > new Date(market.latestBetAt)) {
