@@ -9,8 +9,9 @@ import {
   calcFee,
   calcSharesForBuyNetAmount,
   calcSlippageBps,
+  validateFeeBps,
 } from "../domain/ammQuote";
-import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
+import { DEFAULT_AMM_FEE_BPS, DEFAULT_OUTCOME_POOL } from "@/config/economy";
 
 export type QuoteOrderInput = {
   marketId: string;
@@ -63,7 +64,9 @@ export async function quoteOrder(
     ammRepository.findLiquidityByOutcomeId(input.outcomeId, tx),
   ]);
 
-  const feeBps = ammConfig?.feeBps ?? 100;
+  const feeBps = ammConfig?.feeBps ?? DEFAULT_AMM_FEE_BPS;
+  validateFeeBps(feeBps);
+
   const fee = calcFee(input.amount, feeBps);
   const netAmount = input.amount - fee;
 

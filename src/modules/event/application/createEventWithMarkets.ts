@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_AMM_FEE_BPS } from "@/config/economy";
 import { Event } from "../domain/Event";
 import { eventRepository } from "../infrastructure/eventRepository";
 import { marketRepository } from "@/modules/market/infrastructure/marketRepository";
@@ -13,6 +14,7 @@ export type CreateEventWithMarketsInput = {
   description?: string | null;
   bettingCloseAt: Date;
   resolveAt?: Date | null;
+  feeBps?: number;
   createdBy: string;
   markets: CreateEventMarketInput[];
 };
@@ -44,6 +46,11 @@ export async function createEventWithMarkets(
     throw new Error("At least one market is required");
   }
 
+  const feeBps = input.feeBps ?? DEFAULT_AMM_FEE_BPS;
+  if (feeBps < 0 || feeBps > 1000) {
+    throw new Error("feeBps must be between 0 and 1000");
+  }
+
   const markets = input.markets.map((market) => {
     const name = market.name.trim();
     if (!name) {
@@ -69,6 +76,7 @@ export async function createEventWithMarkets(
         bettingCloseAt: input.bettingCloseAt,
         resolveAt: input.resolveAt ?? null,
         createdBy: input.createdBy,
+        feeBps,
       },
       tx,
     );
@@ -84,6 +92,9 @@ export async function createEventWithMarkets(
           bettingCloseAt: input.bettingCloseAt,
           resolveAt: input.resolveAt ?? input.bettingCloseAt,
           createdBy: input.createdBy,
+          ammConfig: {
+            feeBps,
+          },
           outcomes: [
             {
               slug: market.slug,

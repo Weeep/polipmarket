@@ -1,6 +1,7 @@
 import { AmmCurve, Market, MarketType } from "../domain/Market";
 import { OutcomeStatus } from "../domain/Outcome";
 import { MarketRepository } from "../infrastructure/marketRepository";
+import { DEFAULT_AMM_FEE_BPS } from "@/config/economy";
 
 export type CreateMarketOutcomeInput = {
   slug: string;
@@ -74,7 +75,7 @@ function normalizeAmmConfig(
   ammConfig?: CreateMarketAmmConfigInput | null,
 ): Required<CreateMarketAmmConfigInput> {
   const curve = ammConfig?.curve ?? "CPMM";
-  const feeBps = ammConfig?.feeBps ?? 100;
+  const feeBps = ammConfig?.feeBps ?? DEFAULT_AMM_FEE_BPS;
   const lmsrB = ammConfig?.lmsrB ?? null;
 
   if (feeBps < 0 || feeBps > 1000) {

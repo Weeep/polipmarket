@@ -8,7 +8,7 @@ import {
   MarketType,
 } from "../domain/Market";
 import { Outcome, OutcomeStatus } from "../domain/Outcome";
-import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
+import { DEFAULT_AMM_FEE_BPS, DEFAULT_OUTCOME_POOL } from "@/config/economy";
 import { Event } from "@/modules/event/domain/Event";
 
 type CreateOutcomeData = {
@@ -205,7 +205,7 @@ export const marketRepository: MarketRepository = {
           ? {
               create: {
                 curve: data.ammConfig.curve ?? "CPMM",
-                feeBps: data.ammConfig.feeBps ?? 100,
+                feeBps: data.ammConfig.feeBps ?? DEFAULT_AMM_FEE_BPS,
                 lmsrB: data.ammConfig.lmsrB ?? null,
               },
             }

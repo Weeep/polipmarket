@@ -9,6 +9,20 @@ export function calcFee(amount: number, feeBps: number): number {
   return amount * (feeBps / 10_000);
 }
 
+
+export function validateFeeBps(feeBps: number): void {
+  if (!Number.isFinite(feeBps) || feeBps < 0 || feeBps >= 10_000) {
+    throw new Error("Invalid AMM fee configuration");
+  }
+}
+
+export function calcGrossFromNetAfterFee(netAmount: number, feeBps: number): number {
+  validateFeeBps(feeBps);
+
+  const feeRate = feeBps / 10_000;
+  return netAmount / (1 - feeRate);
+}
+
 export function calcExecutionPrice(pool: PoolState, position: OrderPosition): number {
   const total = pool.yesPool + pool.noPool;
 

@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
+import { DEFAULT_AMM_FEE_BPS, DEFAULT_OUTCOME_POOL } from "@/config/economy";
 import { ammRepository } from "@/modules/market/infrastructure/ammRepository";
 import { marketRepository } from "@/modules/market/infrastructure/marketRepository";
 import { outcomeRepository } from "@/modules/market/infrastructure/outcomeRepository";
@@ -9,7 +9,9 @@ import {
   calcExecutionPrice,
   calcNetAmountForSellShares,
   calcFee,
+  calcGrossFromNetAfterFee,
   calcSlippageBps,
+  validateFeeBps,
 } from "../domain/ammQuote";
 
 export type QuoteSellInput = {
@@ -75,12 +77,11 @@ export async function quoteSell(
   }
 
   const netAmount = calcNetAmountForSellShares(beforePool, input.position, input.shares);
-  const feeBps = ammConfig?.feeBps ?? 100;
-  const feeRate = feeBps / 10_000;
+  const feeBps = ammConfig?.feeBps ?? DEFAULT_AMM_FEE_BPS;
+  validateFeeBps(feeBps);
 
-  if (feeRate >= 1) {
-    throw new Error("Invalid AMM fee configuration");
-  }
+  const grossAmount = calcGrossFromNetAfterFee(netAmount, feeBps);
+  const fee = calcFee(grossAmount, feeBps);
 
   const grossAmount = netAmount / (1 - feeRate);
   const fee = calcFee(grossAmount, feeBps);

@@ -40,6 +40,7 @@ model Event {
   description String?
   bettingCloseAt DateTime
   resolveAt   DateTime?
+  feeBps      Int      @default(100)
   createdBy   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
