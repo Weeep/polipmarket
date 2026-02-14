@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/withAuth";
 import { placeOrder } from "@/modules/order/application/placeOrder";
-import { OrderPosition } from "@/modules/order/domain/Order";
+import { OrderPosition, OrderSide } from "@/modules/order/domain/Order";
 import { DEFAULT_MAX_SLIPPAGE_BPS } from "@/config/economy";
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -16,10 +16,25 @@ function parsePosition(value: unknown): OrderPosition {
   throw new Error("Invalid position");
 }
 
+function parseSide(value: unknown): OrderSide {
+  if (value == null) {
+    return "BUY";
+  }
+
+  if (value === "BUY" || value === "SELL") {
+    return value;
+  }
+
+  throw new Error("Invalid side");
+}
+
 export const POST = withAuth(async (user, req) => {
   try {
     const body = (await req.json()) as Record<string, unknown>;
+    const side = parseSide(body.side);
     const amount = Number(body.amount);
+    const shares = Number(body.shares);
+
     const maxSlippageBps =
       body.maxSlippageBps == null
         ? DEFAULT_MAX_SLIPPAGE_BPS
@@ -32,31 +47,48 @@ export const POST = withAuth(async (user, req) => {
       );
     }
 
-    if (
-      !body.marketId ||
-      !body.outcomeId ||
-      body.position == null ||
-      !Number.isFinite(amount)
-    ) {
+    if (!body.marketId || !body.outcomeId || body.position == null) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
       );
     }
 
-    const order = await placeOrder({
-      userId: user.id,
-      marketId: String(body.marketId),
-      outcomeId: String(body.outcomeId),
-      side: "BUY",
-      position: parsePosition(body.position),
-      amount,
-      maxSlippageBps,
-    });
+    if (side === "BUY" && !Number.isFinite(amount)) {
+      return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
+    }
+
+    if (side === "SELL" && !Number.isFinite(shares)) {
+      return NextResponse.json({ error: "Invalid shares" }, { status: 400 });
+    }
+
+    const order =
+      side === "BUY"
+        ? await placeOrder({
+            userId: user.id,
+            marketId: String(body.marketId),
+            outcomeId: String(body.outcomeId),
+            side,
+            position: parsePosition(body.position),
+            amount,
+            maxSlippageBps,
+          })
+        : await placeOrder({
+            userId: user.id,
+            marketId: String(body.marketId),
+            outcomeId: String(body.outcomeId),
+            side,
+            position: parsePosition(body.position),
+            shares,
+            maxSlippageBps,
+          });
 
     return NextResponse.json(order, { status: 201 });
   } catch (error: unknown) {
-    if (error instanceof Error && error.message === "Invalid position") {
+    if (
+      error instanceof Error &&
+      (error.message === "Invalid position" || error.message === "Invalid side")
+    ) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 

@@ -27,46 +27,61 @@ export async function resolveMarket(input: ResolveMarketInput) {
       tx,
     );
 
-    const orders = await tx.order.findMany({
+    const positions = await tx.position.findMany({
       where: {
         marketId: input.marketId,
-        status: { not: "CANCELLED" },
       },
       select: {
         userId: true,
-        amount: true,
-        price: true,
         outcomeId: true,
         position: true,
+        shares: true,
+        costBasis: true,
       },
     });
 
-    const refunds = new Map<string, { locked: number; payout: number }>();
-    for (const order of orders) {
-      const locked = refunds.get(order.userId) ?? { locked: 0, payout: 0 };
-      locked.locked += order.amount;
+    const settlements = new Map<string, { lockedRelease: number; payout: number }>();
 
-      if (
-        order.outcomeId === input.outcomeId &&
-        order.position === input.position
-      ) {
-        locked.payout += order.amount / order.price;
+    for (const entry of positions) {
+      const settlement = settlements.get(entry.userId) ?? {
+        lockedRelease: 0,
+        payout: 0,
+      };
+
+      settlement.lockedRelease += entry.shares * entry.costBasis;
+
+      if (entry.outcomeId === input.outcomeId && entry.position === input.position) {
+        settlement.payout += entry.shares;
       }
 
-      refunds.set(order.userId, locked);
+      settlements.set(entry.userId, settlement);
     }
 
-    for (const [userId, totals] of refunds) {
-      if (totals.locked > 0 || totals.payout > 0) {
+    for (const [userId, totals] of settlements) {
+      const wallet = await tx.wallet.findUnique({ where: { userId } });
+      if (!wallet) {
+        throw new Error(`Wallet not found for user: ${userId}`);
+      }
+
+      const lockedRelease = Math.max(0, Math.min(wallet.locked, totals.lockedRelease));
+      const payout = Math.max(0, totals.payout);
+
+      if (lockedRelease > 0 || payout > 0) {
         await tx.wallet.update({
           where: { userId },
           data: {
-            locked: { decrement: totals.locked },
-            balance: { increment: totals.payout },
+            locked: { decrement: lockedRelease },
+            balance: { increment: payout },
           },
         });
       }
     }
+
+    await tx.position.deleteMany({
+      where: {
+        marketId: input.marketId,
+      },
+    });
 
     await tx.order.updateMany({
       where: {

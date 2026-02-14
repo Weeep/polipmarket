@@ -6,7 +6,7 @@ export async function getMyEventMarkets(
   limit = 5,
 ): Promise<MyEventMarketBetDTO[]> {
   const orders = await prisma.order.findMany({
-    where: { userId },
+    where: { userId, side: "BUY" },
     include: {
       market: {
         include: {
