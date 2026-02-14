@@ -42,6 +42,7 @@ export async function getMyEventMarkets(
         marketId: true,
         outcomeId: true,
         position: true,
+        shares: true,
       },
     }),
   ]);
@@ -63,15 +64,16 @@ export async function getMyEventMarkets(
     }
   }
 
-  const activePositionKeys = new Set(
-    positions.map((position) =>
-      makeKey({
-        marketId: position.marketId,
-        outcomeId: position.outcomeId,
-        position: position.position as "YES" | "NO",
-      }),
-    ),
-  );
+  const remainingSharesByPositionKey = new Map<string, number>();
+  for (const position of positions) {
+    const key = makeKey({
+      marketId: position.marketId,
+      outcomeId: position.outcomeId,
+      position: position.position as "YES" | "NO",
+    });
+
+    remainingSharesByPositionKey.set(key, position.shares);
+  }
 
   const map = new Map<string, MyEventMarketBetDTO>();
 
@@ -103,13 +105,23 @@ export async function getMyEventMarkets(
       outcomeId: order.outcomeId,
       position: order.position as "YES" | "NO",
     });
-    const isStillOpen = activePositionKeys.has(positionKey);
+    const remainingShares = remainingSharesByPositionKey.get(positionKey) ?? 0;
+    const estimatedBoughtShares =
+      order.price > 0 ? order.amount / order.price : 0;
+    const isStillOpen =
+      order.status !== "CANCELLED" && remainingShares > 0;
+
+    if (isStillOpen) {
+      const consumedShares = Math.min(remainingShares, estimatedBoughtShares);
+      remainingSharesByPositionKey.set(positionKey, remainingShares - consumedShares);
+    }
+
     const latestSell = latestSellByPositionKey.get(positionKey);
 
     const derivedStatus =
       order.status === "CANCELLED"
         ? "CANCELLED"
-        : isStillOpen && order.market.status === "OPEN"
+        : isStillOpen
           ? "OPEN"
           : "FILLED";
 

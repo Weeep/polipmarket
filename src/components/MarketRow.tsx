@@ -116,6 +116,8 @@ export function MarketRow({ market, onUpdate }: Props) {
           const isFilled = bet.status === "FILLED";
           const isResolved = market.status === "RESOLVED";
           const isActive = bet.status === "OPEN";
+          const canSell =
+            isActive && market.status === "OPEN" && new Date(market.closesAt) > new Date();
           const statusLabel = isCancelled
             ? "Törölt"
             : isFilled
@@ -169,12 +171,15 @@ export function MarketRow({ market, onUpdate }: Props) {
                 </span>
                 {isActive && (
                   <button
-                    className="button-gold px-3 py-1 text-xs"
+                    className="button-gold px-3 py-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
+                      if (!canSell) return;
                       onSell(bet);
                     }}
+                    disabled={!canSell}
+                    title={!canSell ? "Market closed" : undefined}
                   >
                     Sell
                   </button>
