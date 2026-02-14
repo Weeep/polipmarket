@@ -27,22 +27,32 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
     market.bets.map((bet) => ({ market, bet })),
   );
 
-  async function onCancel(market: MyEventMarketBetDTO, orderId: string) {
-    const ok = window.confirm("Are you sure you want to cancel this order?");
+  async function onSell(market: MyEventMarketBetDTO, bet: MarketBet["bet"]) {
+    const shares = bet.amount / bet.price;
+    const ok = window.confirm(
+      `Sell ${shares.toFixed(2)} shares of ${bet.position} at market price?`,
+    );
 
     if (!ok) return;
 
     try {
-      const res = await apiFetch(`/api/orders/${orderId}`, {
-        method: "DELETE",
+      const res = await apiFetch("/api/orders", {
+        method: "POST",
+        body: JSON.stringify({
+          marketId: market.marketId,
+          outcomeId: bet.outcomeId,
+          position: bet.position,
+          side: "SELL",
+          shares,
+        }),
       });
 
       if (!res.ok) {
         const body = await res.json();
-        throw new Error(body.error ?? "Cancel failed");
+        throw new Error(body.error ?? "Sell failed");
       }
 
-      const remainingBets = market.bets.filter((b) => b.orderId !== orderId);
+      const remainingBets = market.bets.filter((b) => b.orderId !== bet.orderId);
 
       if (remainingBets.length === 0) {
         onUpdateMarket(market.marketId, null);
@@ -55,7 +65,7 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
 
       await refreshMe();
     } catch (err: unknown) {
-      alert(getErrorMessage(err, "Cancel failed"));
+      alert(getErrorMessage(err, "Sell failed"));
     }
   }
 
@@ -85,8 +95,8 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
         {allBets.map(({ market, bet }) => {
           const shares = bet.amount / bet.price;
           const isCancelled = bet.status === "CANCELLED";
-          const isResolved = bet.status === "FILLED" || market.status === "RESOLVED";
-          const isActive = !isCancelled && !isResolved;
+          const isResolved = market.status === "RESOLVED";
+          const isActive = !isCancelled && market.status === "OPEN";
           const resolvedPosition = market.resolvedPosition ?? null;
           const statusLabel = isCancelled ? "Törölt" : isResolved ? "Lezárt" : "Aktív";
           const isWinning =
@@ -128,7 +138,7 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      onCancel(market, bet.orderId);
+                      onSell(market, bet);
                     }}
                   >
                     Sell
@@ -163,9 +173,7 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
 
       <div className="marketcard-statusbar text-stone-400">
         <span>{markets[0]?.status}</span>
-        <span>
-          Fogadás zár {new Date(markets[0]?.closesAt).toLocaleDateString()}
-        </span>
+        <span>Fogadás zár {new Date(markets[0]?.closesAt).toLocaleDateString()}</span>
         {markets[0]?.resolvesAt && (
           <span>Esemény vége {new Date(markets[0].resolvesAt).toLocaleDateString()}</span>
         )}

@@ -53,7 +53,7 @@ function makeOrder(input: {
     side: input.side,
     price: input.price,
     amount: input.amount,
-    status: "OPEN",
+    status: "FILLED",
     createdAt: new Date(),
   };
 }
@@ -110,7 +110,7 @@ export async function placeOrder(input: PlaceOrderInput) {
           outcomeId: input.outcomeId,
           position: input.position,
           sharesToAdd: quote.estimatedShares,
-          executionPrice: quote.executionPrice,
+          costPerShare: input.amount / quote.estimatedShares,
         },
         tx,
       );
@@ -130,7 +130,7 @@ export async function placeOrder(input: PlaceOrderInput) {
 
     validateSlippage(quote.slippageBps, input.maxSlippageBps);
 
-    await positionRepository.removeShares(
+    const { removedCost } = await positionRepository.removeShares(
       {
         userId: input.userId,
         marketId: input.marketId,
@@ -144,6 +144,7 @@ export async function placeOrder(input: PlaceOrderInput) {
     await tx.wallet.update({
       where: { userId: input.userId },
       data: {
+        locked: { decrement: removedCost },
         balance: { increment: quote.netAmount },
       },
     });

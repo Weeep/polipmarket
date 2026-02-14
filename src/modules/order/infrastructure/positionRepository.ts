@@ -46,7 +46,7 @@ export type PositionRepository = {
   addShares(
     input: PositionKey & {
       sharesToAdd: number;
-      executionPrice: number;
+      costPerShare: number;
     },
     tx?: Prisma.TransactionClient,
   ): Promise<Position>;
@@ -55,7 +55,7 @@ export type PositionRepository = {
       sharesToRemove: number;
     },
     tx?: Prisma.TransactionClient,
-  ): Promise<Position | null>;
+  ): Promise<{ position: Position | null; removedCost: number }>;
 };
 
 export const positionRepository: PositionRepository = {
@@ -98,7 +98,7 @@ export const positionRepository: PositionRepository = {
           outcomeId: input.outcomeId,
           position: input.position,
           shares: input.sharesToAdd,
-          costBasis: input.executionPrice,
+          costBasis: input.costPerShare,
         },
       });
 
@@ -107,7 +107,7 @@ export const positionRepository: PositionRepository = {
 
     const nextShares = existing.shares + input.sharesToAdd;
     const nextCostBasis =
-      (existing.costBasis * existing.shares + input.executionPrice * input.sharesToAdd) /
+      (existing.costBasis * existing.shares + input.costPerShare * input.sharesToAdd) /
       nextShares;
 
     const updated = await client.position.update({
@@ -139,6 +139,7 @@ export const positionRepository: PositionRepository = {
       throw new Error("Insufficient shares");
     }
 
+    const removedCost = existing.costBasis * input.sharesToRemove;
     const nextShares = existing.shares - input.sharesToRemove;
 
     if (nextShares <= 0) {
@@ -146,7 +147,7 @@ export const positionRepository: PositionRepository = {
         where: { id: existing.id },
       });
 
-      return null;
+      return { position: null, removedCost };
     }
 
     const updated = await client.position.update({
@@ -156,6 +157,6 @@ export const positionRepository: PositionRepository = {
       },
     });
 
-    return toDomain(updated);
+    return { position: toDomain(updated), removedCost };
   },
 };
