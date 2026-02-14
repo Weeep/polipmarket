@@ -27,6 +27,35 @@ function groupMarketsByEvent(markets: MyEventMarketBetDTO[]) {
   });
 }
 
+function filterMarketsByBetStatus(
+  markets: MyEventMarketBetDTO[],
+  statuses: string[],
+): MyEventMarketBetDTO[] {
+  return markets
+    .map((market) => {
+      const filteredBets = market.bets.filter((bet) => statuses.includes(bet.status));
+
+      if (filteredBets.length === 0) {
+        return null;
+      }
+
+      const latestBetAt = filteredBets
+        .map((bet) => new Date(bet.createdAt).getTime())
+        .reduce((a, b) => Math.max(a, b), 0);
+
+      return {
+        ...market,
+        bets: filteredBets,
+        latestBetAt: new Date(latestBetAt).toISOString(),
+      };
+    })
+    .filter((market): market is MyEventMarketBetDTO => market !== null)
+    .sort(
+      (a, b) =>
+        new Date(b.latestBetAt).getTime() - new Date(a.latestBetAt).getTime(),
+    );
+}
+
 export default function HomePage() {
   const [myMarkets, setMyMarkets] = useState<MyEventMarketBetDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,18 +86,8 @@ export default function HomePage() {
     );
   }
 
-  const openMarkets = myMarkets
-    .filter((market) => market.status === "OPEN")
-    .sort(
-      (a, b) =>
-        new Date(b.latestBetAt).getTime() - new Date(a.latestBetAt).getTime(),
-    );
-  const closedMarkets = myMarkets
-    .filter((market) => market.status !== "OPEN")
-    .sort(
-      (a, b) =>
-        new Date(b.latestBetAt).getTime() - new Date(a.latestBetAt).getTime(),
-    );
+  const openMarkets = filterMarketsByBetStatus(myMarkets, ["OPEN"]);
+  const closedMarkets = filterMarketsByBetStatus(myMarkets, ["FILLED", "CANCELLED"]);
   const openMarketGroups = groupMarketsByEvent(openMarkets);
   const closedMarketGroups = groupMarketsByEvent(closedMarkets);
 
@@ -76,12 +95,10 @@ export default function HomePage() {
     <main className="p-8">
       <div className="max-w-6xl mx-auto px-6 py-10 space-y-10">
         <div className="marketcard-base space-y-4">
-          <h2 className="text-lg font-bold text-stone-100">
-            Nyitott marketjeim
-          </h2>
+          <h2 className="text-lg font-bold text-stone-100">Fogadások</h2>
 
           {openMarketGroups.length === 0 && (
-            <p className="text-stone-400 text-sm">Nincs aktív fogadásod</p>
+            <p className="text-stone-400 text-sm">Nincs nyitott fogadásod</p>
           )}
 
           <div className="space-y-4">
@@ -96,9 +113,7 @@ export default function HomePage() {
         </div>
 
         <div className="marketcard-base space-y-4">
-          <h2 className="text-lg font-bold text-stone-100">
-            Lezárt marketjeim
-          </h2>
+          <h2 className="text-lg font-bold text-stone-100">Lezárt fogadások</h2>
 
           {closedMarketGroups.length === 0 && (
             <p className="text-stone-400 text-sm">Nincs lezárt fogadásod</p>
