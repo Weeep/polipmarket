@@ -135,6 +135,7 @@ function toDomain(market: MarketRecord): Market {
       createdBy: market.event.createdBy,
       createdAt: market.event.createdAt,
       updatedAt: market.event.updatedAt,
+      feeBps: market.event.feeBps,
     },
     question: market.question,
     description: market.description,

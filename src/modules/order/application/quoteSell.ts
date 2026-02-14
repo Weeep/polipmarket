@@ -76,17 +76,22 @@ export async function quoteSell(
     throw new Error("Invalid quote price");
   }
 
-  const netAmount = calcNetAmountForSellShares(beforePool, input.position, input.shares);
+  const netAmount = calcNetAmountForSellShares(
+    beforePool,
+    input.position,
+    input.shares,
+  );
   const feeBps = ammConfig?.feeBps ?? DEFAULT_AMM_FEE_BPS;
   validateFeeBps(feeBps);
 
   const grossAmount = calcGrossFromNetAfterFee(netAmount, feeBps);
   const fee = calcFee(grossAmount, feeBps);
 
-  const grossAmount = netAmount / (1 - feeRate);
-  const fee = calcFee(grossAmount, feeBps);
-
-  const afterPool = applyNetAmountFromPool(beforePool, input.position, netAmount);
+  const afterPool = applyNetAmountFromPool(
+    beforePool,
+    input.position,
+    netAmount,
+  );
   const afterPrice = calcExecutionPrice(afterPool, input.position);
   const slippageBps = calcSlippageBps(executionPrice, afterPrice);
 
