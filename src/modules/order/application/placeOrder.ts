@@ -118,12 +118,26 @@ export async function placeOrder(input: PlaceOrderInput) {
       return created;
     }
 
+    const currentPosition = await positionRepository.findByUserOutcome(
+      input.userId,
+      input.marketId,
+      input.outcomeId,
+      input.position,
+      tx,
+    );
+
+    if (!currentPosition || currentPosition.shares <= 0) {
+      throw new Error("Insufficient shares");
+    }
+
+    const sharesToSell = Math.min(input.shares, currentPosition.shares);
+
     const quote = await quoteSell(
       {
         marketId: input.marketId,
         outcomeId: input.outcomeId,
         position: input.position,
-        shares: input.shares,
+        shares: sharesToSell,
       },
       tx,
     );
@@ -136,7 +150,7 @@ export async function placeOrder(input: PlaceOrderInput) {
         marketId: input.marketId,
         outcomeId: input.outcomeId,
         position: input.position,
-        sharesToRemove: input.shares,
+        sharesToRemove: sharesToSell,
       },
       tx,
     );

@@ -47,21 +47,32 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
         }),
       });
 
+      const body = await res.json();
       if (!res.ok) {
-        const body = await res.json();
         throw new Error(body.error ?? "Sell failed");
       }
 
-      const remainingBets = market.bets.filter((b) => b.orderId !== bet.orderId);
-
-      if (remainingBets.length === 0) {
-        onUpdateMarket(market.marketId, null);
-      } else {
-        onUpdateMarket(market.marketId, {
-          ...market,
-          bets: remainingBets,
-        });
-      }
+      onUpdateMarket(market.marketId, {
+        ...market,
+        bets: market.bets.map((currentBet) =>
+          currentBet.orderId === bet.orderId
+            ? {
+                ...currentBet,
+                status: "FILLED",
+                soldAmount:
+                  typeof body.amount === "number"
+                    ? body.amount
+                    : currentBet.soldAmount,
+                soldPrice:
+                  typeof body.price === "number" ? body.price : currentBet.soldPrice,
+                soldAt:
+                  typeof body.createdAt === "string"
+                    ? body.createdAt
+                    : new Date().toISOString(),
+              }
+            : currentBet,
+        ),
+      });
 
       await refreshMe();
     } catch (err: unknown) {
@@ -95,10 +106,13 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
         {allBets.map(({ market, bet }) => {
           const shares = bet.amount / bet.price;
           const isCancelled = bet.status === "CANCELLED";
+          const isFilled = bet.status === "FILLED";
           const isResolved = market.status === "RESOLVED";
-          const isActive = !isCancelled && market.status === "OPEN";
+          const isActive = bet.status === "OPEN";
+          const canSell =
+            isActive && market.status === "OPEN" && new Date(market.closesAt) > new Date();
           const resolvedPosition = market.resolvedPosition ?? null;
-          const statusLabel = isCancelled ? "Törölt" : isResolved ? "Lezárt" : "Aktív";
+          const statusLabel = isCancelled ? "Törölt" : isFilled ? "Eladott" : isResolved ? "Lezárt" : "Aktív";
           const isWinning =
             isResolved &&
             market.resolvedOutcomeId === bet.outcomeId &&
@@ -109,6 +123,9 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
           const profitLabel =
             profit > 0 ? `+${profit.toFixed(2)}` : profit < 0 ? profit.toFixed(2) : "0";
           const payoutLabel = payout.toFixed(2);
+          const soldPrice = bet.soldPrice ?? bet.price;
+          const soldAmount = bet.soldAmount ?? bet.amount;
+          const soldShares = soldPrice > 0 ? soldAmount / soldPrice : shares;
 
           return (
             <div
@@ -134,19 +151,22 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
                 </span>
                 {isActive && (
                   <button
-                    className="button-gold px-3 py-1 text-xs"
+                    className="button-gold px-3 py-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
+                      if (!canSell) return;
                       onSell(market, bet);
                     }}
+                    disabled={!canSell}
+                    title={!canSell ? "Market closed" : undefined}
                   >
                     Sell
                   </button>
                 )}
-                {isCancelled && (
+                {(isCancelled || isFilled) && (
                   <span className="text-xs text-stone-400">
-                    Eladott {bet.amount.toFixed(2)} @ {bet.price.toFixed(2)} · {payoutLabel}
+                    Eladott {soldShares.toFixed(2)} @ {soldPrice.toFixed(2)} · Bevétel: {soldAmount.toFixed(2)}
                   </span>
                 )}
                 {isResolved && (

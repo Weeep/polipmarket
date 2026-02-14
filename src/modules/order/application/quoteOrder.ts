@@ -7,6 +7,7 @@ import {
   applyNetAmountToPool,
   calcExecutionPrice,
   calcFee,
+  calcSharesFromNetAmount,
   calcSlippageBps,
 } from "../domain/ammQuote";
 import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
@@ -85,6 +86,12 @@ export async function quoteOrder(
   const afterPrice = calcExecutionPrice(afterPool, input.position);
   const slippageBps = calcSlippageBps(executionPrice, afterPrice);
 
+  const estimatedShares = calcSharesFromNetAmount(
+    beforePool,
+    input.position,
+    netAmount,
+  );
+
   return {
     marketId: input.marketId,
     outcomeId: input.outcomeId,
@@ -92,8 +99,8 @@ export async function quoteOrder(
     amount: input.amount,
     fee,
     netAmount,
-    executionPrice,
-    estimatedShares: netAmount / executionPrice,
+    executionPrice: netAmount / estimatedShares,
+    estimatedShares,
     slippageBps,
   };
 }
