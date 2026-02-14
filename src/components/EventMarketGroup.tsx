@@ -135,7 +135,7 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
               <span className="font-semibold text-stone-100">{bet.outcomeLabel}</span>
               <span className="text-stone-200">{bet.position}</span>
               <span>{bet.amount.toFixed(2)}</span>
-              <span>@ {bet.price.toFixed(2)}</span>
+              <span>@ {bet.price.toFixed(4)}</span>
               <span>{shares.toFixed(2)}</span>
               <div className="flex flex-col items-end gap-1 text-right">
                 <span
