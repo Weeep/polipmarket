@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
+import { DEFAULT_AMM_FEE_BPS, DEFAULT_OUTCOME_POOL } from "@/config/economy";
 import { ammRepository } from "@/modules/market/infrastructure/ammRepository";
 import { marketRepository } from "@/modules/market/infrastructure/marketRepository";
 import { outcomeRepository } from "@/modules/market/infrastructure/outcomeRepository";
@@ -7,8 +7,11 @@ import { OrderPosition } from "../domain/Order";
 import {
   applyNetAmountFromPool,
   calcExecutionPrice,
+  calcNetAmountForSellShares,
   calcFee,
+  calcGrossFromNetAfterFee,
   calcSlippageBps,
+  validateFeeBps,
 } from "../domain/ammQuote";
 
 export type QuoteSellInput = {
@@ -73,14 +76,12 @@ export async function quoteSell(
     throw new Error("Invalid quote price");
   }
 
-  const grossAmount = input.shares * executionPrice;
-  const feeBps = ammConfig?.feeBps ?? 100;
-  const fee = calcFee(grossAmount, feeBps);
-  const netAmount = grossAmount - fee;
+  const netAmount = calcNetAmountForSellShares(beforePool, input.position, input.shares);
+  const feeBps = ammConfig?.feeBps ?? DEFAULT_AMM_FEE_BPS;
+  validateFeeBps(feeBps);
 
-  if (netAmount <= 0) {
-    throw new Error("Shares too low after fees");
-  }
+  const grossAmount = calcGrossFromNetAfterFee(netAmount, feeBps);
+  const fee = calcFee(grossAmount, feeBps);
 
   const afterPool = applyNetAmountFromPool(beforePool, input.position, netAmount);
   const afterPrice = calcExecutionPrice(afterPool, input.position);
@@ -91,7 +92,7 @@ export async function quoteSell(
     outcomeId: input.outcomeId,
     position: input.position,
     shares: input.shares,
-    executionPrice,
+    executionPrice: grossAmount / input.shares,
     grossAmount,
     fee,
     netAmount,

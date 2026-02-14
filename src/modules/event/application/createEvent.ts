@@ -1,11 +1,13 @@
 import { Event } from "../domain/Event";
 import { EventRepository } from "../infrastructure/eventRepository";
+import { DEFAULT_AMM_FEE_BPS } from "@/config/economy";
 
 export type CreateEventInput = {
   question: string;
   description?: string | null;
   bettingCloseAt: Date;
   resolveAt?: Date | null;
+  feeBps?: number;
   createdBy: string;
 };
 
@@ -25,11 +27,17 @@ export async function createEvent(
     throw new Error("resolveAt must be after bettingCloseAt");
   }
 
+  const feeBps = input.feeBps ?? DEFAULT_AMM_FEE_BPS;
+  if (feeBps < 0 || feeBps > 1000) {
+    throw new Error("feeBps must be between 0 and 1000");
+  }
+
   return repo.create({
     question: input.question.trim(),
     description: input.description ?? null,
     bettingCloseAt: input.bettingCloseAt,
     resolveAt: input.resolveAt ?? null,
     createdBy: input.createdBy,
+    feeBps,
   });
 }

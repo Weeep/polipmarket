@@ -6,6 +6,7 @@ export interface Event {
   description?: string | null;
   bettingCloseAt: Date;
   resolveAt?: Date | null;
+  feeBps: number;
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;

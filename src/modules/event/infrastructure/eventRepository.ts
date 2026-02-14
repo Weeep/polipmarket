@@ -1,12 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { Event } from "@/modules/event/domain/Event";
+import { DEFAULT_AMM_FEE_BPS } from "@/config/economy";
 
 type CreateEventData = {
   question: string;
   description?: string | null;
   bettingCloseAt: Date;
   resolveAt?: Date | null;
+  feeBps?: number;
   createdBy: string;
 };
 
@@ -16,6 +18,7 @@ type EventRecord = {
   description: string | null;
   bettingCloseAt: Date;
   resolveAt: Date | null;
+  feeBps: number;
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
@@ -29,6 +32,7 @@ function toDomain(event: EventRecord): Event {
     bettingCloseAt: event.bettingCloseAt,
     resolveAt: event.resolveAt,
     createdBy: event.createdBy,
+    feeBps: event.feeBps,
     createdAt: event.createdAt,
     updatedAt: event.updatedAt,
   };
@@ -55,6 +59,7 @@ export const eventRepository: EventRepository = {
         bettingCloseAt: data.bettingCloseAt,
         resolveAt: data.resolveAt ?? null,
         createdBy: data.createdBy,
+        feeBps: data.feeBps ?? DEFAULT_AMM_FEE_BPS,
       },
     });
 
@@ -85,6 +90,7 @@ export const eventRepository: EventRepository = {
         description: data.description ?? null,
         bettingCloseAt: data.bettingCloseAt,
         resolveAt: data.resolveAt ?? null,
+        feeBps: data.feeBps,
       },
     });
 

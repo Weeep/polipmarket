@@ -7,6 +7,10 @@ export const DEFAULT_OUTCOME_POOL = 2000;
 // 2000 bps = 20%
 export const DEFAULT_MAX_SLIPPAGE_BPS = 2000;
 
+// Default AMM fee in basis points
+// 100 bps = 1%
+export const DEFAULT_AMM_FEE_BPS = 100;
+
 // === Possible improvement later
 // export const ECONOMY = {
 //   default: {

@@ -29,6 +29,7 @@ export default function NewEventPage() {
   const [description, setDescription] = useState("");
   const [bettingCloseAt, setBettingCloseAt] = useState("");
   const [resolveAt, setResolveAt] = useState("");
+  const [feeBps, setFeeBps] = useState(100);
   const [markets, setMarkets] = useState<DraftMarket[]>([createMarket()]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -58,6 +59,7 @@ export default function NewEventPage() {
           description,
           bettingCloseAt,
           resolveAt: resolveAt || null,
+          feeBps,
           markets: payloadMarkets,
         }),
       });
@@ -122,6 +124,18 @@ export default function NewEventPage() {
               value={resolveAt}
               onChange={(e) => setResolveAt(e.target.value)}
               required
+            />
+          </label>
+
+          <label>
+            Fee (bps, default 100 = 1%)
+            <input
+              className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              type="number"
+              min="0"
+              max="1000"
+              value={feeBps}
+              onChange={(e) => setFeeBps(Number(e.target.value))}
             />
           </label>
 
