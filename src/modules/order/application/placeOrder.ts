@@ -178,7 +178,7 @@ export async function placeOrder(input: PlaceOrderInput) {
         order,
         side: "SELL",
         position: input.position,
-        ammStakeAmount: quote.netAmount,
+        ammStakeAmount: quote.grossAmount,
       },
       tx,
     );

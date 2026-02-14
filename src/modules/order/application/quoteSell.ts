@@ -9,7 +9,6 @@ import {
   calcExecutionPrice,
   calcNetAmountForSellShares,
   calcFee,
-  calcGrossFromNetAfterFee,
   calcSlippageBps,
   validateFeeBps,
 } from "../domain/ammQuote";
@@ -76,7 +75,7 @@ export async function quoteSell(
     throw new Error("Invalid quote price");
   }
 
-  const netAmount = calcNetAmountForSellShares(
+  const grossAmount = calcNetAmountForSellShares(
     beforePool,
     input.position,
     input.shares,
@@ -84,13 +83,13 @@ export async function quoteSell(
   const feeBps = ammConfig?.feeBps ?? DEFAULT_AMM_FEE_BPS;
   validateFeeBps(feeBps);
 
-  const grossAmount = calcGrossFromNetAfterFee(netAmount, feeBps);
   const fee = calcFee(grossAmount, feeBps);
+  const netAmount = grossAmount - fee;
 
   const afterPool = applyNetAmountFromPool(
     beforePool,
     input.position,
-    netAmount,
+    grossAmount,
   );
   const afterPrice = calcExecutionPrice(afterPool, input.position);
   const slippageBps = calcSlippageBps(executionPrice, afterPrice);

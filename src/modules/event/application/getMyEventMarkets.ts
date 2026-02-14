@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_AMM_FEE_BPS } from "@/config/economy";
 import { MyEventMarketBetDTO } from "../dto/myEventMarketBetDTO";
 
 function makeKey(input: {
@@ -31,6 +32,15 @@ export async function getMyEventMarkets(
     }),
     prisma.order.findMany({
       where: { userId, side: "SELL" },
+      include: {
+        market: {
+          include: {
+            ammConfig: {
+              select: { feeBps: true },
+            },
+          },
+        },
+      },
       orderBy: {
         createdAt: "desc",
       },
@@ -111,8 +121,11 @@ export async function getMyEventMarkets(
     const isStillOpen =
       order.status !== "CANCELLED" && remainingShares > 0;
 
+    const consumedShares = isStillOpen
+      ? Math.min(remainingShares, estimatedBoughtShares)
+      : 0;
+
     if (isStillOpen) {
-      const consumedShares = Math.min(remainingShares, estimatedBoughtShares);
       remainingSharesByPositionKey.set(positionKey, remainingShares - consumedShares);
     }
 
@@ -125,6 +138,22 @@ export async function getMyEventMarkets(
           ? "OPEN"
           : "FILLED";
 
+    const soldGrossAmount = derivedStatus === "FILLED" ? latestSell?.amount : undefined;
+    const sellFeeBps = latestSell?.market?.ammConfig?.feeBps ?? DEFAULT_AMM_FEE_BPS;
+    const soldAmount =
+      soldGrossAmount != null
+        ? soldGrossAmount * (1 - sellFeeBps / 10_000)
+        : undefined;
+    const soldShares =
+      derivedStatus === "FILLED" && latestSell != null && latestSell.price > 0
+        ? latestSell.amount / latestSell.price
+        : undefined;
+    const soldPrice =
+      derivedStatus === "FILLED" && soldAmount != null && soldShares != null && soldShares > 0
+        ? soldAmount / soldShares
+        : undefined;
+    const orderShares = soldShares ?? consumedShares;
+
     market.bets.push({
       orderId: order.id,
       outcomeId: order.outcomeId,
@@ -132,10 +161,11 @@ export async function getMyEventMarkets(
       position: order.position as "YES" | "NO",
       amount: order.amount,
       price: order.price,
+      shares: orderShares,
       status: derivedStatus,
       createdAt: order.createdAt.toISOString(),
-      soldAmount: derivedStatus === "FILLED" ? latestSell?.amount : undefined,
-      soldPrice: derivedStatus === "FILLED" ? latestSell?.price : undefined,
+      soldAmount,
+      soldPrice,
       soldAt: derivedStatus === "FILLED" ? latestSell?.createdAt.toISOString() : undefined,
     });
 
