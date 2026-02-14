@@ -59,12 +59,20 @@ export async function resolveMarket(input: ResolveMarketInput) {
     }
 
     for (const [userId, totals] of settlements) {
-      if (totals.lockedRelease > 0 || totals.payout > 0) {
+      const wallet = await tx.wallet.findUnique({ where: { userId } });
+      if (!wallet) {
+        throw new Error(`Wallet not found for user: ${userId}`);
+      }
+
+      const lockedRelease = Math.max(0, Math.min(wallet.locked, totals.lockedRelease));
+      const payout = Math.max(0, totals.payout);
+
+      if (lockedRelease > 0 || payout > 0) {
         await tx.wallet.update({
           where: { userId },
           data: {
-            locked: { decrement: totals.lockedRelease },
-            balance: { increment: totals.payout },
+            locked: { decrement: lockedRelease },
+            balance: { increment: payout },
           },
         });
       }
