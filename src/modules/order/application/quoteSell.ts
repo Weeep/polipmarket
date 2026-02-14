@@ -83,6 +83,9 @@ export async function quoteSell(
   const grossAmount = calcGrossFromNetAfterFee(netAmount, feeBps);
   const fee = calcFee(grossAmount, feeBps);
 
+  const grossAmount = netAmount / (1 - feeRate);
+  const fee = calcFee(grossAmount, feeBps);
+
   const afterPool = applyNetAmountFromPool(beforePool, input.position, netAmount);
   const afterPrice = calcExecutionPrice(afterPool, input.position);
   const slippageBps = calcSlippageBps(executionPrice, afterPrice);
