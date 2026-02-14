@@ -28,7 +28,7 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
   );
 
   async function onSell(market: MyEventMarketBetDTO, bet: MarketBet["bet"]) {
-    const shares = bet.amount / bet.price;
+    const shares = bet.shares;
     const ok = window.confirm(
       `Sell ${shares.toFixed(2)} shares of ${bet.position} at market price?`,
     );
@@ -106,7 +106,7 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
         </div>
 
         {allBets.map(({ market, bet }) => {
-          const shares = bet.amount / bet.price;
+          const shares = bet.shares;
           const isCancelled = bet.status === "CANCELLED";
           const isFilled = bet.status === "FILLED";
           const isResolved = market.status === "RESOLVED";
