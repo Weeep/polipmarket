@@ -54,6 +54,14 @@ export type AmmRepository = {
     },
     tx?: Prisma.TransactionClient,
   ): Promise<OutcomeLiquidity>;
+  applySellToOutcomeLiquidity(
+    input: {
+      outcomeId: string;
+      position: OrderPosition;
+      amount: number;
+    },
+    tx?: Prisma.TransactionClient,
+  ): Promise<OutcomeLiquidity>;
 };
 
 export const ammRepository: AmmRepository = {
@@ -90,6 +98,44 @@ export const ammRepository: AmmRepository = {
           DEFAULT_OUTCOME_POOL + (input.position === "YES" ? input.amount : 0),
         noPool:
           DEFAULT_OUTCOME_POOL + (input.position === "NO" ? input.amount : 0),
+      },
+    });
+  },
+
+  async applySellToOutcomeLiquidity(input, tx) {
+    const client = tx ?? prisma;
+
+    const existing = await client.outcomeLiquidity.findUnique({
+      where: { outcomeId: input.outcomeId },
+    });
+
+    const baseYesPool = existing?.yesPool ?? DEFAULT_OUTCOME_POOL;
+    const baseNoPool = existing?.noPool ?? DEFAULT_OUTCOME_POOL;
+
+    const nextYesPool =
+      input.position === "YES" ? baseYesPool - input.amount : baseYesPool;
+    const nextNoPool =
+      input.position === "NO" ? baseNoPool - input.amount : baseNoPool;
+
+    if (nextYesPool <= 0 || nextNoPool <= 0) {
+      throw new Error("Insufficient AMM liquidity for sell");
+    }
+
+    if (!existing) {
+      return client.outcomeLiquidity.create({
+        data: {
+          outcomeId: input.outcomeId,
+          yesPool: nextYesPool,
+          noPool: nextNoPool,
+        },
+      });
+    }
+
+    return client.outcomeLiquidity.update({
+      where: { outcomeId: input.outcomeId },
+      data: {
+        yesPool: nextYesPool,
+        noPool: nextNoPool,
       },
     });
   },
