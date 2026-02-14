@@ -32,6 +32,7 @@ export async function resolveMarket(input: ResolveMarketInput) {
         marketId: input.marketId,
       },
       select: {
+        id: true,
         userId: true,
         outcomeId: true,
         position: true,
