@@ -61,6 +61,7 @@ model User {
   events    Event[]
   markets   Market[]
   orders    Order[]
+  positions Position[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -94,6 +95,7 @@ model Market {
   createdAt DateTime @default(now())
 
   orders     Order[]
+  positions  Position[]
   liquidity  MarketLiquidity?
   outcomes   Outcome[]
   ammConfig  MarketAmmConfig?
@@ -131,9 +133,30 @@ model Outcome {
 
   market    Market            @relation(fields: [marketId], references: [id], onDelete: Cascade)
   liquidity OutcomeLiquidity?
+  positions Position[]
 
   @@unique([marketId, slug])
   @@index([marketId, position])
+}
+
+model Position {
+  id        String        @id @default(cuid())
+  userId    String
+  marketId  String
+  outcomeId String
+  position  OrderPosition
+  shares    Float         @default(0)
+  costBasis Float         @default(0)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  market  Market  @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  outcome Outcome @relation(fields: [outcomeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, marketId, outcomeId, position])
+  @@index([userId])
+  @@index([marketId])
 }
 
 model MarketAmmConfig {

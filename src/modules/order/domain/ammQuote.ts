@@ -31,6 +31,25 @@ export function applyNetAmountToPool(
   };
 }
 
+
+
+export function applyNetAmountFromPool(
+  pool: PoolState,
+  position: OrderPosition,
+  netAmount: number,
+): PoolState {
+  const nextPool = {
+    yesPool: position === "YES" ? pool.yesPool - netAmount : pool.yesPool,
+    noPool: position === "NO" ? pool.noPool - netAmount : pool.noPool,
+  };
+
+  if (nextPool.yesPool <= 0 || nextPool.noPool <= 0) {
+    throw new Error("Insufficient AMM liquidity for sell");
+  }
+
+  return nextPool;
+}
+
 export function calcSlippageBps(beforePrice: number, afterPrice: number): number {
   if (beforePrice <= 0) {
     throw new Error("Invalid quote price");
