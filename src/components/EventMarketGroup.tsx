@@ -64,7 +64,9 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
                     ? body.amount
                     : currentBet.soldAmount,
                 soldPrice:
-                  typeof body.price === "number" ? body.price : currentBet.soldPrice,
+                  typeof body.amount === "number" && shares > 0
+                    ? body.amount / shares
+                    : currentBet.soldPrice,
                 soldAt:
                   typeof body.createdAt === "string"
                     ? body.createdAt
