@@ -7,6 +7,7 @@ import { OrderPosition } from "../domain/Order";
 import {
   applyNetAmountFromPool,
   calcExecutionPrice,
+  calcNetAmountForSellShares,
   calcFee,
   calcSlippageBps,
 } from "../domain/ammQuote";
@@ -73,14 +74,16 @@ export async function quoteSell(
     throw new Error("Invalid quote price");
   }
 
-  const grossAmount = input.shares * executionPrice;
+  const netAmount = calcNetAmountForSellShares(beforePool, input.position, input.shares);
   const feeBps = ammConfig?.feeBps ?? 100;
-  const fee = calcFee(grossAmount, feeBps);
-  const netAmount = grossAmount - fee;
+  const feeRate = feeBps / 10_000;
 
-  if (netAmount <= 0) {
-    throw new Error("Shares too low after fees");
+  if (feeRate >= 1) {
+    throw new Error("Invalid AMM fee configuration");
   }
+
+  const grossAmount = netAmount / (1 - feeRate);
+  const fee = calcFee(grossAmount, feeBps);
 
   const afterPool = applyNetAmountFromPool(beforePool, input.position, netAmount);
   const afterPrice = calcExecutionPrice(afterPool, input.position);
@@ -91,7 +94,7 @@ export async function quoteSell(
     outcomeId: input.outcomeId,
     position: input.position,
     shares: input.shares,
-    executionPrice,
+    executionPrice: grossAmount / input.shares,
     grossAmount,
     fee,
     netAmount,
