@@ -8,6 +8,7 @@ import { OutcomeWithPrices } from "@/modules/market/domain/Outcome";
 import { apiFetch } from "@/lib/apiFetch";
 import { DEFAULT_MAX_SLIPPAGE_BPS } from "@/config/economy";
 import { useMe } from "@/context/MeContext";
+import { QuoteOrderResult } from "@/modules/order/application/quoteOrder";
 
 type MarketCardMarket = MarketSummary;
 
@@ -40,6 +41,17 @@ export function MarketCard({ market, marketStats }: Props) {
       setError(null);
       setSuccess(null);
 
+      const quoteRes = await apiFetch(`/api/markets/${market.id}/quote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          outcomeId,
+          position,
+          amount,
+        }),
+      });
+      const quoteData = (await quoteRes.json()) as QuoteOrderResult;
+
       await apiFetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -53,7 +65,9 @@ export function MarketCard({ market, marketStats }: Props) {
       });
 
       await refreshMe();
-      setSuccess(`Order placed: BUY ${position}`);
+      setSuccess(
+        `Pontosan ${quoteData.amount.toFixed(2)} összegért, ${quoteData.executionPrice.toFixed(4)} átlagáron, ${quoteData.estimatedShares.toFixed(2)} darab részvényt vettél (${position}), Fee: ${quoteData.fee.toFixed(2)}`,
+      );
     } catch (err: unknown) {
       const message = getErrorMessage(err, "Order failed");
       if (message === "Unauthorized") {

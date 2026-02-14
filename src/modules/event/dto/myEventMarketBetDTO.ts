@@ -16,6 +16,7 @@ export type MyEventMarketBetDTO = {
     position: "YES" | "NO";
     amount: number;
     price: number;
+    shares: number;
     status: string;
     createdAt: string;
     soldAmount?: number;
