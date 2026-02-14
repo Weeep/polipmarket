@@ -1,25 +1,77 @@
 import { prisma } from "@/lib/prisma";
 import { MyEventMarketBetDTO } from "../dto/myEventMarketBetDTO";
 
+function makeKey(input: {
+  marketId: string;
+  outcomeId: string;
+  position: "YES" | "NO";
+}) {
+  return `${input.marketId}:${input.outcomeId}:${input.position}`;
+}
+
 export async function getMyEventMarkets(
   userId: string,
   limit = 5,
 ): Promise<MyEventMarketBetDTO[]> {
-  const orders = await prisma.order.findMany({
-    where: { userId, side: "BUY" },
-    include: {
-      market: {
-        include: {
-          event: true,
-          outcomes: true,
+  const [orders, sellOrders, positions] = await Promise.all([
+    prisma.order.findMany({
+      where: { userId, side: "BUY" },
+      include: {
+        market: {
+          include: {
+            event: true,
+            outcomes: true,
+          },
         },
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: 200,
-  });
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 200,
+    }),
+    prisma.order.findMany({
+      where: { userId, side: "SELL" },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 200,
+    }),
+    prisma.position.findMany({
+      where: { userId, shares: { gt: 0 } },
+      select: {
+        marketId: true,
+        outcomeId: true,
+        position: true,
+      },
+    }),
+  ]);
+
+  const latestSellByPositionKey = new Map<string, (typeof sellOrders)[number]>();
+  for (const sell of sellOrders) {
+    if (sell.position == null) {
+      continue;
+    }
+
+    const key = makeKey({
+      marketId: sell.marketId,
+      outcomeId: sell.outcomeId,
+      position: sell.position,
+    });
+
+    if (!latestSellByPositionKey.has(key)) {
+      latestSellByPositionKey.set(key, sell);
+    }
+  }
+
+  const activePositionKeys = new Set(
+    positions.map((position) =>
+      makeKey({
+        marketId: position.marketId,
+        outcomeId: position.outcomeId,
+        position: position.position as "YES" | "NO",
+      }),
+    ),
+  );
 
   const map = new Map<string, MyEventMarketBetDTO>();
 
@@ -46,6 +98,20 @@ export async function getMyEventMarkets(
     const outcomeLabel =
       order.market.outcomes.find((outcome) => outcome.id === order.outcomeId)
         ?.label ?? "Unknown";
+    const positionKey = makeKey({
+      marketId: order.marketId,
+      outcomeId: order.outcomeId,
+      position: order.position as "YES" | "NO",
+    });
+    const isStillOpen = activePositionKeys.has(positionKey);
+    const latestSell = latestSellByPositionKey.get(positionKey);
+
+    const derivedStatus =
+      order.status === "CANCELLED"
+        ? "CANCELLED"
+        : isStillOpen && order.market.status === "OPEN"
+          ? "OPEN"
+          : "FILLED";
 
     market.bets.push({
       orderId: order.id,
@@ -54,8 +120,11 @@ export async function getMyEventMarkets(
       position: order.position as "YES" | "NO",
       amount: order.amount,
       price: order.price,
-      status: order.status,
+      status: derivedStatus,
       createdAt: order.createdAt.toISOString(),
+      soldAmount: derivedStatus === "FILLED" ? latestSell?.amount : undefined,
+      soldPrice: derivedStatus === "FILLED" ? latestSell?.price : undefined,
+      soldAt: derivedStatus === "FILLED" ? latestSell?.createdAt.toISOString() : undefined,
     });
 
     if (order.createdAt > new Date(market.latestBetAt)) {
