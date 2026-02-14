@@ -9,11 +9,19 @@ function makeKey(input: {
   return `${input.marketId}:${input.outcomeId}:${input.position}`;
 }
 
+type SellSlice = {
+  remainingShares: number;
+  netAmountPerShare: number;
+  soldAt: string;
+};
+
+const SHARE_EPSILON = 1e-9;
+
 export async function getMyEventMarkets(
   userId: string,
   limit = 5,
 ): Promise<MyEventMarketBetDTO[]> {
-  const [orders, sellOrders, positions] = await Promise.all([
+  const [buyOrders, sellOrders] = await Promise.all([
     prisma.order.findMany({
       where: { userId, side: "BUY" },
       include: {
@@ -31,25 +39,24 @@ export async function getMyEventMarkets(
     }),
     prisma.order.findMany({
       where: { userId, side: "SELL" },
+      include: {
+        market: {
+          include: {
+            event: true,
+          },
+        },
+      },
       orderBy: {
-        createdAt: "desc",
+        createdAt: "asc",
       },
       take: 200,
     }),
-    prisma.position.findMany({
-      where: { userId, shares: { gt: 0 } },
-      select: {
-        marketId: true,
-        outcomeId: true,
-        position: true,
-        shares: true,
-      },
-    }),
   ]);
 
-  const latestSellByPositionKey = new Map<string, (typeof sellOrders)[number]>();
+  const sellQueuesByPositionKey = new Map<string, SellSlice[]>();
+
   for (const sell of sellOrders) {
-    if (sell.position == null) {
+    if (sell.position == null || sell.price <= 0) {
       continue;
     }
 
@@ -59,31 +66,35 @@ export async function getMyEventMarkets(
       position: sell.position,
     });
 
-    if (!latestSellByPositionKey.has(key)) {
-      latestSellByPositionKey.set(key, sell);
+    const feeRate = Math.max(0, Math.min(1, sell.market.event.feeBps / 10_000));
+    const netAmount = sell.amount * (1 - feeRate);
+    const soldShares = sell.amount / sell.price;
+
+    if (soldShares <= 0) {
+      continue;
     }
-  }
 
-  const remainingSharesByPositionKey = new Map<string, number>();
-  for (const position of positions) {
-    const key = makeKey({
-      marketId: position.marketId,
-      outcomeId: position.outcomeId,
-      position: position.position as "YES" | "NO",
+    const netAmountPerShare = netAmount / soldShares;
+
+    const queue = sellQueuesByPositionKey.get(key) ?? [];
+    queue.push({
+      remainingShares: soldShares,
+      netAmountPerShare,
+      soldAt: sell.createdAt.toISOString(),
     });
-
-    remainingSharesByPositionKey.set(key, position.shares);
+    sellQueuesByPositionKey.set(key, queue);
   }
 
   const map = new Map<string, MyEventMarketBetDTO>();
 
-  for (const order of orders) {
+  for (const order of buyOrders) {
     if (!map.has(order.marketId)) {
       map.set(order.marketId, {
         marketId: order.market.id,
         question: order.market.question,
         eventId: order.market.event.id,
         eventQuestion: order.market.event.question,
+        feeBps: order.market.event.feeBps,
         closesAt: order.market.bettingCloseAt.toISOString(),
         resolvesAt: order.market.resolveAt?.toISOString() ?? null,
         status: order.market.status,
@@ -105,25 +116,36 @@ export async function getMyEventMarkets(
       outcomeId: order.outcomeId,
       position: order.position as "YES" | "NO",
     });
-    const remainingShares = remainingSharesByPositionKey.get(positionKey) ?? 0;
-    const estimatedBoughtShares =
-      order.price > 0 ? order.amount / order.price : 0;
-    const isStillOpen =
-      order.status !== "CANCELLED" && remainingShares > 0;
 
-    if (isStillOpen) {
-      const consumedShares = Math.min(remainingShares, estimatedBoughtShares);
-      remainingSharesByPositionKey.set(positionKey, remainingShares - consumedShares);
+    const boughtShares = order.price > 0 ? order.amount / order.price : 0;
+    let remainingShares = boughtShares;
+    let soldShares = 0;
+    let soldNetAmount = 0;
+    let soldAt: string | undefined;
+
+    const queue = sellQueuesByPositionKey.get(positionKey) ?? [];
+
+    while (remainingShares > SHARE_EPSILON && queue.length > 0) {
+      const currentSell = queue[0];
+      const matchedShares = Math.min(remainingShares, currentSell.remainingShares);
+
+      soldShares += matchedShares;
+      soldNetAmount += matchedShares * currentSell.netAmountPerShare;
+      remainingShares -= matchedShares;
+      currentSell.remainingShares -= matchedShares;
+      soldAt = currentSell.soldAt;
+
+      if (currentSell.remainingShares <= SHARE_EPSILON) {
+        queue.shift();
+      }
     }
-
-    const latestSell = latestSellByPositionKey.get(positionKey);
 
     const derivedStatus =
       order.status === "CANCELLED"
         ? "CANCELLED"
-        : isStillOpen
-          ? "OPEN"
-          : "FILLED";
+        : remainingShares <= SHARE_EPSILON
+          ? "FILLED"
+          : "OPEN";
 
     market.bets.push({
       orderId: order.id,
@@ -134,14 +156,23 @@ export async function getMyEventMarkets(
       price: order.price,
       status: derivedStatus,
       createdAt: order.createdAt.toISOString(),
-      soldAmount: derivedStatus === "FILLED" ? latestSell?.amount : undefined,
-      soldPrice: derivedStatus === "FILLED" ? latestSell?.price : undefined,
-      soldAt: derivedStatus === "FILLED" ? latestSell?.createdAt.toISOString() : undefined,
+      soldAmount: derivedStatus === "FILLED" ? soldNetAmount : undefined,
+      soldPrice:
+        derivedStatus === "FILLED" && soldShares > SHARE_EPSILON
+          ? soldNetAmount / soldShares
+          : undefined,
+      soldAt: derivedStatus === "FILLED" ? soldAt : undefined,
     });
 
     if (order.createdAt > new Date(market.latestBetAt)) {
       market.latestBetAt = order.createdAt.toISOString();
     }
+  }
+
+  for (const market of map.values()) {
+    market.bets.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
   }
 
   return Array.from(map.values())

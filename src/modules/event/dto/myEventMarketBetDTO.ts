@@ -3,6 +3,7 @@ export type MyEventMarketBetDTO = {
   question: string;
   eventId: string;
   eventQuestion: string;
+  feeBps: number;
   closesAt: string;
   resolvesAt?: string | null;
   status: string;
