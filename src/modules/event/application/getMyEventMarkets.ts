@@ -33,7 +33,7 @@ export async function getMyEventMarkets(
         },
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: "asc",
       },
       take: 200,
     }),
@@ -47,18 +47,9 @@ export async function getMyEventMarkets(
         },
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: "asc",
       },
       take: 200,
-    }),
-    prisma.position.findMany({
-      where: { userId, shares: { gt: 0 } },
-      select: {
-        marketId: true,
-        outcomeId: true,
-        position: true,
-        shares: true,
-      },
     }),
   ]);
 
