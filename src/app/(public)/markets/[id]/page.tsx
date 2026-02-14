@@ -114,6 +114,17 @@ export default function MarketDetailPage() {
       setError(null);
       setSuccess(null);
 
+      const quoteRes = await apiFetch(`/api/markets/${id}/quote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          outcomeId: selectedOutcomeId,
+          position,
+          amount,
+        }),
+      });
+      const quoteData = (await quoteRes.json()) as QuoteOrderResult;
+
       await apiFetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -128,7 +139,7 @@ export default function MarketDetailPage() {
 
       await refreshMe();
       setSuccess(
-        `Order placed: BUY ${position}${selectedOutcome ? ` (${selectedOutcome.label})` : ""}`,
+        `Pontosan ${quoteData.amount.toFixed(2)} összegért, ${quoteData.executionPrice.toFixed(4)} átlagáron, ${quoteData.estimatedShares.toFixed(2)} darab részvényt vettél (${position}${selectedOutcome ? ` · ${selectedOutcome.label}` : ""}), Fee: ${quoteData.fee.toFixed(2)}`,
       );
     } catch (err: unknown) {
       const message = getErrorMessage(err, "Order failed");

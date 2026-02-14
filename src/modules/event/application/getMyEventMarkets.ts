@@ -125,6 +125,12 @@ export async function getMyEventMarkets(
           ? "OPEN"
           : "FILLED";
 
+    const soldAmount = derivedStatus === "FILLED" ? latestSell?.amount : undefined;
+    const soldPrice =
+      derivedStatus === "FILLED" && soldAmount != null && estimatedBoughtShares > 0
+        ? soldAmount / estimatedBoughtShares
+        : undefined;
+
     market.bets.push({
       orderId: order.id,
       outcomeId: order.outcomeId,
@@ -134,8 +140,8 @@ export async function getMyEventMarkets(
       price: order.price,
       status: derivedStatus,
       createdAt: order.createdAt.toISOString(),
-      soldAmount: derivedStatus === "FILLED" ? latestSell?.amount : undefined,
-      soldPrice: derivedStatus === "FILLED" ? latestSell?.price : undefined,
+      soldAmount,
+      soldPrice,
       soldAt: derivedStatus === "FILLED" ? latestSell?.createdAt.toISOString() : undefined,
     });
 
