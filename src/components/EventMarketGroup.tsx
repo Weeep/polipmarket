@@ -4,6 +4,7 @@ import { useMe } from "@/context/MeContext";
 import { apiFetch } from "@/lib/apiFetch";
 import { MyEventMarketBetDTO } from "@/modules/event/dto/myEventMarketBetDTO";
 import type { QuoteSellResult } from "@/modules/order/application/quoteSell";
+import { getSellDisplayMetricsFromBet } from "@/components/sellDisplay";
 
 type Props = {
   markets: MyEventMarketBetDTO[];
@@ -90,7 +91,7 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
       onUpdateMarket(market.marketId, {
         ...market,
         bets: market.bets.map((currentBet) =>
-          currentBet.orderId === bet.orderId
+          currentBet.lotId === bet.lotId
             ? {
                 ...currentBet,
                 status: "FILLED",
@@ -99,9 +100,25 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
                     ? quote.netAmount
                     : currentBet.soldAmount,
                 soldPrice:
-                  typeof quote.netAmount === "number" && quote.shares > 0
-                    ? quote.netAmount / quote.shares
+                  typeof quote.executionPrice === "number"
+                    ? quote.executionPrice
                     : currentBet.soldPrice,
+                soldShares:
+                  typeof quote.shares === "number"
+                    ? quote.shares
+                    : currentBet.soldShares,
+                soldGrossAmount:
+                  typeof quote.grossAmount === "number"
+                    ? quote.grossAmount
+                    : currentBet.soldGrossAmount,
+                soldFee:
+                  typeof quote.fee === "number"
+                    ? quote.fee
+                    : currentBet.soldFee,
+                soldNetAmount:
+                  typeof quote.netAmount === "number"
+                    ? quote.netAmount
+                    : currentBet.soldNetAmount,
                 soldAt:
                   typeof body.createdAt === "string"
                     ? body.createdAt
@@ -165,13 +182,20 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
             const profitLabel =
               profit > 0 ? `+${profit.toFixed(2)}` : profit < 0 ? profit.toFixed(2) : "0";
             const payoutLabel = payout.toFixed(2);
-            const soldPrice = bet.soldPrice ?? bet.price;
-            const soldAmount = bet.soldAmount ?? bet.amount;
-            const soldShares = soldPrice > 0 ? soldAmount / soldPrice : shares;
+            const soldMetrics = getSellDisplayMetricsFromBet({
+              shares,
+              soldPrice: bet.soldPrice,
+              soldShares: bet.soldShares,
+              soldGrossAmount: bet.soldGrossAmount,
+              soldFee: bet.soldFee,
+              soldNetAmount: bet.soldNetAmount,
+              soldAmount: bet.soldAmount,
+              amount: bet.amount,
+            });
 
             return (
               <div
-                key={bet.orderId}
+                key={bet.lotId}
                 className="grid grid-cols-[1.6fr_0.8fr_0.7fr_0.7fr_0.8fr_1fr] items-center gap-2 rounded-md border border-stone-800 bg-stone-950/60 px-3 py-2 text-sm text-stone-300"
               >
                 <span className="font-semibold text-stone-100">{bet.outcomeLabel}</span>
@@ -206,10 +230,13 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
                       {sellDialogLoading ? "Számolás..." : "Sell"}
                     </button>
                   )}
-                  {(isCancelled || isFilled) && (
+                  {isFilled && (
                     <span className="text-xs text-stone-400">
-                      Eladott {soldShares.toFixed(2)} @ {soldPrice.toFixed(2)} · Bevétel: {soldAmount.toFixed(2)}
+                      Eladott {soldMetrics.shares.toFixed(2)} · Átlagár: {soldMetrics.executionPrice.toFixed(4)} · Bruttó: {soldMetrics.grossAmount.toFixed(2)} · Fee: {soldMetrics.fee.toFixed(2)} · Nettó: {soldMetrics.netAmount.toFixed(2)}
                     </span>
+                  )}
+                  {isCancelled && (
+                    <span className="text-xs text-stone-400">Törölt megbízás</span>
                   )}
                   {isResolved && (
                     <span className="text-xs text-stone-400">
