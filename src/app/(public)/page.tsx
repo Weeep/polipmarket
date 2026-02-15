@@ -56,6 +56,27 @@ function filterMarketsByBetStatus(
     );
 }
 
+function mergeUpdatedMarket(
+  currentMarket: MyEventMarketBetDTO,
+  updatedMarket: MyEventMarketBetDTO,
+): MyEventMarketBetDTO {
+  const updatedBetsByLotId = new Map(
+    updatedMarket.bets.map((bet) => [bet.lotId, bet]),
+  );
+
+  const mergedCurrentBets = currentMarket.bets.map(
+    (bet) => updatedBetsByLotId.get(bet.lotId) ?? bet,
+  );
+  const currentLotIds = new Set(currentMarket.bets.map((bet) => bet.lotId));
+  const newBets = updatedMarket.bets.filter((bet) => !currentLotIds.has(bet.lotId));
+
+  return {
+    ...currentMarket,
+    ...updatedMarket,
+    bets: [...mergedCurrentBets, ...newBets],
+  };
+}
+
 export default function HomePage() {
   const [myMarkets, setMyMarkets] = useState<MyEventMarketBetDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,7 +95,9 @@ export default function HomePage() {
     setMyMarkets((prev) =>
       updatedMarket === null
         ? prev.filter((m) => m.marketId !== marketId)
-        : prev.map((m) => (m.marketId === marketId ? updatedMarket : m)),
+        : prev.map((m) =>
+            m.marketId === marketId ? mergeUpdatedMarket(m, updatedMarket) : m,
+          ),
     );
   }
 

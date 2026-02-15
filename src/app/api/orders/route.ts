@@ -80,6 +80,7 @@ export const POST = withAuth(async (user, req) => {
             side,
             position: parsePosition(body.position),
             shares,
+            lotId: body.lotId == null ? undefined : String(body.lotId),
             maxSlippageBps,
           });
 

@@ -25,6 +25,7 @@ type PlaceOrderSellInput = {
   side: "SELL";
   position: OrderPosition;
   shares: number;
+  lotId?: string;
   maxSlippageBps?: number;
 };
 
@@ -207,6 +208,7 @@ export async function placeOrder(input: PlaceOrderInput) {
         outcomeId: input.outcomeId,
         position: input.position,
         sellOrderId: createdSellOrder.id,
+        preferredBuyLotId: input.lotId,
         sharesToClose: sharesToSell,
         grossAmount: quote.grossAmount,
         feeAmount: quote.fee,
@@ -215,6 +217,13 @@ export async function placeOrder(input: PlaceOrderInput) {
       tx,
     );
 
-    return createdSellOrder;
+    return {
+      ...createdSellOrder,
+      executionPrice: quote.executionPrice,
+      grossAmount: quote.grossAmount,
+      feeAmount: quote.fee,
+      netAmount: quote.netAmount,
+      shares: sharesToSell,
+    };
   });
 }
