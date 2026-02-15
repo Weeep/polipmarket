@@ -44,6 +44,7 @@ export const positionLotRepository = {
     outcomeId: string;
     position: OrderPosition;
     sellOrderId: string;
+    preferredBuyLotId?: string;
     sharesToClose: number;
     grossAmount: number;
     feeAmount: number;
@@ -59,7 +60,13 @@ export const positionLotRepository = {
         AND "outcomeId" = ${input.outcomeId}
         AND "position" = ${input.position}
         AND "remainingShares" > 0
-      ORDER BY "createdAt" ASC, "id" ASC
+      ORDER BY
+        CASE
+          WHEN ${input.preferredBuyLotId ?? null} IS NOT NULL AND "id" = ${input.preferredBuyLotId ?? null} THEN 0
+          ELSE 1
+        END ASC,
+        "createdAt" ASC,
+        "id" ASC
     `;
 
     let remainingShares = input.sharesToClose;
