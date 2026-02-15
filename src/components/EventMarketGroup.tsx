@@ -80,6 +80,7 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
           position: bet.position,
           side: "SELL",
           shares: quote.shares,
+          lotId: bet.lotId,
         }),
       });
 
@@ -96,28 +97,28 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
                 ...currentBet,
                 status: "FILLED",
                 soldAmount:
-                  typeof quote.netAmount === "number"
-                    ? quote.netAmount
+                  typeof body.netAmount === "number"
+                    ? body.netAmount
                     : currentBet.soldAmount,
                 soldPrice:
-                  typeof quote.executionPrice === "number"
-                    ? quote.executionPrice
+                  typeof body.executionPrice === "number"
+                    ? body.executionPrice
                     : currentBet.soldPrice,
                 soldShares:
-                  typeof quote.shares === "number"
-                    ? quote.shares
+                  typeof body.shares === "number"
+                    ? body.shares
                     : currentBet.soldShares,
                 soldGrossAmount:
-                  typeof quote.grossAmount === "number"
-                    ? quote.grossAmount
+                  typeof body.grossAmount === "number"
+                    ? body.grossAmount
                     : currentBet.soldGrossAmount,
                 soldFee:
-                  typeof quote.fee === "number"
-                    ? quote.fee
+                  typeof body.feeAmount === "number"
+                    ? body.feeAmount
                     : currentBet.soldFee,
                 soldNetAmount:
-                  typeof quote.netAmount === "number"
-                    ? quote.netAmount
+                  typeof body.netAmount === "number"
+                    ? body.netAmount
                     : currentBet.soldNetAmount,
                 soldAt:
                   typeof body.createdAt === "string"
