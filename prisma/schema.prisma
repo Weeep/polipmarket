@@ -63,6 +63,7 @@ model User {
   markets   Market[]
   orders    Order[]
   positions Position[]
+  positionLots PositionLot[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -97,6 +98,7 @@ model Market {
 
   orders     Order[]
   positions  Position[]
+  positionLots PositionLot[]
   liquidity  MarketLiquidity?
   outcomes   Outcome[]
   ammConfig  MarketAmmConfig?
@@ -135,6 +137,7 @@ model Outcome {
   market    Market            @relation(fields: [marketId], references: [id], onDelete: Cascade)
   liquidity OutcomeLiquidity?
   positions Position[]
+  positionLots PositionLot[]
 
   @@unique([marketId, slug])
   @@index([marketId, position])
@@ -158,6 +161,50 @@ model Position {
   @@unique([userId, marketId, outcomeId, position])
   @@index([userId])
   @@index([marketId])
+}
+
+
+model PositionLot {
+  id              String        @id @default(cuid())
+  userId          String
+  marketId        String
+  outcomeId       String
+  position        OrderPosition
+  buyOrderId      String        @unique
+  openedShares    Float
+  remainingShares Float
+  entryPrice      Float
+  entryGrossAmount Float
+  entryFee        Float
+  entryNetAmount  Float
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  market  Market  @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  outcome Outcome @relation(fields: [outcomeId], references: [id], onDelete: Cascade)
+  buyOrder Order  @relation("BuyOrderLots", fields: [buyOrderId], references: [id], onDelete: Cascade)
+  lotCloses LotClose[]
+
+  @@index([userId, marketId, outcomeId, position])
+  @@index([marketId])
+}
+
+model LotClose {
+  id          String   @id @default(cuid())
+  sellOrderId String
+  buyLotId    String
+  closedShares Float
+  grossAmount Float
+  feeAmount   Float
+  netAmount   Float
+  createdAt   DateTime @default(now())
+
+  sellOrder Order      @relation("SellOrderCloses", fields: [sellOrderId], references: [id], onDelete: Cascade)
+  buyLot    PositionLot @relation(fields: [buyLotId], references: [id], onDelete: Cascade)
+
+  @@index([sellOrderId])
+  @@index([buyLotId])
 }
 
 model MarketAmmConfig {
@@ -196,6 +243,8 @@ model Order {
 
   user   User   @relation(fields: [userId], references: [id])
   market Market @relation(fields: [marketId], references: [id])
+  buyLots PositionLot[] @relation("BuyOrderLots")
+  lotCloses LotClose[] @relation("SellOrderCloses")
 
   @@index([marketId])
   @@index([userId])

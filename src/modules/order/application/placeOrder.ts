@@ -4,6 +4,7 @@ import { walletRepository } from "@/modules/wallet/infrastructure/walletReposito
 import { Order, OrderPosition, OrderSide } from "../domain/Order";
 import { orderRepository } from "../infrastructure/orderRepository";
 import { positionRepository } from "../infrastructure/positionRepository";
+import { positionLotRepository } from "../infrastructure/positionLotRepository";
 import { quoteOrder } from "./quoteOrder";
 import { quoteSell } from "./quoteSell";
 
@@ -115,6 +116,22 @@ export async function placeOrder(input: PlaceOrderInput) {
         tx,
       );
 
+      await positionLotRepository.createBuyLot(
+        {
+          userId: input.userId,
+          marketId: input.marketId,
+          outcomeId: input.outcomeId,
+          position: input.position,
+          buyOrderId: created.id,
+          openedShares: quote.estimatedShares,
+          entryPrice: quote.executionPrice,
+          entryGrossAmount: input.amount,
+          entryFee: quote.fee,
+          entryNetAmount: quote.netAmount,
+        },
+        tx,
+      );
+
       return created;
     }
 
@@ -173,7 +190,7 @@ export async function placeOrder(input: PlaceOrderInput) {
       price: quote.executionPrice,
     });
 
-    return orderRepository.placeWithAmmUpdate(
+    const createdSellOrder = await orderRepository.placeWithAmmUpdate(
       {
         order,
         side: "SELL",
@@ -182,5 +199,22 @@ export async function placeOrder(input: PlaceOrderInput) {
       },
       tx,
     );
+
+    await positionLotRepository.closeLotsForSell(
+      {
+        userId: input.userId,
+        marketId: input.marketId,
+        outcomeId: input.outcomeId,
+        position: input.position,
+        sellOrderId: createdSellOrder.id,
+        sharesToClose: sharesToSell,
+        grossAmount: quote.grossAmount,
+        feeAmount: quote.fee,
+        netAmount: quote.netAmount,
+      },
+      tx,
+    );
+
+    return createdSellOrder;
   });
 }

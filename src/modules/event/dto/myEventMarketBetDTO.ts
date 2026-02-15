@@ -10,6 +10,7 @@ export type MyEventMarketBetDTO = {
   resolvedPosition?: "YES" | "NO" | null;
   latestBetAt: string;
   bets: {
+    lotId: string;
     orderId: string;
     outcomeId: string;
     outcomeLabel: string;
@@ -21,6 +22,10 @@ export type MyEventMarketBetDTO = {
     createdAt: string;
     soldAmount?: number;
     soldPrice?: number;
+    soldShares?: number;
+    soldGrossAmount?: number;
+    soldFee?: number;
+    soldNetAmount?: number;
     soldAt?: string;
   }[];
 };
