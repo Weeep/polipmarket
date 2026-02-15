@@ -210,6 +210,7 @@ export async function getMyEventMarkets(
           : "OPEN";
 
     market.bets.push({
+      lotId: order.id,
       orderId: order.id,
       outcomeId: order.outcomeId,
       outcomeLabel,
