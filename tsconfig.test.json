@@ -9,11 +9,17 @@
     "declaration": false,
     "incremental": false,
     "tsBuildInfoFile": ".test-dist/.tsbuildinfo",
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "src/modules/order/domain/Order.ts",
     "src/modules/order/domain/ammQuote.ts",
-    "src/modules/order/domain/__tests__/ammQuote.test.ts"
+    "src/components/sellDisplay.ts",
+    "src/modules/order/domain/__tests__/ammQuote.test.ts",
+    "src/modules/order/domain/__tests__/sellDisplay.test.ts",
+    "src/modules/event/application/sellAllocation.ts",
+    "src/modules/order/domain/__tests__/sellSequenceAllocation.test.ts"
   ]
 }
