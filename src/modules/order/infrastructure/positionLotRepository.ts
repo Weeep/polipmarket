@@ -62,7 +62,7 @@ export const positionLotRepository = {
         AND "remainingShares" > 0
       ORDER BY
         CASE
-          WHEN ${input.preferredBuyLotId ?? ""} <> "" AND "id" = ${input.preferredBuyLotId ?? ""} THEN 0
+          WHEN ${input.preferredBuyLotId ?? null} IS NOT NULL AND "id" = ${input.preferredBuyLotId ?? null} THEN 0
           ELSE 1
         END ASC,
         "createdAt" ASC,
