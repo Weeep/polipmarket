@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": ".test-dist",
+    "rootDir": "src",
+    "declaration": false,
+    "incremental": false,
+    "tsBuildInfoFile": ".test-dist/.tsbuildinfo",
+    "types": ["node"]
+  },
+  "include": [
+    "src/modules/order/domain/Order.ts",
+    "src/modules/order/domain/ammQuote.ts",
+    "src/modules/order/domain/__tests__/ammQuote.test.ts"
+  ]
+}

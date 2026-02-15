@@ -1,4 +1,6 @@
-import { describe, expect, it } from "vitest";
+import test from "node:test";
+import assert from "node:assert/strict";
+
 import {
   applyNetAmountFromPool,
   applyNetAmountToPool,
@@ -9,103 +11,103 @@ import {
   calcSharesForBuyNetAmount,
   calcSlippageBps,
   validateFeeBps,
-} from "@/modules/order/domain/ammQuote";
+} from "../ammQuote";
 
-describe("ammQuote domain calculations", () => {
-  describe("fee helpers", () => {
-    it("calculates fee from amount and bps", () => {
-      expect(calcFee(1000, 250)).toBe(25);
-    });
-
-    it("accepts valid fee bps values", () => {
-      expect(() => validateFeeBps(0)).not.toThrow();
-      expect(() => validateFeeBps(500)).not.toThrow();
-      expect(() => validateFeeBps(9999)).not.toThrow();
-    });
-
-    it("rejects invalid fee bps values", () => {
-      expect(() => validateFeeBps(-1)).toThrow("Invalid AMM fee configuration");
-      expect(() => validateFeeBps(10_000)).toThrow("Invalid AMM fee configuration");
-      expect(() => validateFeeBps(Number.NaN)).toThrow("Invalid AMM fee configuration");
-      expect(() => validateFeeBps(Number.POSITIVE_INFINITY)).toThrow(
-        "Invalid AMM fee configuration",
-      );
-    });
-
-    it("converts net amount to gross amount", () => {
-      expect(calcGrossFromNetAfterFee(975, 250)).toBeCloseTo(1000, 10);
-    });
+function assertThrowsMessage(fn: () => unknown, message: string): void {
+  assert.throws(fn, (error: unknown) => {
+    return error instanceof Error && error.message === message;
   });
+}
 
-  describe("price and pool movement", () => {
-    const pool = { yesPool: 5000, noPool: 5000 };
+test("calculates fee from amount and bps", () => {
+  assert.equal(calcFee(1000, 250), 25);
+});
 
-    it("returns expected execution price for YES and NO", () => {
-      expect(calcExecutionPrice(pool, "YES")).toBeCloseTo(0.5, 10);
-      expect(calcExecutionPrice(pool, "NO")).toBeCloseTo(0.5, 10);
+test("accepts valid fee bps values", () => {
+  assert.doesNotThrow(() => validateFeeBps(0));
+  assert.doesNotThrow(() => validateFeeBps(500));
+  assert.doesNotThrow(() => validateFeeBps(9999));
+});
 
-      const asymmetricPool = { yesPool: 7000, noPool: 3000 };
-      expect(calcExecutionPrice(asymmetricPool, "YES")).toBeCloseTo(0.7, 10);
-      expect(calcExecutionPrice(asymmetricPool, "NO")).toBeCloseTo(0.3, 10);
-    });
+test("rejects invalid fee bps values", () => {
+  assertThrowsMessage(() => validateFeeBps(-1), "Invalid AMM fee configuration");
+  assertThrowsMessage(() => validateFeeBps(10_000), "Invalid AMM fee configuration");
+  assertThrowsMessage(() => validateFeeBps(Number.NaN), "Invalid AMM fee configuration");
+  assertThrowsMessage(() => validateFeeBps(Number.POSITIVE_INFINITY), "Invalid AMM fee configuration");
+});
 
-    it("rejects invalid execution price pool", () => {
-      expect(() => calcExecutionPrice({ yesPool: 0, noPool: 0 }, "YES")).toThrow(
-        "Invalid AMM liquidity state",
-      );
-    });
+test("converts net amount to gross amount", () => {
+  assert.ok(Math.abs(calcGrossFromNetAfterFee(975, 250) - 1000) < 1e-10);
+});
 
-    it("adds net amount only to the selected side", () => {
-      expect(applyNetAmountToPool(pool, "YES", 200)).toEqual({ yesPool: 5200, noPool: 5000 });
-      expect(applyNetAmountToPool(pool, "NO", 200)).toEqual({ yesPool: 5000, noPool: 5200 });
-    });
+test("returns expected execution price for YES and NO", () => {
+  const pool = { yesPool: 5000, noPool: 5000 };
 
-    it("removes net amount from selected side and blocks full depletion", () => {
-      expect(applyNetAmountFromPool(pool, "YES", 200)).toEqual({ yesPool: 4800, noPool: 5000 });
-      expect(() => applyNetAmountFromPool({ yesPool: 100, noPool: 100 }, "YES", 100)).toThrow(
-        "Insufficient AMM liquidity for sell",
-      );
-    });
+  assert.ok(Math.abs(calcExecutionPrice(pool, "YES") - 0.5) < 1e-10);
+  assert.ok(Math.abs(calcExecutionPrice(pool, "NO") - 0.5) < 1e-10);
 
-    it("calculates slippage in bps", () => {
-      expect(calcSlippageBps(0.5, 0.55)).toBeCloseTo(1000, 10);
-      expect(calcSlippageBps(0.5, 0.45)).toBeCloseTo(1000, 10);
-      expect(() => calcSlippageBps(0, 0.5)).toThrow("Invalid quote price");
-    });
-  });
+  const asymmetricPool = { yesPool: 7000, noPool: 3000 };
+  assert.ok(Math.abs(calcExecutionPrice(asymmetricPool, "YES") - 0.7) < 1e-10);
+  assert.ok(Math.abs(calcExecutionPrice(asymmetricPool, "NO") - 0.3) < 1e-10);
+});
 
-  describe("share/net conversions", () => {
-    const pool = { yesPool: 8000, noPool: 8000 };
+test("rejects invalid execution price pool", () => {
+  assertThrowsMessage(
+    () => calcExecutionPrice({ yesPool: 0, noPool: 0 }, "YES"),
+    "Invalid AMM liquidity state",
+  );
+});
 
-    it("calculates shares bought for a valid net amount", () => {
-      const shares = calcSharesForBuyNetAmount(pool, "YES", 250);
-      expect(shares).toBeGreaterThan(250);
-      expect(shares).toBeCloseTo(496.173, 3);
-    });
+test("adds net amount only to the selected side", () => {
+  const pool = { yesPool: 5000, noPool: 5000 };
 
-    it("rejects non-positive net amounts for buy share calculation", () => {
-      expect(() => calcSharesForBuyNetAmount(pool, "YES", 0)).toThrow(
-        "Net amount must be greater than 0",
-      );
-      expect(() => calcSharesForBuyNetAmount(pool, "YES", -1)).toThrow(
-        "Net amount must be greater than 0",
-      );
-    });
+  assert.deepEqual(applyNetAmountToPool(pool, "YES", 200), { yesPool: 5200, noPool: 5000 });
+  assert.deepEqual(applyNetAmountToPool(pool, "NO", 200), { yesPool: 5000, noPool: 5200 });
+});
 
-    it("calculates sell net amount from shares and keeps it below active pool", () => {
-      const soldNet = calcNetAmountForSellShares(pool, "YES", 400);
-      expect(soldNet).toBeGreaterThan(0);
-      expect(soldNet).toBeLessThan(pool.yesPool);
-      expect(soldNet).toBeCloseTo(198.745, 3);
-    });
+test("removes net amount from selected side and blocks full depletion", () => {
+  const pool = { yesPool: 5000, noPool: 5000 };
 
-    it("rejects non-positive shares for sell net amount calculation", () => {
-      expect(() => calcNetAmountForSellShares(pool, "YES", 0)).toThrow(
-        "Shares must be greater than 0",
-      );
-      expect(() => calcNetAmountForSellShares(pool, "NO", -10)).toThrow(
-        "Shares must be greater than 0",
-      );
-    });
-  });
+  assert.deepEqual(applyNetAmountFromPool(pool, "YES", 200), { yesPool: 4800, noPool: 5000 });
+  assertThrowsMessage(
+    () => applyNetAmountFromPool({ yesPool: 100, noPool: 100 }, "YES", 100),
+    "Insufficient AMM liquidity for sell",
+  );
+});
+
+test("calculates slippage in bps", () => {
+  assert.ok(Math.abs(calcSlippageBps(0.5, 0.55) - 1000) < 1e-10);
+  assert.ok(Math.abs(calcSlippageBps(0.5, 0.45) - 1000) < 1e-10);
+  assertThrowsMessage(() => calcSlippageBps(0, 0.5), "Invalid quote price");
+});
+
+test("calculates shares bought for a valid net amount", () => {
+  const pool = { yesPool: 8000, noPool: 8000 };
+  const shares = calcSharesForBuyNetAmount(pool, "YES", 250);
+
+  assert.ok(shares > 250);
+  assert.ok(Math.abs(shares - 496.173) < 1e-3);
+});
+
+test("rejects non-positive net amounts for buy share calculation", () => {
+  const pool = { yesPool: 8000, noPool: 8000 };
+
+  assertThrowsMessage(() => calcSharesForBuyNetAmount(pool, "YES", 0), "Net amount must be greater than 0");
+  assertThrowsMessage(() => calcSharesForBuyNetAmount(pool, "YES", -1), "Net amount must be greater than 0");
+});
+
+test("calculates sell net amount from shares and keeps it below active pool", () => {
+  const pool = { yesPool: 8000, noPool: 8000 };
+  const soldNet = calcNetAmountForSellShares(pool, "YES", 400);
+
+  assert.ok(soldNet > 0);
+  assert.ok(soldNet < pool.yesPool);
+  assert.ok(Math.abs(soldNet - 198.745) < 1e-3);
+});
+
+test("rejects non-positive shares for sell net amount calculation", () => {
+  const pool = { yesPool: 8000, noPool: 8000 };
+
+  assertThrowsMessage(() => calcNetAmountForSellShares(pool, "YES", 0), "Shares must be greater than 0");
+  assertThrowsMessage(() => calcNetAmountForSellShares(pool, "NO", -10), "Shares must be greater than 0");
 });
