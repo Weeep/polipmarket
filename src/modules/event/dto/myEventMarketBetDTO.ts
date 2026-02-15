@@ -21,6 +21,10 @@ export type MyEventMarketBetDTO = {
     createdAt: string;
     soldAmount?: number;
     soldPrice?: number;
+    soldShares?: number;
+    soldGrossAmount?: number;
+    soldFee?: number;
+    soldNetAmount?: number;
     soldAt?: string;
   }[];
 };
