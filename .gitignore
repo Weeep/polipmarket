@@ -56,4 +56,5 @@ prisma/dev.db-journal
 
 .DS_Store
 dev.db
+.test-dist
 
