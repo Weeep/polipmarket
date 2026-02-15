@@ -91,7 +91,7 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
       onUpdateMarket(market.marketId, {
         ...market,
         bets: market.bets.map((currentBet) =>
-          currentBet.orderId === bet.orderId
+          currentBet.lotId === bet.lotId
             ? {
                 ...currentBet,
                 status: "FILLED",
@@ -195,7 +195,7 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
 
             return (
               <div
-                key={bet.orderId}
+                key={bet.lotId}
                 className="grid grid-cols-[1.6fr_0.8fr_0.7fr_0.7fr_0.8fr_1fr] items-center gap-2 rounded-md border border-stone-800 bg-stone-950/60 px-3 py-2 text-sm text-stone-300"
               >
                 <span className="font-semibold text-stone-100">{bet.outcomeLabel}</span>
