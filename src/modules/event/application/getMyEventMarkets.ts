@@ -62,7 +62,7 @@ export async function getMyEventMarkets(
 
   const sellStatsByPositionKey = new Map<
     string,
-    { netAmount: number; shares: number; latestAt: Date }
+    { grossAmount: number; netAmount: number; fee: number; shares: number; latestAt: Date }
   >();
   for (const sell of sellOrders) {
     if (sell.position == null || sell.price <= 0) {
@@ -76,12 +76,16 @@ export async function getMyEventMarkets(
     });
 
     const feeBps = sell.market?.ammConfig?.feeBps ?? DEFAULT_AMM_FEE_BPS;
-    const netAmount = sell.amount * (1 - feeBps / 10_000);
+    const grossAmount = sell.amount;
+    const fee = grossAmount * (feeBps / 10_000);
+    const netAmount = grossAmount - fee;
     const shares = sell.amount / sell.price;
     const current = sellStatsByPositionKey.get(key);
 
     if (current) {
+      current.grossAmount += grossAmount;
       current.netAmount += netAmount;
+      current.fee += fee;
       current.shares += shares;
       if (sell.createdAt > current.latestAt) {
         current.latestAt = sell.createdAt;
@@ -90,7 +94,9 @@ export async function getMyEventMarkets(
     }
 
     sellStatsByPositionKey.set(key, {
+      grossAmount,
       netAmount,
+      fee,
       shares,
       latestAt: sell.createdAt,
     });
@@ -162,16 +168,16 @@ export async function getMyEventMarkets(
           ? "OPEN"
           : "FILLED";
 
-    const averageNetSellPrice =
+    const averageGrossSellPrice =
       sellStats != null && sellStats.shares > 0
-        ? sellStats.netAmount / sellStats.shares
+        ? sellStats.grossAmount / sellStats.shares
         : undefined;
-    const soldShares = derivedStatus === "FILLED" ? estimatedBoughtShares : undefined;
-    const soldPrice = derivedStatus === "FILLED" ? averageNetSellPrice : undefined;
-    const soldAmount =
-      derivedStatus === "FILLED" && soldShares != null && soldPrice != null
-        ? soldShares * soldPrice
-        : undefined;
+    const soldShares = derivedStatus === "FILLED" ? sellStats?.shares : undefined;
+    const soldPrice = derivedStatus === "FILLED" ? averageGrossSellPrice : undefined;
+    const soldGrossAmount = derivedStatus === "FILLED" ? sellStats?.grossAmount : undefined;
+    const soldFee = derivedStatus === "FILLED" ? sellStats?.fee : undefined;
+    const soldNetAmount = derivedStatus === "FILLED" ? sellStats?.netAmount : undefined;
+    const soldAmount = soldNetAmount;
     const orderShares = derivedStatus === "FILLED" ? estimatedBoughtShares : consumedShares;
 
     market.bets.push({
@@ -186,6 +192,10 @@ export async function getMyEventMarkets(
       createdAt: order.createdAt.toISOString(),
       soldAmount,
       soldPrice,
+      soldShares,
+      soldGrossAmount,
+      soldFee,
+      soldNetAmount,
       soldAt: derivedStatus === "FILLED" ? sellStats?.latestAt.toISOString() : undefined,
     });
 
