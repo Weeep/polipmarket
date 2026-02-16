@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Fragment } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/lib/apiFetch";
 import type { EventSummary } from "@/modules/event/domain/Event";
@@ -25,12 +26,36 @@ const TAB_CONFIG: Record<
   },
 };
 
-function formatDate(value?: Date | string | null) {
+function formatRemainingTime(value?: Date | string | null) {
   if (!value) {
     return "—";
   }
 
-  return new Date(value).toLocaleString("hu-HU");
+  const targetTime = new Date(value).getTime();
+  const diffMs = targetTime - Date.now();
+
+  if (diffMs <= 0) {
+    return "Lezárt";
+  }
+
+  const totalHours = Math.floor(diffMs / (1000 * 60 * 60));
+
+  if (totalHours < 1) {
+    return "<1 óra";
+  }
+
+  const days = Math.floor(totalHours / 24);
+  const hours = totalHours % 24;
+
+  if (days > 0) {
+    return `${days} nap ${hours} óra`;
+  }
+
+  return `${hours} óra`;
+}
+
+function formatVolume(value?: number) {
+  return Math.round(value ?? 0).toLocaleString("hu-HU");
 }
 
 export function ActiveEventsTabsTable() {
@@ -76,8 +101,7 @@ export function ActiveEventsTabsTable() {
         <table className="min-w-full text-sm text-stone-200">
           <thead className="text-left text-stone-400">
             <tr className="border-b border-stone-700">
-              <th className="py-2 pr-4">Esemény címe</th>
-              <th className="py-2 pr-4">Teljes volume</th>
+              <th className="py-2 pr-4">Összes tét</th>
               <th className="py-2 pr-4">Fogadás zárás</th>
               <th className="py-2">Esemény zárás</th>
             </tr>
@@ -85,7 +109,7 @@ export function ActiveEventsTabsTable() {
           <tbody>
             {loading && (
               <tr>
-                <td className="py-4 text-stone-400" colSpan={4}>
+                <td className="py-4 text-stone-400" colSpan={3}>
                   Betöltés...
                 </td>
               </tr>
@@ -93,7 +117,7 @@ export function ActiveEventsTabsTable() {
 
             {!loading && events.length === 0 && (
               <tr>
-                <td className="py-4 text-stone-400" colSpan={4}>
+                <td className="py-4 text-stone-400" colSpan={3}>
                   Nincs megjeleníthető aktív esemény.
                 </td>
               </tr>
@@ -101,16 +125,26 @@ export function ActiveEventsTabsTable() {
 
             {!loading &&
               events.map((event) => (
-                <tr key={event.id} className="border-b border-stone-800">
-                  <td className="py-2 pr-4">
-                    <Link href={`/events/${event.id}`} className="hover:underline">
-                      {event.question}
-                    </Link>
-                  </td>
-                  <td className="py-2 pr-4">{event.eventStats?.totalVolume ?? 0}</td>
-                  <td className="py-2 pr-4">{formatDate(event.bettingCloseAt)}</td>
-                  <td className="py-2">{formatDate(event.resolveAt)}</td>
-                </tr>
+                <Fragment key={event.id}>
+                  <tr>
+                    <td className="pb-1 pt-3" colSpan={3}>
+                      <Link href={`/events/${event.id}`} className="font-medium hover:underline">
+                        {event.question}
+                      </Link>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-stone-800">
+                    <td className="pb-3 pr-4 text-stone-300">
+                      {formatVolume(event.eventStats?.totalVolume)}
+                    </td>
+                    <td className="pb-3 pr-4 text-stone-300">
+                      {formatRemainingTime(event.bettingCloseAt)}
+                    </td>
+                    <td className="pb-3 text-stone-300">
+                      {formatRemainingTime(event.resolveAt)}
+                    </td>
+                  </tr>
+                </Fragment>
               ))}
           </tbody>
         </table>
