@@ -3,6 +3,7 @@
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { EventMarketGroup } from "@/components/EventMarketGroup";
+import { ActiveEventsTabsTable } from "@/components/ActiveEventsTabsTable";
 import { MyEventMarketBetDTO } from "@/modules/event/dto/myEventMarketBetDTO";
 import { apiFetch } from "@/lib/apiFetch";
 
@@ -117,22 +118,26 @@ export default function HomePage() {
   return (
     <main className="p-8">
       <div className="max-w-6xl mx-auto px-6 py-10 space-y-10">
-        <div className="marketcard-base space-y-4">
-          <h2 className="text-lg font-bold text-stone-100">Fogadások</h2>
+        <div className="grid gap-6 xl:grid-cols-2 xl:items-start">
+          <div className="marketcard-base space-y-4">
+            <h2 className="text-lg font-bold text-stone-100">Fogadások</h2>
 
-          {openMarketGroups.length === 0 && (
-            <p className="text-stone-400 text-sm">Nincs nyitott fogadásod</p>
-          )}
+            {openMarketGroups.length === 0 && (
+              <p className="text-stone-400 text-sm">Nincs nyitott fogadásod</p>
+            )}
 
-          <div className="space-y-4">
-            {openMarketGroups.map((markets) => (
-              <EventMarketGroup
-                key={markets[0].eventId ?? markets[0].marketId}
-                markets={markets}
-                onUpdateMarket={updateMarket}
-              />
-            ))}
+            <div className="space-y-4">
+              {openMarketGroups.map((markets) => (
+                <EventMarketGroup
+                  key={markets[0].eventId ?? markets[0].marketId}
+                  markets={markets}
+                  onUpdateMarket={updateMarket}
+                />
+              ))}
+            </div>
           </div>
+
+          <ActiveEventsTabsTable />
         </div>
 
         <div className="marketcard-base space-y-4">
