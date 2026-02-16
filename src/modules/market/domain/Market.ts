@@ -2,7 +2,12 @@ import type { TotalMarketStats, UserMarketStats } from "@/modules/order/domain/O
 import type { Event } from "@/modules/event/domain/Event";
 import type { Outcome, OutcomeWithPrices } from "@/modules/market/domain/Outcome";
 
-export type MarketStatus = "OPEN" | "CLOSED" | "RESOLVED" | "CANCELLED";
+export type MarketStatus =
+  | "PENDING_APPROVAL"
+  | "OPEN"
+  | "CLOSED"
+  | "RESOLVED"
+  | "CANCELLED";
 
 export type MarketType = "BINARY";
 

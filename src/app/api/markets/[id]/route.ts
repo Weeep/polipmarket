@@ -6,6 +6,7 @@ import { ammRepository } from "@/modules/market/infrastructure/ammRepository";
 import { marketRepository } from "@/modules/market/infrastructure/marketRepository";
 import { outcomeRepository } from "@/modules/market/infrastructure/outcomeRepository";
 import { calcExecutionPrice } from "@/modules/order/domain/ammQuote";
+import { ensureAdmin } from "@/modules/auth/application/ensureAdmin";
 
 export async function GET(
   req: Request,
@@ -18,6 +19,10 @@ export async function GET(
 
     if (!market) {
       return NextResponse.json({ error: "Market not found" }, { status: 404 });
+    }
+
+    if (market.status === "PENDING_APPROVAL") {
+      await ensureAdmin();
     }
 
     const { searchParams } = new URL(req.url);

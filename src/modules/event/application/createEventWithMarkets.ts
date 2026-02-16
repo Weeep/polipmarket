@@ -87,7 +87,7 @@ export async function createEventWithMarkets(
           eventId: event.id,
           question: market.name,
           description: market.description,
-          status: "OPEN",
+          status: "PENDING_APPROVAL",
           type: "BINARY",
           bettingCloseAt: input.bettingCloseAt,
           resolveAt: input.resolveAt ?? input.bettingCloseAt,

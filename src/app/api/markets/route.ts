@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/withAuth";
+import { ensureAdmin } from "@/modules/auth/application/ensureAdmin";
 import {
   createMarket,
   CreateMarketInput,
@@ -123,6 +124,15 @@ export async function GET(req: Request) {
   try {
     const markets = await getMarkets(marketRepository);
     const { searchParams } = new URL(req.url);
+    const includePending = searchParams.get("includePending") === "true";
+
+    if (includePending) {
+      await ensureAdmin();
+    }
+
+    const visibleMarkets = includePending
+      ? markets
+      : markets.filter((market) => market.status !== "PENDING_APPROVAL");
     const include = new Set(
       (searchParams.get("include") ?? "")
         .split(",")
@@ -136,11 +146,11 @@ export async function GET(req: Request) {
       include.has("stats") || include.has("prices") || include.has("outcomes");
 
     if (!includeOutcomes && !includeStats) {
-      return NextResponse.json(markets);
+      return NextResponse.json(visibleMarkets);
     }
 
     const marketsWithExtras = await Promise.all(
-      markets.map(async (market) => {
+      visibleMarkets.map(async (market) => {
         const [outcomes, marketStats] = await Promise.all([
           includeOutcomes
             ? outcomeRepository.findByMarketId(market.id)
