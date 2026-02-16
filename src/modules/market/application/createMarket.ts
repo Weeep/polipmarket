@@ -119,7 +119,7 @@ export async function createMarket(
     eventId: input.eventId.trim(),
     question: input.question.trim(),
     description: input.description ?? null,
-    status: "OPEN",
+    status: "PENDING_APPROVAL",
     type,
     bettingCloseAt: input.bettingCloseAt,
     resolveAt: input.resolveAt ?? input.bettingCloseAt,

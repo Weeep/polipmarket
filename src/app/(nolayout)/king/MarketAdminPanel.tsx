@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/lib/apiFetch";
 import type { MarketStatus } from "@/modules/market/domain/Market";
 
 const MARKET_STATUSES: MarketStatus[] = [
+  "PENDING_APPROVAL",
   "OPEN",
   "CLOSED",
   "RESOLVED",
@@ -27,6 +28,7 @@ type MarketSummary = {
   question: string;
   event?: MarketEvent | null;
   status: MarketStatus;
+  bettingCloseAt: string;
   resolvedOutcomeId?: string | null;
   resolvedPosition?: "YES" | "NO" | null;
   outcomes?: MarketOutcome[];
@@ -57,7 +59,7 @@ export function MarketAdminPanel() {
     setLoading(true);
     setError(null);
 
-    apiFetch("/api/markets?include=outcomes")
+    apiFetch("/api/markets?include=outcomes&includePending=true")
       .then((res) => res.json())
       .then((data: MarketSummaryApi[]) => {
         if (cancelled) return;
@@ -65,7 +67,7 @@ export function MarketAdminPanel() {
           data
             .map((market) => ({
               ...market,
-              id: market.id ?? market.marketId ?? "", //TODO test without market.marketId
+              id: market.id ?? market.marketId ?? "",
             }))
             .filter((market) => Boolean(market.id)),
         );
@@ -99,10 +101,44 @@ export function MarketAdminPanel() {
     });
   }, [markets]);
 
+  const expiredOpenMarkets = useMemo(() => {
+    const now = Date.now();
+    return markets.filter(
+      (market) =>
+        market.status === "OPEN" && new Date(market.bettingCloseAt).getTime() <= now,
+    );
+  }, [markets]);
+
+  const nonExpiredOrNonOpenMarkets = useMemo(() => {
+    const expiredIds = new Set(expiredOpenMarkets.map((market) => market.id));
+    return markets.filter((market) => !expiredIds.has(market.id));
+  }, [expiredOpenMarkets, markets]);
+
   const updateMarket = (updated: MarketSummary) => {
     setMarkets((prev) =>
       prev.map((market) => (market.id === updated.id ? updated : market)),
     );
+  };
+
+  const handleApprove = async (marketId: string) => {
+    if (!marketId) {
+      setActionError("Missing market id for approval.");
+      return;
+    }
+
+    setActionError(null);
+    setBusyMarketId(marketId);
+    try {
+      const res = await apiFetch(`/api/markets/${marketId}/approve`, {
+        method: "POST",
+      });
+      const updated = (await res.json()) as MarketSummary;
+      updateMarket(updated);
+    } catch (err) {
+      setActionError(getErrorMessage(err, "Failed to approve market"));
+    } finally {
+      setBusyMarketId(null);
+    }
   };
 
   const handleResolve = async (marketId: string) => {
@@ -136,9 +172,9 @@ export function MarketAdminPanel() {
     }
   };
 
-  const handleCancel = async (marketId: string) => {
+  const handleRejectOrCancel = async (marketId: string) => {
     if (!marketId) {
-      setActionError("Missing market id for cancel.");
+      setActionError("Missing market id for reject/cancel.");
       return;
     }
     setActionError(null);
@@ -150,7 +186,7 @@ export function MarketAdminPanel() {
       const updated = (await res.json()) as MarketSummary;
       updateMarket(updated);
     } catch (err) {
-      setActionError(getErrorMessage(err, "Failed to cancel market"));
+      setActionError(getErrorMessage(err, "Failed to reject/cancel market"));
     } finally {
       setBusyMarketId(null);
     }
@@ -187,40 +223,46 @@ export function MarketAdminPanel() {
     return `${outcome.label} (${market.resolvedPosition ?? "YES"})`;
   };
 
-  return (
-    <section style={{ marginTop: 32 }}>
-      <h2>Markets</h2>
-      {loading && <p>Loading markets…</p>}
-      {error && <p style={{ color: "crimson" }}>{error}</p>}
-      {actionError && <p style={{ color: "crimson" }}>{actionError}</p>}
-      {!loading && !error && markets.length === 0 && (
-        <p>No markets available.</p>
-      )}
+  const renderMarketTable = (title: string, rows: MarketSummary[]) => {
+    if (rows.length === 0) {
+      return (
+        <div style={{ marginTop: 20 }}>
+          <h3>{title}</h3>
+          <p>Nincs market ebben a csoportban.</p>
+        </div>
+      );
+    }
 
-      {!loading && markets.length > 0 && (
+    return (
+      <div style={{ marginTop: 20 }}>
+        <h3>{title}</h3>
         <table border={1} cellPadding={8} style={{ width: "100%" }}>
           <thead>
             <tr>
               <th>Event</th>
               <th>Question</th>
               <th>Status</th>
+              <th>Betting close</th>
               <th>Resolved outcome</th>
               <th>Winning position</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {markets.map((market) => {
+            {rows.map((market) => {
+              const canApprove = market.status === "PENDING_APPROVAL";
+              const canReject = market.status === "PENDING_APPROVAL";
               const canClose = market.status === "OPEN";
-              const canCancel =
-                market.status === "OPEN" || market.status === "CLOSED";
+              const canCancel = market.status === "OPEN" || market.status === "CLOSED";
               const canResolve = market.status === "CLOSED";
               const busy = busyMarketId === market.id;
+
               return (
                 <tr key={market.id}>
                   <td>{market.event?.question ?? "-"}</td>
                   <td>{market.question}</td>
                   <td>{statusLabel(market.status)}</td>
+                  <td>{new Date(market.bettingCloseAt).toLocaleString()}</td>
                   <td>{renderResolvedOutcome(market)}</td>
                   <td>
                     <select
@@ -243,6 +285,13 @@ export function MarketAdminPanel() {
                     <div style={{ display: "flex", gap: 8 }}>
                       <button
                         type="button"
+                        onClick={() => handleApprove(market.id)}
+                        disabled={!canApprove || busy}
+                      >
+                        {busy && canApprove ? "Approving…" : "Approve"}
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => handleClose(market.id)}
                         disabled={!canClose || busy}
                       >
@@ -250,10 +299,16 @@ export function MarketAdminPanel() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleCancel(market.id)}
-                        disabled={!canCancel || busy}
+                        onClick={() => handleRejectOrCancel(market.id)}
+                        disabled={!(canReject || canCancel) || busy}
                       >
-                        {busy && canCancel ? "Cancelling…" : "Cancel"}
+                        {busy && (canReject || canCancel)
+                          ? canReject
+                            ? "Rejecting…"
+                            : "Cancelling…"
+                          : canReject
+                            ? "Reject"
+                            : "Cancel"}
                       </button>
                       <button
                         type="button"
@@ -269,6 +324,25 @@ export function MarketAdminPanel() {
             })}
           </tbody>
         </table>
+      </div>
+    );
+  };
+
+  return (
+    <section style={{ marginTop: 32 }}>
+      <h2>Markets</h2>
+      {loading && <p>Loading markets…</p>}
+      {error && <p style={{ color: "crimson" }}>{error}</p>}
+      {actionError && <p style={{ color: "crimson" }}>{actionError}</p>}
+      {!loading && !error && markets.length === 0 && (
+        <p>No markets available.</p>
+      )}
+
+      {!loading && markets.length > 0 && (
+        <>
+          {renderMarketTable("Lezárandó (lejárt) marketek", expiredOpenMarkets)}
+          {renderMarketTable("További marketek", nonExpiredOrNonOpenMarkets)}
+        </>
       )}
     </section>
   );
