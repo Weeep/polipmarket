@@ -69,12 +69,34 @@ export const POST = withAuth(async (user, req) => {
   }
 });
 
-export async function GET() {
+function isActiveEvent(event: { bettingCloseAt: Date; resolveAt?: Date | null }) {
+  const now = Date.now();
+  const bettingCloseAt = new Date(event.bettingCloseAt).getTime();
+  const resolveAt = event.resolveAt ? new Date(event.resolveAt).getTime() : null;
+
+  return bettingCloseAt > now && (resolveAt == null || resolveAt > now);
+}
+
+function toComparableDate(value?: Date | null) {
+  if (!value) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  return new Date(value).getTime();
+}
+
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const sort = searchParams.get("sort");
+    const activeOnly = searchParams.get("activeOnly") === "true";
+    const limit = Number(searchParams.get("limit") ?? "0");
     const events = await getEvents();
 
+    const sourceEvents = activeOnly ? events.filter(isActiveEvent) : events;
+
     const eventsWithMarkets = await Promise.all(
-      events.map(async (event) => {
+      sourceEvents.map(async (event) => {
         const marketsWithExtras = await getMarketsByEventId(event.id);
 
         const eventStats = marketsWithExtras.reduce(
@@ -96,7 +118,32 @@ export async function GET() {
       }),
     );
 
-    return NextResponse.json(eventsWithMarkets);
+    if (sort === "volume_desc") {
+      eventsWithMarkets.sort(
+        (a, b) =>
+          (b.eventStats?.totalVolume ?? 0) - (a.eventStats?.totalVolume ?? 0),
+      );
+    }
+
+    if (sort === "betting_close_asc") {
+      eventsWithMarkets.sort(
+        (a, b) =>
+          toComparableDate(a.bettingCloseAt) - toComparableDate(b.bettingCloseAt),
+      );
+    }
+
+    if (sort === "event_close_asc") {
+      eventsWithMarkets.sort(
+        (a, b) => toComparableDate(a.resolveAt) - toComparableDate(b.resolveAt),
+      );
+    }
+
+    const limitedEvents =
+      Number.isFinite(limit) && limit > 0
+        ? eventsWithMarkets.slice(0, Math.floor(limit))
+        : eventsWithMarkets;
+
+    return NextResponse.json(limitedEvents);
   } catch (err: unknown) {
     console.error("[GET /api/events]", err);
     return NextResponse.json(
