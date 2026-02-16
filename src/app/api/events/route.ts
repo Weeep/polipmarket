@@ -99,6 +99,10 @@ export async function GET(req: Request) {
       sourceEvents.map(async (event) => {
         const marketsWithExtras = await getMarketsByEventId(event.id);
 
+        if (marketsWithExtras.length === 0) {
+          return null;
+        }
+
         const eventStats = marketsWithExtras.reduce(
           (acc, market) => {
             acc.totalBets +=
@@ -118,30 +122,35 @@ export async function GET(req: Request) {
       }),
     );
 
+    const visibleEvents = eventsWithMarkets.filter(
+      (event): event is NonNullable<(typeof eventsWithMarkets)[number]> =>
+        event !== null,
+    );
+
     if (sort === "volume_desc") {
-      eventsWithMarkets.sort(
+      visibleEvents.sort(
         (a, b) =>
           (b.eventStats?.totalVolume ?? 0) - (a.eventStats?.totalVolume ?? 0),
       );
     }
 
     if (sort === "betting_close_asc") {
-      eventsWithMarkets.sort(
+      visibleEvents.sort(
         (a, b) =>
           toComparableDate(a.bettingCloseAt) - toComparableDate(b.bettingCloseAt),
       );
     }
 
     if (sort === "event_close_asc") {
-      eventsWithMarkets.sort(
+      visibleEvents.sort(
         (a, b) => toComparableDate(a.resolveAt) - toComparableDate(b.resolveAt),
       );
     }
 
     const limitedEvents =
       Number.isFinite(limit) && limit > 0
-        ? eventsWithMarkets.slice(0, Math.floor(limit))
-        : eventsWithMarkets;
+        ? visibleEvents.slice(0, Math.floor(limit))
+        : visibleEvents;
 
     return NextResponse.json(limitedEvents);
   } catch (err: unknown) {

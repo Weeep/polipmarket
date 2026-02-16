@@ -10,8 +10,12 @@ export async function cancelMarket(marketId: string) {
       throw new Error("Market not found");
     }
 
-    if (market.status !== "OPEN" && market.status !== "CLOSED") {
-      throw new Error("Only OPEN or CLOSED markets can be cancelled");
+    if (
+      market.status !== "PENDING_APPROVAL" &&
+      market.status !== "OPEN" &&
+      market.status !== "CLOSED"
+    ) {
+      throw new Error("Only PENDING_APPROVAL, OPEN or CLOSED markets can be cancelled");
     }
 
     const orders = await tx.order.findMany({

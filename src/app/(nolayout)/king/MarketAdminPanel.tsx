@@ -172,9 +172,9 @@ export function MarketAdminPanel() {
     }
   };
 
-  const handleCancel = async (marketId: string) => {
+  const handleRejectOrCancel = async (marketId: string) => {
     if (!marketId) {
-      setActionError("Missing market id for cancel.");
+      setActionError("Missing market id for reject/cancel.");
       return;
     }
     setActionError(null);
@@ -186,7 +186,7 @@ export function MarketAdminPanel() {
       const updated = (await res.json()) as MarketSummary;
       updateMarket(updated);
     } catch (err) {
-      setActionError(getErrorMessage(err, "Failed to cancel market"));
+      setActionError(getErrorMessage(err, "Failed to reject/cancel market"));
     } finally {
       setBusyMarketId(null);
     }
@@ -251,11 +251,9 @@ export function MarketAdminPanel() {
           <tbody>
             {rows.map((market) => {
               const canApprove = market.status === "PENDING_APPROVAL";
+              const canReject = market.status === "PENDING_APPROVAL";
               const canClose = market.status === "OPEN";
-              const canCancel =
-                market.status === "PENDING_APPROVAL" ||
-                market.status === "OPEN" ||
-                market.status === "CLOSED";
+              const canCancel = market.status === "OPEN" || market.status === "CLOSED";
               const canResolve = market.status === "CLOSED";
               const busy = busyMarketId === market.id;
 
@@ -301,10 +299,16 @@ export function MarketAdminPanel() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleCancel(market.id)}
-                        disabled={!canCancel || busy}
+                        onClick={() => handleRejectOrCancel(market.id)}
+                        disabled={!(canReject || canCancel) || busy}
                       >
-                        {busy && canCancel ? "Cancelling…" : "Cancel"}
+                        {busy && (canReject || canCancel)
+                          ? canReject
+                            ? "Rejecting…"
+                            : "Cancelling…"
+                          : canReject
+                            ? "Reject"
+                            : "Cancel"}
                       </button>
                       <button
                         type="button"
