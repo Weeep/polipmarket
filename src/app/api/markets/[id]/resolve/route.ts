@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/withAuth";
+import { ensureAdmin } from "@/modules/auth/application/ensureAdmin";
 import { resolveMarket } from "@/modules/market/application/resolveMarket";
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -8,6 +9,7 @@ function getErrorMessage(error: unknown, fallback: string) {
 
 export const POST = withAuth(async (_user, req, context) => {
   try {
+    await ensureAdmin();
     const { params } = context as { params: { id: string } };
     const { id } = params;
     const body = (await req.json()) as { outcomeId?: string; position?: string };
