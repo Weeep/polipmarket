@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { DEFAULT_AMM_FEE_BPS } from "@/config/economy";
+import { DEFAULT_AMM_FEE_BPS, DEFAULT_OUTCOME_POOL } from "@/config/economy";
 import { Event } from "../domain/Event";
 import { eventRepository } from "../infrastructure/eventRepository";
 import { marketRepository } from "@/modules/market/infrastructure/marketRepository";
@@ -14,7 +14,7 @@ export type CreateEventWithMarketsInput = {
   description?: string | null;
   bettingCloseAt: Date;
   resolveAt?: Date | null;
-  feeBps?: number;
+  yesStartPercent?: number;
   createdBy: string;
   markets: CreateEventMarketInput[];
 };
@@ -46,10 +46,19 @@ export async function createEventWithMarkets(
     throw new Error("At least one market is required");
   }
 
-  const feeBps = input.feeBps ?? DEFAULT_AMM_FEE_BPS;
-  if (feeBps < 0 || feeBps > 1000) {
-    throw new Error("feeBps must be between 0 and 1000");
+  const feeBps = DEFAULT_AMM_FEE_BPS;
+  if (feeBps < 0 || feeBps > 10_000) {
+    throw new Error("feeBps must be between 0 and 10000");
   }
+
+  const yesStartPercent = input.yesStartPercent ?? 50;
+  if (yesStartPercent < 3 || yesStartPercent > 97) {
+    throw new Error("yesStartPercent must be between 3 and 97");
+  }
+
+  const totalPool = DEFAULT_OUTCOME_POOL * 2;
+  const yesPool = Math.round((totalPool * yesStartPercent) / 100);
+  const noPool = totalPool - yesPool;
 
   const markets = input.markets.map((market) => {
     const name = market.name.trim();
@@ -101,6 +110,10 @@ export async function createEventWithMarkets(
               label: market.name,
               position: 0,
               status: "ACTIVE",
+              liquidity: {
+                yesPool,
+                noPool,
+              },
             },
           ],
         },

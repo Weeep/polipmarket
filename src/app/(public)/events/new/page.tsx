@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
+import { DEFAULT_AMM_FEE_BPS } from "@/config/economy";
 
 type DraftMarket = {
   id: string;
   name: string;
-  description: string;
 };
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -22,14 +22,14 @@ export default function NewEventPage() {
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random()}`,
     name: "",
-    description: "",
   });
 
   const [question, setQuestion] = useState("");
   const [description, setDescription] = useState("");
   const [bettingCloseAt, setBettingCloseAt] = useState("");
   const [resolveAt, setResolveAt] = useState("");
-  const [feeBps, setFeeBps] = useState(100);
+  const [yesStartPercent, setYesStartPercent] = useState(50);
+  const noStartPercent = 100 - yesStartPercent;
   const [markets, setMarkets] = useState<DraftMarket[]>([createMarket()]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -43,9 +43,12 @@ export default function NewEventPage() {
       const payloadMarkets = markets
         .map((market) => ({
           name: market.name.trim(),
-          description: market.description.trim(),
         }))
         .filter((market) => market.name);
+
+      const safeYesStartPercent = Number.isFinite(yesStartPercent)
+        ? Math.min(97, Math.max(3, Math.round(yesStartPercent)))
+        : 50;
 
       if (payloadMarkets.length === 0) {
         throw new Error("At least one market is required");
@@ -59,7 +62,7 @@ export default function NewEventPage() {
           description,
           bettingCloseAt,
           resolveAt: resolveAt || null,
-          feeBps,
+          yesStartPercent: safeYesStartPercent,
           markets: payloadMarkets,
         }),
       });
@@ -128,14 +131,40 @@ export default function NewEventPage() {
           </label>
 
           <label>
-            Fee (bps, default 100 = 1%)
+            Fee (bps)
             <input
               className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
               type="number"
-              min="0"
-              max="1000"
-              value={feeBps}
-              onChange={(e) => setFeeBps(Number(e.target.value))}
+              value={DEFAULT_AMM_FEE_BPS}
+              readOnly
+            />
+          </label>
+
+          <label>
+            Yes: %
+            <input
+              className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              type="number"
+              min="3"
+              max="97"
+              value={yesStartPercent}
+              onChange={(e) => {
+                const value = Number(e.target.value);
+                if (Number.isFinite(value)) {
+                  setYesStartPercent(Math.min(97, Math.max(3, Math.round(value))));
+                }
+              }}
+              required
+            />
+          </label>
+
+          <label>
+            No: %
+            <input
+              className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              type="number"
+              value={noStartPercent}
+              readOnly
             />
           </label>
 
@@ -174,23 +203,6 @@ export default function NewEventPage() {
                       required
                     />
                   </label>
-                  <label className="text-sm">
-                    Market description (optional)
-                    <textarea
-                      className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                      value={market.description}
-                      onChange={(e) =>
-                        setMarkets((prev) =>
-                          prev.map((item, idx) =>
-                            idx === index
-                              ? { ...item, description: e.target.value }
-                              : item,
-                          ),
-                        )
-                      }
-                    />
-                  </label>
-
                   {markets.length > 1 && (
                     <button
                       type="button"
