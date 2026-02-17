@@ -116,8 +116,8 @@ export default function HomePage() {
   const closedMarketGroups = groupMarketsByEvent(closedMarkets);
 
   return (
-    <main className="p-8">
-      <div className="max-w-6xl mx-auto px-6 py-10 space-y-10">
+    <main className="p-0 sm:p-8">
+      <div className="max-w-6xl mx-auto px-4 py-0 sm:px-6 sm:py-10 space-y-6 sm:space-y-10">
         <div className="grid gap-6 xl:grid-cols-2 xl:items-start">
           <div className="marketcard-base space-y-4">
             <h2 className="text-lg font-bold text-stone-100">Fogadások</h2>
