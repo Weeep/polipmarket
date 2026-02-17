@@ -4,7 +4,9 @@ export type RemainingTimeInfo = {
   isClosed: boolean;
 };
 
-export function getRemainingTimeInfo(value?: Date | string | null): RemainingTimeInfo {
+export function getRemainingTimeInfo(
+  value?: Date | string | null,
+): RemainingTimeInfo {
   if (!value) {
     return {
       shortLabel: "—",
@@ -29,7 +31,7 @@ export function getRemainingTimeInfo(value?: Date | string | null): RemainingTim
   if (totalHours < 1) {
     return {
       shortLabel: "<1ó",
-      longLabel: "Kevesebb mint 1 óra van hátra",
+      longLabel: "Kevesebb mint 1 óra",
       isClosed: false,
     };
   }
@@ -40,14 +42,14 @@ export function getRemainingTimeInfo(value?: Date | string | null): RemainingTim
   if (days > 0) {
     return {
       shortLabel: `${days}n ${hours}ó`,
-      longLabel: `${days} nap ${hours} óra van hátra`,
+      longLabel: `${days} nap ${hours} óra`,
       isClosed: false,
     };
   }
 
   return {
     shortLabel: `${hours}ó`,
-    longLabel: `${hours} óra van hátra`,
+    longLabel: `${hours} óra`,
     isClosed: false,
   };
 }

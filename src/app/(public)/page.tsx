@@ -34,7 +34,9 @@ function filterMarketsByBetStatus(
 ): MyEventMarketBetDTO[] {
   return markets
     .map((market) => {
-      const filteredBets = market.bets.filter((bet) => statuses.includes(bet.status));
+      const filteredBets = market.bets.filter((bet) =>
+        statuses.includes(bet.status),
+      );
 
       if (filteredBets.length === 0) {
         return null;
@@ -69,7 +71,9 @@ function mergeUpdatedMarket(
     (bet) => updatedBetsByLotId.get(bet.lotId) ?? bet,
   );
   const currentLotIds = new Set(currentMarket.bets.map((bet) => bet.lotId));
-  const newBets = updatedMarket.bets.filter((bet) => !currentLotIds.has(bet.lotId));
+  const newBets = updatedMarket.bets.filter(
+    (bet) => !currentLotIds.has(bet.lotId),
+  );
 
   return {
     ...currentMarket,
@@ -111,16 +115,21 @@ export default function HomePage() {
   }
 
   const openMarkets = filterMarketsByBetStatus(myMarkets, ["OPEN"]);
-  const closedMarkets = filterMarketsByBetStatus(myMarkets, ["FILLED", "CANCELLED"]);
+  const closedMarkets = filterMarketsByBetStatus(myMarkets, [
+    "FILLED",
+    "CANCELLED",
+  ]);
   const openMarketGroups = groupMarketsByEvent(openMarkets);
   const closedMarketGroups = groupMarketsByEvent(closedMarkets);
 
   return (
     <main className="p-0 sm:p-8">
-      <div className="max-w-6xl mx-auto px-4 py-0 sm:px-6 sm:py-10 space-y-6 sm:space-y-10">
+      <div className="max-w-6xl mx-auto py-0 sm:px-6 sm:py-10 space-y-6 sm:space-y-10 pt-2">
         <div className="grid gap-6 xl:grid-cols-2 xl:items-start">
+          <ActiveEventsTabsTable />
+
           <div className="marketcard-base space-y-4">
-            <h2 className="text-lg font-bold text-stone-100">Fogadások</h2>
+            <h2 className="text-lg font-bold text-stone-100">Fogadásaim</h2>
 
             {openMarketGroups.length === 0 && (
               <p className="text-stone-400 text-sm">Nincs nyitott fogadásod</p>
@@ -136,8 +145,6 @@ export default function HomePage() {
               ))}
             </div>
           </div>
-
-          <ActiveEventsTabsTable />
         </div>
 
         <div className="marketcard-base space-y-4">

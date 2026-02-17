@@ -57,7 +57,7 @@ export function BetCard({
         {market.eventId && market.eventQuestion ? (
           <Link
             href={`/events/${market.eventId}`}
-            className="block text-lg leading-tight font-semibold text-stone-400 hover:text-stone-200 hover:underline border-b border-stone-800 pb-2 px-4"
+            className="block text-l leading-tight font-semibold text-stone-400 hover:text-stone-200 hover:underline border-b border-stone-800 pb-2"
           >
             {market.eventQuestion}
           </Link>
@@ -70,7 +70,7 @@ export function BetCard({
 
       <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm text-center items-center">
         <div>
-          <p className="font-semibold text-2xl text-stone-100">
+          <p className="font-semibold text-xl text-stone-100">
             {bet.outcomeLabel}
           </p>
           <p className="text-xs uppercase tracking-wide text-stone-400">
