@@ -11,7 +11,13 @@ type BetCardProps = {
   onSell: () => void;
 };
 
-export function BetCard({ market, bet, canSell, sellDialogLoading, onSell }: BetCardProps) {
+export function BetCard({
+  market,
+  bet,
+  canSell,
+  sellDialogLoading,
+  onSell,
+}: BetCardProps) {
   const shares = bet.shares;
   const isCancelled = bet.status === "CANCELLED";
   const isFilled = bet.status === "FILLED";
@@ -25,7 +31,11 @@ export function BetCard({ market, bet, canSell, sellDialogLoading, onSell }: Bet
     market.resolvedOutcomeId === bet.outcomeId &&
     resolvedPosition === bet.position;
   const settlePrice = isResolved ? (isWinning ? 1 : 0) : bet.price;
-  const payout = isResolved ? (isWinning ? shares * settlePrice : 0) : bet.amount;
+  const payout = isResolved
+    ? isWinning
+      ? shares * settlePrice
+      : 0
+    : bet.amount;
   const profit = payout - bet.amount;
   const profitLabel =
     profit > 0 ? `+${profit.toFixed(2)}` : profit < 0 ? profit.toFixed(2) : "0";
@@ -43,25 +53,30 @@ export function BetCard({ market, bet, canSell, sellDialogLoading, onSell }: Bet
 
   return (
     <div className="rounded-lg border border-stone-800 bg-stone-950/60 px-4 py-3 text-sm text-stone-300 space-y-3">
-      <div className="space-y-2 border-b border-stone-800 pb-2">
+      <div className="space-y-2">
         {market.eventId && market.eventQuestion ? (
           <Link
             href={`/events/${market.eventId}`}
-            className="block text-lg leading-tight font-semibold text-stone-400 hover:text-stone-200 hover:underline"
+            className="block text-lg leading-tight font-semibold text-stone-400 hover:text-stone-200 hover:underline border-b border-stone-800 pb-2 px-4"
           >
             {market.eventQuestion}
           </Link>
         ) : (
-          <p className="block text-sm font-medium text-stone-400">{market.question}</p>
+          <p className="block text-sm font-medium text-stone-400">
+            {market.question}
+          </p>
         )}
-
-        <div>
-          <p className="font-semibold text-2xl text-stone-100">{bet.outcomeLabel}</p>
-          <p className="text-xs uppercase tracking-wide text-stone-400">{bet.position}</p>
-        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm">
+      <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm text-center items-center">
+        <div>
+          <p className="font-semibold text-2xl text-stone-100">
+            {bet.outcomeLabel}
+          </p>
+          <p className="text-xs uppercase tracking-wide text-stone-400">
+            {bet.position}
+          </p>
+        </div>
         <div>
           <p className="text-stone-500">Tét</p>
           <p>{bet.amount.toFixed(2)}</p>
@@ -78,7 +93,9 @@ export function BetCard({ market, bet, canSell, sellDialogLoading, onSell }: Bet
 
       {isFilled && (
         <p className="text-xs text-stone-400">
-          Eladott {soldMetrics.shares.toFixed(2)} · Átlagár: {soldMetrics.executionPrice.toFixed(4)} · Nettó: {soldMetrics.netAmount.toFixed(2)}
+          Eladott {soldMetrics.shares.toFixed(2)} · Átlagár:{" "}
+          {soldMetrics.executionPrice.toFixed(4)} · Nettó:{" "}
+          {soldMetrics.netAmount.toFixed(2)}
         </p>
       )}
 
@@ -89,7 +106,11 @@ export function BetCard({ market, bet, canSell, sellDialogLoading, onSell }: Bet
           Elszámolás: {payout.toFixed(2)}
           <span
             className={
-              profit > 0 ? "text-emerald-400" : profit < 0 ? "text-rose-400" : "text-stone-400"
+              profit > 0
+                ? "text-emerald-400"
+                : profit < 0
+                  ? "text-rose-400"
+                  : "text-stone-400"
             }
           >
             {` (${profitLabel})`}
@@ -97,7 +118,7 @@ export function BetCard({ market, bet, canSell, sellDialogLoading, onSell }: Bet
         </p>
       )}
 
-      <div className="flex items-center justify-between border-t border-stone-800 pt-2">
+      <div className="flex items-center justify-between border-t border-stone-800 pt-2 px-4">
         <span
           className="text-stone-300"
           title={`Fogadás lezárásáig hátralévő idő: ${closeTime.longLabel}`}
