@@ -84,6 +84,16 @@ export async function resolveMarket(input: ResolveMarketInput) {
       },
     });
 
+    await tx.positionLot.updateMany({
+      where: {
+        marketId: input.marketId,
+        remainingShares: { gt: 0 },
+      },
+      data: {
+        remainingShares: 0,
+      },
+    });
+
     await tx.order.updateMany({
       where: {
         marketId: input.marketId,
