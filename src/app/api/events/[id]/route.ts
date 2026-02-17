@@ -28,7 +28,10 @@ export async function GET(
     }
 
     const markets = await prisma.market.findMany({
-      where: { eventId: event.id },
+      where: {
+        eventId: event.id,
+        status: { notIn: ["PENDING_APPROVAL", "CANCELLED"] },
+      },
       orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     });
 

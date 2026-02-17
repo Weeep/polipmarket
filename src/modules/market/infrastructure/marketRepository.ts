@@ -73,6 +73,7 @@ type MarketRecord = {
 
 function parseMarketStatus(status: string): MarketStatus {
   if (
+    status === "PENDING_APPROVAL" ||
     status === "OPEN" ||
     status === "CLOSED" ||
     status === "RESOLVED" ||

@@ -11,9 +11,13 @@ export async function getMarketsByEventId(eventId: string) {
   }
 
   const markets = await marketRepository.findByEventId(eventId);
+  const visibleMarkets = markets.filter(
+    (market) =>
+      market.status !== "PENDING_APPROVAL" && market.status !== "CANCELLED",
+  );
 
   return Promise.all(
-    markets.map(async (market) => {
+    visibleMarkets.map(async (market) => {
       const [outcomes, marketStats] = await Promise.all([
         outcomeRepository.findByMarketId(market.id),
         getMarketStats(market.id),
