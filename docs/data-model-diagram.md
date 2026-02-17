@@ -1,5 +1,7 @@
 # Polipmarket adatmodell (ER áttekintés)
 
+# https://mermaidviewer.com/editor
+
 ```mermaid
 erDiagram
     USER ||--o| WALLET : has
