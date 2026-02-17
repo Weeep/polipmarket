@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Link from "next/link";
 import { useMe } from "@/context/MeContext";
 import { apiFetch } from "@/lib/apiFetch";
 import { MyEventMarketBetDTO } from "@/modules/event/dto/myEventMarketBetDTO";
@@ -32,9 +31,6 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
   const [sellDialogLoading, setSellDialogLoading] = useState(false);
   const [sellDialogError, setSellDialogError] = useState<string | null>(null);
   const [sellSubmitting, setSellSubmitting] = useState(false);
-
-  const eventId = markets[0]?.eventId;
-  const eventQuestion = markets[0]?.eventQuestion;
 
   const allBets: MarketBet[] = markets.flatMap((market) =>
     market.bets.map((bet) => ({ market, bet })),
@@ -142,17 +138,6 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
   return (
     <>
       <div className="bg-stone-900 rounded-lg p-4 space-y-3">
-        {eventId && eventQuestion ? (
-          <Link
-            href={`/events/${eventId}`}
-            className="block text-sm font-medium text-stone-400 hover:text-stone-300 hover:underline"
-          >
-            {eventQuestion}
-          </Link>
-        ) : (
-          <p className="block text-sm font-medium text-stone-400">{markets[0]?.question}</p>
-        )}
-
         <div className="space-y-2">
           {allBets.map(({ market, bet }) => {
             const isActive = bet.status === "OPEN";
@@ -176,13 +161,6 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
 
           {sellDialogError && (
             <p className="text-xs text-rose-400 text-right">{sellDialogError}</p>
-          )}
-        </div>
-
-        <div className="marketcard-statusbar text-stone-400">
-          <span>Fogadás zár {new Date(markets[0]?.closesAt).toLocaleDateString()}</span>
-          {markets[0]?.resolvesAt && (
-            <span>Esemény vége {new Date(markets[0].resolvesAt).toLocaleDateString()}</span>
           )}
         </div>
       </div>

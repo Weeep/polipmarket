@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Fragment } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/lib/apiFetch";
+import { getRemainingTimeInfo } from "@/lib/remainingTime";
 import type { EventSummary } from "@/modules/event/domain/Event";
 
 type ActiveEventsTab = "TOP_VOLUME" | "BETTING_CLOSE" | "EVENT_CLOSE";
@@ -25,34 +26,6 @@ const TAB_CONFIG: Record<
     sort: "event_close_asc",
   },
 };
-
-function formatRemainingTime(value?: Date | string | null) {
-  if (!value) {
-    return "—";
-  }
-
-  const targetTime = new Date(value).getTime();
-  const diffMs = targetTime - Date.now();
-
-  if (diffMs <= 0) {
-    return "Lezárt";
-  }
-
-  const totalHours = Math.floor(diffMs / (1000 * 60 * 60));
-
-  if (totalHours < 1) {
-    return "<1 óra";
-  }
-
-  const days = Math.floor(totalHours / 24);
-  const hours = totalHours % 24;
-
-  if (days > 0) {
-    return `${days} nap ${hours} óra`;
-  }
-
-  return `${hours} óra`;
-}
 
 function formatVolume(value?: number) {
   return Math.round(value ?? 0).toLocaleString("hu-HU");
@@ -138,10 +111,10 @@ export function ActiveEventsTabsTable() {
                       {formatVolume(event.eventStats?.totalVolume)}
                     </td>
                     <td className="pb-3 pr-4 text-stone-300">
-                      {formatRemainingTime(event.bettingCloseAt)}
+                      {getRemainingTimeInfo(event.bettingCloseAt).longLabel}
                     </td>
                     <td className="pb-3 text-stone-300">
-                      {formatRemainingTime(event.resolveAt)}
+                      {getRemainingTimeInfo(event.resolveAt).longLabel}
                     </td>
                   </tr>
                 </Fragment>

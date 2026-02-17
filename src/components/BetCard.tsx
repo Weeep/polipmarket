@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { getSellDisplayMetricsFromBet } from "@/components/sellDisplay";
+import { getRemainingTimeInfo } from "@/lib/remainingTime";
 import { MyEventMarketBetDTO } from "@/modules/event/dto/myEventMarketBetDTO";
 
 type BetCardProps = {
@@ -15,6 +17,7 @@ export function BetCard({ market, bet, canSell, sellDialogLoading, onSell }: Bet
   const isFilled = bet.status === "FILLED";
   const isResolved = market.status === "RESOLVED";
   const isActive = bet.status === "OPEN";
+  const closeTime = getRemainingTimeInfo(market.closesAt);
 
   const resolvedPosition = market.resolvedPosition ?? null;
   const isWinning =
@@ -40,32 +43,32 @@ export function BetCard({ market, bet, canSell, sellDialogLoading, onSell }: Bet
 
   return (
     <div className="rounded-lg border border-stone-800 bg-stone-950/60 px-4 py-3 text-sm text-stone-300 space-y-3">
-      <div className="flex items-start justify-between gap-3">
+      <div className="space-y-2 border-b border-stone-800 pb-2">
+        {market.eventId && market.eventQuestion ? (
+          <Link
+            href={`/events/${market.eventId}`}
+            className="block text-lg leading-tight font-semibold text-stone-400 hover:text-stone-200 hover:underline"
+          >
+            {market.eventQuestion}
+          </Link>
+        ) : (
+          <p className="block text-sm font-medium text-stone-400">{market.question}</p>
+        )}
+
         <div>
-          <p className="font-semibold text-base text-stone-100">{bet.outcomeLabel}</p>
+          <p className="font-semibold text-2xl text-stone-100">{bet.outcomeLabel}</p>
           <p className="text-xs uppercase tracking-wide text-stone-400">{bet.position}</p>
         </div>
-
-        {isActive && (
-          <button
-            className="button-gold px-3 py-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={onSell}
-            disabled={!canSell || sellDialogLoading}
-            title={!canSell ? "Market closed" : undefined}
-          >
-            {sellDialogLoading ? "Számolás..." : "Sell"}
-          </button>
-        )}
       </div>
 
-      <div className="grid grid-cols-3 gap-2 text-xs sm:text-sm">
+      <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm">
         <div>
           <p className="text-stone-500">Tét</p>
           <p>{bet.amount.toFixed(2)}</p>
         </div>
         <div>
           <p className="text-stone-500">Ár</p>
-          <p>@ {bet.price.toFixed(4)}</p>
+          <p>{bet.price.toFixed(4)}</p>
         </div>
         <div>
           <p className="text-stone-500">Shares</p>
@@ -93,6 +96,27 @@ export function BetCard({ market, bet, canSell, sellDialogLoading, onSell }: Bet
           </span>
         </p>
       )}
+
+      <div className="flex items-center justify-between border-t border-stone-800 pt-2">
+        <span
+          className="text-stone-300"
+          title={`Fogadás lezárásáig hátralévő idő: ${closeTime.longLabel}`}
+          aria-label={`Fogadás lezárásáig hátralévő idő: ${closeTime.longLabel}`}
+        >
+          {closeTime.shortLabel}
+        </span>
+
+        {isActive && (
+          <button
+            className="button-gold px-4 py-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={onSell}
+            disabled={!canSell || sellDialogLoading}
+            title={!canSell ? "Market closed" : undefined}
+          >
+            {sellDialogLoading ? "Számolás..." : "Sell"}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
