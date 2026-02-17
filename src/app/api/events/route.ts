@@ -69,10 +69,15 @@ export const POST = withAuth(async (user, req) => {
   }
 });
 
-function isActiveEvent(event: { bettingCloseAt: Date; resolveAt?: Date | null }) {
+function isActiveEvent(event: {
+  bettingCloseAt: Date;
+  resolveAt?: Date | null;
+}) {
   const now = Date.now();
   const bettingCloseAt = new Date(event.bettingCloseAt).getTime();
-  const resolveAt = event.resolveAt ? new Date(event.resolveAt).getTime() : null;
+  const resolveAt = event.resolveAt
+    ? new Date(event.resolveAt).getTime()
+    : null;
 
   return bettingCloseAt > now && (resolveAt == null || resolveAt > now);
 }
@@ -124,7 +129,8 @@ export async function GET(req: Request) {
 
     const visibleEvents = eventsWithMarkets.filter(
       (event): event is NonNullable<(typeof eventsWithMarkets)[number]> =>
-        event !== null,
+        event !== null &&
+        event.markets?.some((m) => m?.status === "OPEN") === true,
     );
 
     if (sort === "volume_desc") {
@@ -137,7 +143,8 @@ export async function GET(req: Request) {
     if (sort === "betting_close_asc") {
       visibleEvents.sort(
         (a, b) =>
-          toComparableDate(a.bettingCloseAt) - toComparableDate(b.bettingCloseAt),
+          toComparableDate(a.bettingCloseAt) -
+          toComparableDate(b.bettingCloseAt),
       );
     }
 
