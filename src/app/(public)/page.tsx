@@ -1,6 +1,5 @@
 "use client";
 
-import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { EventMarketGroup } from "@/components/EventMarketGroup";
 import { ActiveEventsTabsTable } from "@/components/ActiveEventsTabsTable";
@@ -82,6 +81,21 @@ function mergeUpdatedMarket(
   };
 }
 
+function HomeSearchBar() {
+  return (
+    <div className="md:hidden px-4 pt-3">
+      <label className="block">
+        <span className="sr-only">Search</span>
+        <input
+          type="search"
+          placeholder="Keresés események között..."
+          className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-stone-100 placeholder:text-stone-400 focus:border-amber-400 focus:outline-none"
+        />
+      </label>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const [myMarkets, setMyMarkets] = useState<MyEventMarketBetDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -124,11 +138,12 @@ export default function HomePage() {
 
   return (
     <main className="p-0 sm:p-8">
+      <HomeSearchBar />
       <div className="max-w-6xl mx-auto py-0 sm:px-6 sm:py-10 space-y-6 sm:space-y-10 pt-2">
         <div className="grid gap-6 xl:grid-cols-2 xl:items-start">
           <ActiveEventsTabsTable />
 
-          <div className="marketcard-base space-y-4">
+          <div id="fogadasaim" className="marketcard-base space-y-4 scroll-mt-24">
             <h2 className="text-lg font-bold text-stone-100">Fogadásaim</h2>
 
             {openMarketGroups.length === 0 && (
@@ -147,7 +162,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="marketcard-base space-y-4">
+        <div id="sikerek" className="marketcard-base space-y-4 scroll-mt-24">
           <h2 className="text-lg font-bold text-stone-100">Lezárt fogadások</h2>
 
           {closedMarketGroups.length === 0 && (
@@ -166,14 +181,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/*<p className="mb-4">Logged in as {session.user.email}</p>*/}
-
-      <button
-        onClick={() => signOut({ callbackUrl: "/" })}
-        className="rounded-xl bg-red-600 px-4 py-2 text-white"
-      >
-        Logout
-      </button>
     </main>
   );
 }
