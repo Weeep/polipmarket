@@ -33,7 +33,6 @@ function toCreateEventInput(
     description: typeof body.description === "string" ? body.description : null,
     bettingCloseAt,
     resolveAt,
-    feeBps: typeof body.feeBps === "number" ? body.feeBps : undefined,
     createdBy: userId,
     markets: Array.isArray(body.markets)
       ? body.markets.map((item) => {
@@ -47,6 +46,10 @@ function toCreateEventInput(
               typeof market.description === "string"
                 ? market.description
                 : null,
+            yesStartPercent:
+              typeof market.yesStartPercent === "number"
+                ? market.yesStartPercent
+                : undefined,
           };
         })
       : [],

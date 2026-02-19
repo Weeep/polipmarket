@@ -16,6 +16,10 @@ type CreateOutcomeData = {
   label: string;
   position: number;
   status?: OutcomeStatus;
+  liquidity?: {
+    yesPool: number;
+    noPool: number;
+  };
 };
 
 type CreateAmmConfigData = {
@@ -196,8 +200,8 @@ export const marketRepository: MarketRepository = {
                   status: outcome.status ?? "ACTIVE",
                   liquidity: {
                     create: {
-                      yesPool: DEFAULT_OUTCOME_POOL,
-                      noPool: DEFAULT_OUTCOME_POOL,
+                      yesPool: outcome.liquidity?.yesPool ?? DEFAULT_OUTCOME_POOL,
+                      noPool: outcome.liquidity?.noPool ?? DEFAULT_OUTCOME_POOL,
                     },
                   },
                 })),
