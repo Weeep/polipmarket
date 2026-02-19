@@ -3,10 +3,12 @@ import { DEFAULT_AMM_FEE_BPS, DEFAULT_OUTCOME_POOL } from "@/config/economy";
 import { Event } from "../domain/Event";
 import { eventRepository } from "../infrastructure/eventRepository";
 import { marketRepository } from "@/modules/market/infrastructure/marketRepository";
+import { MarketStatus } from "@/modules/market/domain/Market";
 
 export type CreateEventMarketInput = {
   name: string;
   description?: string | null;
+  yesStartPercent?: number;
 };
 
 export type CreateEventWithMarketsInput = {
@@ -14,9 +16,9 @@ export type CreateEventWithMarketsInput = {
   description?: string | null;
   bettingCloseAt: Date;
   resolveAt?: Date | null;
-  yesStartPercent?: number;
   createdBy: string;
   markets: CreateEventMarketInput[];
+  initialMarketStatus?: MarketStatus;
 };
 
 function toSlug(value: string) {
@@ -25,6 +27,18 @@ function toSlug(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function normalizeYesStartPercent(value?: number) {
+  if (value == null) {
+    return 50;
+  }
+
+  if (value < 3 || value > 97) {
+    throw new Error("yesStartPercent must be between 3 and 97");
+  }
+
+  return value;
 }
 
 export async function createEventWithMarkets(
@@ -51,14 +65,15 @@ export async function createEventWithMarkets(
     throw new Error("feeBps must be between 0 and 10000");
   }
 
-  const yesStartPercent = input.yesStartPercent ?? 50;
-  if (yesStartPercent < 3 || yesStartPercent > 97) {
-    throw new Error("yesStartPercent must be between 3 and 97");
+  const initialMarketStatus = input.initialMarketStatus ?? "PENDING_APPROVAL";
+  if (
+    initialMarketStatus !== "PENDING_APPROVAL" &&
+    initialMarketStatus !== "OPEN"
+  ) {
+    throw new Error("initialMarketStatus must be PENDING_APPROVAL or OPEN");
   }
 
   const totalPool = DEFAULT_OUTCOME_POOL * 2;
-  const yesPool = Math.round((totalPool * yesStartPercent) / 100);
-  const noPool = totalPool - yesPool;
 
   const markets = input.markets.map((market) => {
     const name = market.name.trim();
@@ -70,10 +85,16 @@ export async function createEventWithMarkets(
       throw new Error("Market name must contain letters or numbers");
     }
 
+    const yesStartPercent = normalizeYesStartPercent(market.yesStartPercent);
+    const yesPool = Math.round((totalPool * yesStartPercent) / 100);
+    const noPool = totalPool - yesPool;
+
     return {
       name,
       description: market.description ?? null,
       slug,
+      yesPool,
+      noPool,
     };
   });
 
@@ -96,7 +117,7 @@ export async function createEventWithMarkets(
           eventId: event.id,
           question: market.name,
           description: market.description,
-          status: "PENDING_APPROVAL",
+          status: initialMarketStatus,
           type: "BINARY",
           bettingCloseAt: input.bettingCloseAt,
           resolveAt: input.resolveAt ?? input.bettingCloseAt,
@@ -111,8 +132,8 @@ export async function createEventWithMarkets(
               position: 0,
               status: "ACTIVE",
               liquidity: {
-                yesPool,
-                noPool,
+                yesPool: market.yesPool,
+                noPool: market.noPool,
               },
             },
           ],

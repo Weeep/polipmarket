@@ -8,10 +8,19 @@ import { DEFAULT_AMM_FEE_BPS } from "@/config/economy";
 type DraftMarket = {
   id: string;
   name: string;
+  yesStartPercent: number;
 };
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
+}
+
+function normalizeYesStartPercent(value: number) {
+  if (!Number.isFinite(value)) {
+    return 50;
+  }
+
+  return Math.min(97, Math.max(3, Math.round(value)));
 }
 
 export default function NewEventPage() {
@@ -22,14 +31,13 @@ export default function NewEventPage() {
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random()}`,
     name: "",
+    yesStartPercent: 50,
   });
 
   const [question, setQuestion] = useState("");
   const [description, setDescription] = useState("");
   const [bettingCloseAt, setBettingCloseAt] = useState("");
   const [resolveAt, setResolveAt] = useState("");
-  const [yesStartPercent, setYesStartPercent] = useState(50);
-  const noStartPercent = 100 - yesStartPercent;
   const [markets, setMarkets] = useState<DraftMarket[]>([createMarket()]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -43,6 +51,7 @@ export default function NewEventPage() {
       const payloadMarkets = markets
         .map((market) => ({
           name: market.name.trim(),
+          yesStartPercent: normalizeYesStartPercent(market.yesStartPercent),
         }))
         .filter((market) => market.name);
 
@@ -62,7 +71,6 @@ export default function NewEventPage() {
           description,
           bettingCloseAt,
           resolveAt: resolveAt || null,
-          yesStartPercent: safeYesStartPercent,
           markets: payloadMarkets,
         }),
       });
@@ -140,34 +148,6 @@ export default function NewEventPage() {
             />
           </label>
 
-          <label>
-            Yes: %
-            <input
-              className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              type="number"
-              min="3"
-              max="97"
-              value={yesStartPercent}
-              onChange={(e) => {
-                const value = Number(e.target.value);
-                if (Number.isFinite(value)) {
-                  setYesStartPercent(Math.min(97, Math.max(3, Math.round(value))));
-                }
-              }}
-              required
-            />
-          </label>
-
-          <label>
-            No: %
-            <input
-              className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              type="number"
-              value={noStartPercent}
-              readOnly
-            />
-          </label>
-
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold">Markets</span>
@@ -181,43 +161,85 @@ export default function NewEventPage() {
             </div>
 
             <div className="space-y-3">
-              {markets.map((market, index) => (
-                <div
-                  key={market.id}
-                  className="flex flex-col gap-2 rounded-lg border border-blue-800/60 bg-blue-950/40 p-3"
-                >
-                  <label className="text-sm">
-                    Market name
-                    <input
-                      className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                      value={market.name}
-                      onChange={(e) =>
-                        setMarkets((prev) =>
-                          prev.map((item, idx) =>
-                            idx === index
-                              ? { ...item, name: e.target.value }
-                              : item,
-                          ),
-                        )
-                      }
-                      required
-                    />
-                  </label>
-                  {markets.length > 1 && (
-                    <button
-                      type="button"
-                      className="text-sm text-red-300 hover:text-red-200 self-start"
-                      onClick={() =>
-                        setMarkets((prev) =>
-                          prev.filter((_, idx) => idx !== index),
-                        )
-                      }
-                    >
-                      Remove market
-                    </button>
-                  )}
-                </div>
-              ))}
+              {markets.map((market, index) => {
+                const noStartPercent = 100 - normalizeYesStartPercent(market.yesStartPercent);
+
+                return (
+                  <div
+                    key={market.id}
+                    className="flex flex-col gap-2 rounded-lg border border-blue-800/60 bg-blue-950/40 p-3"
+                  >
+                    <label className="text-sm">
+                      Market name
+                      <input
+                        className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                        value={market.name}
+                        onChange={(e) =>
+                          setMarkets((prev) =>
+                            prev.map((item, idx) =>
+                              idx === index
+                                ? { ...item, name: e.target.value }
+                                : item,
+                            ),
+                          )
+                        }
+                        required
+                      />
+                    </label>
+
+                    <label className="text-sm">
+                      Yes: %
+                      <input
+                        className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                        type="number"
+                        min="3"
+                        max="97"
+                        value={market.yesStartPercent}
+                        onChange={(e) => {
+                          const value = Number(e.target.value);
+                          if (Number.isFinite(value)) {
+                            setMarkets((prev) =>
+                              prev.map((item, idx) =>
+                                idx === index
+                                  ? {
+                                      ...item,
+                                      yesStartPercent: normalizeYesStartPercent(value),
+                                    }
+                                  : item,
+                              ),
+                            );
+                          }
+                        }}
+                        required
+                      />
+                    </label>
+
+                    <label className="text-sm">
+                      No: %
+                      <input
+                        className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                        type="number"
+                        value={noStartPercent}
+                        readOnly
+                      />
+                    </label>
+
+                    {markets.length > 1 && (
+                      <button
+                        type="button"
+                        className="text-sm text-red-300 hover:text-red-200 self-start"
+                        onClick={() =>
+                          setMarkets((prev) =>
+                            prev.filter((_, idx) => idx !== index),
+                          )
+                        }
+                      >
+                        Remove market
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
