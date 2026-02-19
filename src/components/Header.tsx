@@ -58,10 +58,14 @@ export function Header() {
 
   return (
     <header className="bg-zinc-800 text-white px-4 sm:px-6 py-4 flex items-center gap-3 sm:gap-4">
-      <Link href="/" aria-label="Polipmarket home" className="shrink-0 leading-none">
+      <Link
+        href="/"
+        aria-label="Polipmarket home"
+        className="shrink-0 leading-none"
+      >
         <div className="uppercase font-bold tracking-[0.24em] text-xs sm:text-sm text-stone-100">
-          <div className="w-[7.2ch]">POLIP</div>
-          <div className="w-[7.2ch]">MARKET</div>
+          <div className="w-[8ch] text-[1.4rem]">POLIP</div>
+          <div className="w-[7.2ch]  text-[.9rem] -mt-2">MARKET</div>
         </div>
       </Link>
 
