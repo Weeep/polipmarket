@@ -55,6 +55,10 @@ export default function NewEventPage() {
         }))
         .filter((market) => market.name);
 
+      const safeYesStartPercent = Number.isFinite(yesStartPercent)
+        ? Math.min(97, Math.max(3, Math.round(yesStartPercent)))
+        : 50;
+
       if (payloadMarkets.length === 0) {
         throw new Error("At least one market is required");
       }
