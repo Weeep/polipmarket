@@ -4,27 +4,11 @@ import Link from "next/link";
 import { useMe } from "@/context/MeContext";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-
-function HeaderSearch() {
-  return (
-    <div className="hidden md:flex flex-1 justify-center px-6">
-      <label className="w-full max-w-md">
-        <span className="sr-only">Search</span>
-        <input
-          type="search"
-          placeholder="Keresés események között..."
-          className="w-full rounded-xl border border-zinc-600 bg-zinc-900 px-4 py-2 text-sm text-stone-100 placeholder:text-stone-400 focus:border-amber-400 focus:outline-none"
-        />
-      </label>
-    </div>
-  );
-}
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 export function Header() {
   const { data: session, update } = useSession();
-  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -32,7 +16,6 @@ export function Header() {
 
   const isImpersonating = Boolean(session?.user?.impersonatedBy);
   const isAdmin = me?.role === "ADMIN";
-  const isHomePage = pathname === "/";
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -58,18 +41,16 @@ export function Header() {
 
   return (
     <header className="bg-zinc-800 text-white px-4 sm:px-6 py-4 flex items-center gap-3 sm:gap-4">
-      <Link
-        href="/"
-        aria-label="Polipmarket home"
-        className="shrink-0 leading-none"
-      >
+      <Link href="/" aria-label="Polipmarket home" className="shrink-0 leading-none">
         <div className="uppercase font-bold tracking-[0.24em] text-xs sm:text-sm text-stone-100">
-          <div className="w-[8ch] text-[1.4rem]">POLIP</div>
-          <div className="w-[7.2ch]  text-[.9rem] -mt-2">MARKET</div>
+          <div className="w-[7.2ch]">POLIP</div>
+          <div className="w-[7.2ch]">MARKET</div>
         </div>
       </Link>
 
-      {isHomePage && <HeaderSearch />}
+      <div className="hidden md:flex flex-1 justify-center px-2">
+        <MobileBottomNav mode="desktop" />
+      </div>
 
       <div className="ml-auto flex items-center gap-3 sm:gap-4">
         <div className="text-stone-200 text-xs sm:text-sm text-right">

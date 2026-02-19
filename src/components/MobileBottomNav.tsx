@@ -11,7 +11,11 @@ const navItems = [
   { href: "/events/new", label: "Létrehozás", emoji: "➕" },
 ] as const;
 
-export function MobileBottomNav() {
+type MobileBottomNavProps = {
+  mode?: "mobile" | "desktop";
+};
+
+export function MobileBottomNav({ mode = "mobile" }: MobileBottomNavProps) {
   const pathname = usePathname();
   const [hash, setHash] = useState("");
 
@@ -22,9 +26,23 @@ export function MobileBottomNav() {
     return () => window.removeEventListener("hashchange", updateHash);
   }, []);
 
+  const isDesktop = mode === "desktop";
+
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-amber-400/25 bg-zinc-950/95 px-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-2 backdrop-blur md:hidden">
-      <ul className="mx-auto grid max-w-md grid-cols-4 gap-1">
+    <nav
+      className={
+        isDesktop
+          ? "hidden md:block w-full"
+          : "fixed inset-x-0 bottom-0 z-30 border-t border-amber-400/25 bg-zinc-950/95 px-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-2 backdrop-blur md:hidden"
+      }
+    >
+      <ul
+        className={
+          isDesktop
+            ? "mx-auto grid max-w-lg grid-cols-4 gap-1"
+            : "mx-auto grid max-w-md grid-cols-4 gap-1"
+        }
+      >
         {navItems.map((item) => {
           const isEvents = item.href === "/events";
           const isCreate = item.href === "/events/new";

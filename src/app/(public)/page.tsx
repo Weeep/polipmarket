@@ -83,8 +83,8 @@ function mergeUpdatedMarket(
 
 function HomeSearchBar() {
   return (
-    <div className="md:hidden px-4 pt-3">
-      <label className="block">
+    <div className="px-4 pt-3">
+      <label className="block mx-auto w-full max-w-md">
         <span className="sr-only">Search</span>
         <input
           type="search"
