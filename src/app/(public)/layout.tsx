@@ -3,6 +3,7 @@ import "../../styles/globals.css";
 import Providers from "../providers";
 import { Header } from "@/components/Header";
 import { MeProvider } from "@/context/MeContext";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -20,7 +21,8 @@ export default function RootLayout({
         <Providers>
           <MeProvider>
             <Header />
-            {children}
+            <div className="pb-20 md:pb-0">{children}</div>
+            <MobileBottomNav />
           </MeProvider>
         </Providers>
       </body>

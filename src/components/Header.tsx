@@ -103,9 +103,7 @@ export function Header() {
 
           {isMenuOpen && (
             <div className="absolute right-0 top-11 w-52 rounded-xl border border-zinc-700 bg-zinc-900 p-3 shadow-xl z-20">
-              <div className="text-sm font-medium text-stone-100">
-                {me.name}
-              </div>
+              <div className="text-sm font-medium text-stone-100">{me.name}</div>
               <hr className="my-3 border-zinc-700" />
               <div className="space-y-1 text-sm">
                 {isImpersonating ? (

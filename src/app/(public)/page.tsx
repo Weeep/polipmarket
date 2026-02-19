@@ -143,7 +143,7 @@ export default function HomePage() {
         <div className="grid gap-6 xl:grid-cols-2 xl:items-start">
           <ActiveEventsTabsTable />
 
-          <div className="marketcard-base space-y-4">
+          <div id="fogadasaim" className="marketcard-base space-y-4 scroll-mt-24">
             <h2 className="text-lg font-bold text-stone-100">Fogadásaim</h2>
 
             {openMarketGroups.length === 0 && (
@@ -162,7 +162,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="marketcard-base space-y-4">
+        <div id="sikerek" className="marketcard-base space-y-4 scroll-mt-24">
           <h2 className="text-lg font-bold text-stone-100">Lezárt fogadások</h2>
 
           {closedMarketGroups.length === 0 && (
