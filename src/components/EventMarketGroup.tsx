@@ -8,6 +8,7 @@ import { BetCard } from "@/components/BetCard";
 type Props = {
   markets: MyEventMarketBetDTO[];
   onUpdateMarket: (marketId: string, updatedMarket: MyEventMarketBetDTO | null) => void;
+  layout?: "stack" | "responsive-grid";
 };
 
 type MarketBet = {
@@ -25,7 +26,11 @@ function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
 
-export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
+export function EventMarketGroup({
+  markets,
+  onUpdateMarket,
+  layout = "stack",
+}: Props) {
   const { refreshMe } = useMe();
   const [sellDialog, setSellDialog] = useState<SellDialogState | null>(null);
   const [sellDialogLoading, setSellDialogLoading] = useState(false);
@@ -137,8 +142,14 @@ export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
 
   return (
     <>
-      <div className="bg-stone-900 rounded-lg p-4 space-y-3">
-        <div className="space-y-2">
+      <div className="bg-stone-900 rounded-lg p-4">
+        <div
+          className={
+            layout === "responsive-grid"
+              ? "mx-auto grid max-w-[994px] grid-cols-1 gap-3 lg:grid-cols-3"
+              : "space-y-2"
+          }
+        >
           {allBets.map(({ market, bet }) => {
             const isActive = bet.status === "OPEN";
             const canSell =
