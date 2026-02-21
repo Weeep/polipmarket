@@ -140,37 +140,17 @@ export default function HomePage() {
     <main className="p-0 sm:p-8">
       <HomeSearchBar />
       <div className="max-w-6xl mx-auto py-0 sm:px-6 sm:py-10 space-y-6 sm:space-y-10 pt-2">
-        <div className="grid gap-6 xl:grid-cols-2 xl:items-start">
-          <ActiveEventsTabsTable />
+        <ActiveEventsTabsTable />
 
-          <div id="fogadasaim" className="marketcard-base space-y-4 scroll-mt-24">
-            <h2 className="text-lg font-bold text-stone-100">Fogadásaim</h2>
+        <div className="marketcard-base space-y-4 scroll-mt-24">
+          <h2 className="text-lg font-bold text-stone-100">Fogadásaim</h2>
 
-            {openMarketGroups.length === 0 && (
-              <p className="text-stone-400 text-sm">Nincs nyitott fogadásod</p>
-            )}
-
-            <div className="space-y-4">
-              {openMarketGroups.map((markets) => (
-                <EventMarketGroup
-                  key={markets[0].eventId ?? markets[0].marketId}
-                  markets={markets}
-                  onUpdateMarket={updateMarket}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div id="sikerek" className="marketcard-base space-y-4 scroll-mt-24">
-          <h2 className="text-lg font-bold text-stone-100">Lezárt fogadások</h2>
-
-          {closedMarketGroups.length === 0 && (
-            <p className="text-stone-400 text-sm">Nincs lezárt fogadásod</p>
+          {openMarketGroups.length === 0 && (
+            <p className="text-stone-400 text-sm">Nincs nyitott fogadásod</p>
           )}
 
           <div className="space-y-4">
-            {closedMarketGroups.map((markets) => (
+            {openMarketGroups.map((markets) => (
               <EventMarketGroup
                 key={markets[0].eventId ?? markets[0].marketId}
                 markets={markets}
@@ -180,7 +160,6 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-
     </main>
   );
 }

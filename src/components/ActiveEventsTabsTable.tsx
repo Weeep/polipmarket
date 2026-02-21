@@ -11,7 +11,10 @@ type ActiveEventsTab = "TOP_VOLUME" | "BETTING_CLOSE" | "EVENT_CLOSE";
 
 const TAB_CONFIG: Record<
   ActiveEventsTab,
-  { label: string; sort: "volume_desc" | "betting_close_asc" | "event_close_asc" }
+  {
+    label: string;
+    sort: "volume_desc" | "betting_close_asc" | "event_close_asc";
+  }
 > = {
   TOP_VOLUME: {
     label: "Legtöbb fogadás",
@@ -53,7 +56,7 @@ export function ActiveEventsTabsTable() {
     <section className="marketcard-base space-y-4">
       <h2 className="text-lg font-bold text-stone-100">Aktív események</h2>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 justify-center">
         {(Object.keys(TAB_CONFIG) as ActiveEventsTab[]).map((tab) => (
           <button
             key={tab}
@@ -101,7 +104,10 @@ export function ActiveEventsTabsTable() {
                 <Fragment key={event.id}>
                   <tr>
                     <td className="pb-1 pt-3" colSpan={3}>
-                      <Link href={`/events/${event.id}`} className="font-medium hover:underline">
+                      <Link
+                        href={`/events/${event.id}`}
+                        className="font-medium hover:underline"
+                      >
                         {event.question}
                       </Link>
                     </td>
