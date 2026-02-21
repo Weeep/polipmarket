@@ -8,6 +8,7 @@ import { BetCard } from "@/components/BetCard";
 type Props = {
   markets: MyEventMarketBetDTO[];
   onUpdateMarket: (marketId: string, updatedMarket: MyEventMarketBetDTO | null) => void;
+  layout?: "stack" | "responsive-grid";
 };
 
 type MarketBet = {
@@ -25,7 +26,11 @@ function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
 
-export function EventMarketGroup({ markets, onUpdateMarket }: Props) {
+export function EventMarketGroup({
+  markets,
+  onUpdateMarket,
+  layout = "stack",
+}: Props) {
   const { refreshMe } = useMe();
   const [sellDialog, setSellDialog] = useState<SellDialogState | null>(null);
   const [sellDialogLoading, setSellDialogLoading] = useState(false);
