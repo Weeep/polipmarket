@@ -5,6 +5,9 @@ import { EventMarketGroup } from "@/components/EventMarketGroup";
 import { MyEventMarketBetDTO } from "@/modules/event/dto/myEventMarketBetDTO";
 import { apiFetch } from "@/lib/apiFetch";
 
+const INITIAL_CLOSED_BETS_LIMIT = 20;
+const CLOSED_BETS_PAGE_SIZE = 10;
+
 function groupMarketsByEvent(markets: MyEventMarketBetDTO[]) {
   const grouped = new Map<string, MyEventMarketBetDTO[]>();
 
@@ -45,6 +48,40 @@ function filterMarketsByBetStatus(markets: MyEventMarketBetDTO[], statuses: stri
     .sort((a, b) => new Date(b.latestBetAt).getTime() - new Date(a.latestBetAt).getTime());
 }
 
+function limitMarketsByBetCount(markets: MyEventMarketBetDTO[], limit: number): MyEventMarketBetDTO[] {
+  if (limit <= 0) {
+    return [];
+  }
+
+  const limitedMarkets: MyEventMarketBetDTO[] = [];
+  let remaining = limit;
+
+  for (const market of markets) {
+    if (remaining <= 0) {
+      break;
+    }
+
+    const bets = market.bets.slice(0, remaining);
+    if (bets.length === 0) {
+      continue;
+    }
+
+    const latestBetAt = bets
+      .map((bet) => new Date(bet.createdAt).getTime())
+      .reduce((a, b) => Math.max(a, b), 0);
+
+    limitedMarkets.push({
+      ...market,
+      bets,
+      latestBetAt: new Date(latestBetAt).toISOString(),
+    });
+
+    remaining -= bets.length;
+  }
+
+  return limitedMarkets;
+}
+
 function mergeUpdatedMarket(
   currentMarket: MyEventMarketBetDTO,
   updatedMarket: MyEventMarketBetDTO,
@@ -65,6 +102,7 @@ function mergeUpdatedMarket(
 export default function MyOrdersPage() {
   const [myMarkets, setMyMarkets] = useState<MyEventMarketBetDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [visibleClosedBetCount, setVisibleClosedBetCount] = useState(INITIAL_CLOSED_BETS_LIMIT);
 
   useEffect(() => {
     apiFetch("/api/events/my")
@@ -72,6 +110,7 @@ export default function MyOrdersPage() {
       .then(setMyMarkets)
       .finally(() => setLoading(false));
   }, []);
+
 
   function updateMarket(marketId: string, updatedMarket: MyEventMarketBetDTO | null) {
     setMyMarkets((prev) =>
@@ -89,8 +128,11 @@ export default function MyOrdersPage() {
 
   const openMarkets = filterMarketsByBetStatus(myMarkets, ["OPEN"]);
   const closedMarkets = filterMarketsByBetStatus(myMarkets, ["FILLED", "CANCELLED"]);
+  const totalClosedBetCount = closedMarkets.reduce((sum, market) => sum + market.bets.length, 0);
+
   const openMarketGroups = groupMarketsByEvent(openMarkets);
-  const closedMarketGroups = groupMarketsByEvent(closedMarkets);
+  const visibleClosedMarkets = limitMarketsByBetCount(closedMarkets, visibleClosedBetCount);
+  const closedMarketGroups = groupMarketsByEvent(visibleClosedMarkets);
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-8 px-4 py-6 sm:px-6 sm:py-10">
@@ -118,15 +160,31 @@ export default function MyOrdersPage() {
         {closedMarketGroups.length === 0 ? (
           <p className="text-sm text-stone-400">Nincs lezárt fogadásod.</p>
         ) : (
-          <div className="space-y-4">
-            {closedMarketGroups.map((markets) => (
-              <EventMarketGroup
-                key={markets[0].eventId ?? markets[0].marketId}
-                markets={markets}
-                onUpdateMarket={updateMarket}
-              />
-            ))}
-          </div>
+          <>
+            <div className="space-y-4">
+              {closedMarketGroups.map((markets) => (
+                <EventMarketGroup
+                  key={markets[0].eventId ?? markets[0].marketId}
+                  markets={markets}
+                  onUpdateMarket={updateMarket}
+                />
+              ))}
+            </div>
+
+            {visibleClosedBetCount < totalClosedBetCount && (
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setVisibleClosedBetCount((prev) => prev + CLOSED_BETS_PAGE_SIZE)
+                  }
+                  className="button-gold px-5 py-2 text-sm"
+                >
+                  Tovább
+                </button>
+              </div>
+            )}
+          </>
         )}
       </section>
     </main>
