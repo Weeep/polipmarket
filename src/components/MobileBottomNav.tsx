@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 const navItems = [
   { href: "/events", label: "Események", emoji: "📅" },
-  { href: "/#fogadasaim", label: "Fogadásaim", emoji: "🎯", hash: "#fogadasaim" },
+  { href: "/myorders", label: "Fogadásaim", emoji: "🎯" },
   { href: "/#sikerek", label: "Sikerek", emoji: "🏆", hash: "#sikerek" },
   { href: "/events/new", label: "Létrehozás", emoji: "➕" },
 ] as const;
@@ -46,11 +46,14 @@ export function MobileBottomNav({ mode = "mobile" }: MobileBottomNavProps) {
         {navItems.map((item) => {
           const isEvents = item.href === "/events";
           const isCreate = item.href === "/events/new";
+          const isMyOrders = item.href === "/myorders";
           const isActive = isEvents
             ? pathname === "/events"
             : isCreate
               ? pathname === "/events/new"
-              : pathname === "/" && (hash === item.hash || (!hash && item.hash === "#fogadasaim"));
+              : isMyOrders
+                ? pathname === "/myorders"
+                : pathname === "/" && hash === item.hash;
 
           return (
             <li key={item.label}>
