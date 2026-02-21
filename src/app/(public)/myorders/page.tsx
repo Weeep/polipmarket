@@ -107,7 +107,6 @@ export default function MyOrdersPage() {
                 key={markets[0].eventId ?? markets[0].marketId}
                 markets={markets}
                 onUpdateMarket={updateMarket}
-                layout="responsive-grid"
               />
             ))}
           </div>
@@ -125,7 +124,6 @@ export default function MyOrdersPage() {
                 key={markets[0].eventId ?? markets[0].marketId}
                 markets={markets}
                 onUpdateMarket={updateMarket}
-                layout="responsive-grid"
               />
             ))}
           </div>

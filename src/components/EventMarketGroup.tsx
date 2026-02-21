@@ -143,35 +143,30 @@ export function EventMarketGroup({
   return (
     <>
       <div className="bg-stone-900 rounded-lg p-4">
-        <div
-          className={
-            layout === "responsive-grid"
-              ? "mx-auto grid max-w-[994px] grid-cols-1 gap-3 lg:grid-cols-3"
-              : "space-y-2"
-          }
-        >
+        <div className="mx-auto flex max-w-[954px] flex-wrap gap-3">
           {allBets.map(({ market, bet }) => {
             const isActive = bet.status === "OPEN";
             const canSell =
               isActive && market.status === "OPEN" && new Date(market.closesAt) > new Date();
 
             return (
-              <BetCard
-                key={bet.lotId}
-                market={market}
-                bet={bet}
-                canSell={canSell}
-                sellDialogLoading={sellDialogLoading}
-                onSell={() => {
-                  if (!canSell || sellDialogLoading) return;
-                  openSellDialog(market, bet);
-                }}
-              />
+              <div key={bet.lotId} className="w-full min-w-0 flex-[1_1_310px]">
+                <BetCard
+                  market={market}
+                  bet={bet}
+                  canSell={canSell}
+                  sellDialogLoading={sellDialogLoading}
+                  onSell={() => {
+                    if (!canSell || sellDialogLoading) return;
+                    openSellDialog(market, bet);
+                  }}
+                />
+              </div>
             );
           })}
 
           {sellDialogError && (
-            <p className="text-xs text-rose-400 text-right">{sellDialogError}</p>
+            <p className="w-full text-right text-xs text-rose-400">{sellDialogError}</p>
           )}
         </div>
       </div>
