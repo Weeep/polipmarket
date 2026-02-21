@@ -55,10 +55,6 @@ export default function NewEventPage() {
         }))
         .filter((market) => market.name);
 
-      const safeYesStartPercent = Number.isFinite(yesStartPercent)
-        ? Math.min(97, Math.max(3, Math.round(yesStartPercent)))
-        : 50;
-
       if (payloadMarkets.length === 0) {
         throw new Error("At least one market is required");
       }
@@ -162,7 +158,8 @@ export default function NewEventPage() {
 
             <div className="space-y-3">
               {markets.map((market, index) => {
-                const noStartPercent = 100 - normalizeYesStartPercent(market.yesStartPercent);
+                const noStartPercent =
+                  100 - normalizeYesStartPercent(market.yesStartPercent);
 
                 return (
                   <div
@@ -203,7 +200,8 @@ export default function NewEventPage() {
                                 idx === index
                                   ? {
                                       ...item,
-                                      yesStartPercent: normalizeYesStartPercent(value),
+                                      yesStartPercent:
+                                        normalizeYesStartPercent(value),
                                     }
                                   : item,
                               ),
