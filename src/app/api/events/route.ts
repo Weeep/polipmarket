@@ -85,6 +85,39 @@ function isActiveEvent(event: {
   return bettingCloseAt > now && (resolveAt == null || resolveAt > now);
 }
 
+
+function normalizeSearchTerm(value: string | null) {
+  return (value ?? "").trim().toLocaleLowerCase();
+}
+
+function hasSearchMatch(
+  event: { question: string; description?: string | null },
+  markets: Array<{
+    question: string;
+    description?: string | null;
+    outcomes?: Array<{ label: string }>;
+  }>,
+  query: string,
+) {
+  if (!query) {
+    return true;
+  }
+
+  const searchableText = [
+    event.question,
+    event.description ?? "",
+    ...markets.flatMap((market) => [
+      market.question,
+      market.description ?? "",
+      ...(market.outcomes?.map((outcome) => outcome.label) ?? []),
+    ]),
+  ]
+    .join(" ")
+    .toLocaleLowerCase();
+
+  return searchableText.includes(query);
+}
+
 function toComparableDate(value?: Date | null) {
   if (!value) {
     return Number.POSITIVE_INFINITY;
@@ -99,6 +132,8 @@ export async function GET(req: Request) {
     const sort = searchParams.get("sort");
     const activeOnly = searchParams.get("activeOnly") === "true";
     const limit = Number(searchParams.get("limit") ?? "0");
+    const query = normalizeSearchTerm(searchParams.get("q"));
+    const hasValidQuery = query.length >= 2;
     const events = await getEvents();
 
     const sourceEvents = activeOnly ? events.filter(isActiveEvent) : events;
@@ -121,6 +156,10 @@ export async function GET(req: Request) {
           },
           { totalBets: 0, totalVolume: 0 },
         );
+
+        if (hasValidQuery && !hasSearchMatch(event, marketsWithExtras, query)) {
+          return null;
+        }
 
         return {
           ...event,
