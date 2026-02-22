@@ -7,7 +7,7 @@ const navItems = [
   { href: "/events", label: "Események", emoji: "📅" },
   { href: "/myorders", label: "Fogadásaim", emoji: "🎯" },
   { href: "/achievements", label: "Sikerek", emoji: "🏆" },
-  { href: "/events/new", label: "Létrehozás", emoji: "➕" },
+  { href: "/events/new", label: "Új Esemény", emoji: "➕" },
 ] as const;
 
 type MobileBottomNavProps = {
@@ -47,7 +47,9 @@ export function MobileBottomNav({ mode = "mobile" }: MobileBottomNavProps) {
                 }`}
               >
                 <span className="text-base leading-none">{item.emoji}</span>
-                <span className="mt-1 text-center leading-tight">{item.label}</span>
+                <span className="mt-1 text-center leading-tight">
+                  {item.label}
+                </span>
               </Link>
             </li>
           );

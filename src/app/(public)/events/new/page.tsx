@@ -87,14 +87,12 @@ export default function NewEventPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">
       <div className="marketcard-base marketcard-question">
-        <h1 className="text-xl font-semibold mb-4">Create event</h1>
-
         <form
           onSubmit={onSubmit}
           style={{ display: "flex", gap: 12, flexDirection: "column" }}
         >
           <label>
-            Event question
+            Kérdés<span className="text-red-600">*</span>
             <input
               className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
               value={question}
@@ -104,7 +102,7 @@ export default function NewEventPage() {
           </label>
 
           <label>
-            Description (optional)
+            Leírás
             <textarea
               className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
               value={description}
@@ -113,7 +111,7 @@ export default function NewEventPage() {
           </label>
 
           <label>
-            Betting closes at
+            Fogadás vége<span className="text-red-600">*</span>
             <input
               className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
               type="datetime-local"
@@ -124,7 +122,7 @@ export default function NewEventPage() {
           </label>
 
           <label>
-            Event resolves at
+            Esemény vége<span className="text-red-600">*</span>
             <input
               className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
               type="datetime-local"
@@ -134,7 +132,7 @@ export default function NewEventPage() {
             />
           </label>
 
-          <label>
+          <label className="hidden">
             Fee (bps)
             <input
               className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
@@ -145,15 +143,8 @@ export default function NewEventPage() {
           </label>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold">Markets</span>
-              <button
-                type="button"
-                className="button-gold"
-                onClick={() => setMarkets((prev) => [...prev, createMarket()])}
-              >
-                Add market
-              </button>
+            <div>
+              Válasz(ok)<span className="text-red-600">*</span>
             </div>
 
             <div className="space-y-3">
@@ -164,10 +155,10 @@ export default function NewEventPage() {
                 return (
                   <div
                     key={market.id}
-                    className="flex flex-col gap-2 rounded-lg border border-blue-800/60 bg-blue-950/40 p-3"
+                    className="flex flex-col gap-2 rounded-lg border border-stone-200/60 bg-stone-700/40 p-3"
                   >
                     <label className="text-sm">
-                      Market name
+                      Válasz
                       <input
                         className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
                         value={market.name}
@@ -184,43 +175,45 @@ export default function NewEventPage() {
                       />
                     </label>
 
-                    <label className="text-sm">
-                      Yes: %
-                      <input
-                        className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        type="number"
-                        min="3"
-                        max="97"
-                        value={market.yesStartPercent}
-                        onChange={(e) => {
-                          const value = Number(e.target.value);
-                          if (Number.isFinite(value)) {
-                            setMarkets((prev) =>
-                              prev.map((item, idx) =>
-                                idx === index
-                                  ? {
-                                      ...item,
-                                      yesStartPercent:
-                                        normalizeYesStartPercent(value),
-                                    }
-                                  : item,
-                              ),
-                            );
-                          }
-                        }}
-                        required
-                      />
-                    </label>
+                    <div className="flex gap-2">
+                      <label className="text-sm w-1/2">
+                        "Yes" esély (%):
+                        <input
+                          className="ml-2 border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                          type="number"
+                          min="10"
+                          max="90"
+                          value={market.yesStartPercent}
+                          onChange={(e) => {
+                            const value = Number(e.target.value);
+                            if (Number.isFinite(value)) {
+                              setMarkets((prev) =>
+                                prev.map((item, idx) =>
+                                  idx === index
+                                    ? {
+                                        ...item,
+                                        yesStartPercent:
+                                          normalizeYesStartPercent(value),
+                                      }
+                                    : item,
+                                ),
+                              );
+                            }
+                          }}
+                          required
+                        />
+                      </label>
 
-                    <label className="text-sm">
-                      No: %
-                      <input
-                        className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        type="number"
-                        value={noStartPercent}
-                        readOnly
-                      />
-                    </label>
+                      <label className="text-sm w-1/2">
+                        "No" esély (%):
+                        <input
+                          className="ml-2 mt-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                          type="number"
+                          value={noStartPercent}
+                          readOnly
+                        />
+                      </label>
+                    </div>
 
                     {markets.length > 1 && (
                       <button
@@ -232,19 +225,29 @@ export default function NewEventPage() {
                           )
                         }
                       >
-                        Remove market
+                        Törlés
                       </button>
                     )}
                   </div>
                 );
               })}
             </div>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                className="button-black"
+                onClick={() => setMarkets((prev) => [...prev, createMarket()])}
+              >
+                Új válasz
+              </button>
+            </div>
           </div>
 
           {error && <p style={{ color: "red" }}>{error}</p>}
 
           <button className="button-gold" type="submit" disabled={loading}>
-            {loading ? "Creating…" : "Create event"}
+            {loading ? "Készül…" : "Mehet"}
           </button>
         </form>
       </div>
