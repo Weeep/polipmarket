@@ -60,6 +60,8 @@ export function EventCard({ event }: Props) {
         }),
       });
 
+      window.dispatchEvent(new Event("achievements:refresh-unread"));
+
       await refreshMe();
       setSuccess(
         `Pontosan ${quoteData.amount.toFixed(2)} összegért, ${quoteData.executionPrice.toFixed(4)} átlagáron, ${quoteData.estimatedShares.toFixed(2)} darab részvényt vettél (${position}), Fee: ${quoteData.fee.toFixed(2)}`,
