@@ -7,6 +7,7 @@ import { positionRepository } from "../infrastructure/positionRepository";
 import { positionLotRepository } from "../infrastructure/positionLotRepository";
 import { quoteOrder } from "./quoteOrder";
 import { quoteSell } from "./quoteSell";
+import { evaluateAchievementsForUser } from "@/modules/achievement/application/evaluateAchievementsForUser";
 
 type PlaceOrderBuyInput = {
   userId: string;
@@ -133,6 +134,11 @@ export async function placeOrder(input: PlaceOrderInput) {
         tx,
       );
 
+      await evaluateAchievementsForUser({
+        userId: input.userId,
+        tx,
+      });
+
       return created;
     }
 
@@ -216,6 +222,11 @@ export async function placeOrder(input: PlaceOrderInput) {
       },
       tx,
     );
+
+    await evaluateAchievementsForUser({
+      userId: input.userId,
+      tx,
+    });
 
     return {
       ...createdSellOrder,

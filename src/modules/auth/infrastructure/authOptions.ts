@@ -1,6 +1,7 @@
 import { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
+import { evaluateAchievementsForUser } from "@/modules/achievement/application/evaluateAchievementsForUser";
 
 type AppToken = {
   sub?: string;
@@ -56,6 +57,11 @@ export const authOptions: AuthOptions = {
             userId: dbUser.id,
             balance: 1000,
           },
+        });
+
+        await evaluateAchievementsForUser({
+          userId: dbUser.id,
+          tx,
         });
       });
 

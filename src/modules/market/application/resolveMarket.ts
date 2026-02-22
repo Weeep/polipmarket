@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { marketRepository } from "@/modules/market/infrastructure/marketRepository";
 import { outcomeRepository } from "@/modules/market/infrastructure/outcomeRepository";
 import { OrderPosition } from "@/modules/order/domain/Order";
+import { evaluateAchievementsForUser } from "@/modules/achievement/application/evaluateAchievementsForUser";
 
 type ResolveMarketInput = {
   marketId: string;
@@ -101,6 +102,13 @@ export async function resolveMarket(input: ResolveMarketInput) {
       },
       data: { status: "FILLED" },
     });
+
+    for (const userId of settlements.keys()) {
+      await evaluateAchievementsForUser({
+        userId,
+        tx,
+      });
+    }
 
     const updated = await tx.market.update({
       where: { id: input.marketId },

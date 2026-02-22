@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 
 const navItems = [
   { href: "/events", label: "Események", emoji: "📅" },
   { href: "/myorders", label: "Fogadásaim", emoji: "🎯" },
-  { href: "/#sikerek", label: "Sikerek", emoji: "🏆", hash: "#sikerek" },
+  { href: "/achievements", label: "Sikerek", emoji: "🏆" },
   { href: "/events/new", label: "Létrehozás", emoji: "➕" },
 ] as const;
 
@@ -17,15 +16,6 @@ type MobileBottomNavProps = {
 
 export function MobileBottomNav({ mode = "mobile" }: MobileBottomNavProps) {
   const pathname = usePathname();
-  const [hash, setHash] = useState("");
-
-  useEffect(() => {
-    const updateHash = () => setHash(window.location.hash);
-    updateHash();
-    window.addEventListener("hashchange", updateHash);
-    return () => window.removeEventListener("hashchange", updateHash);
-  }, []);
-
   const isDesktop = mode === "desktop";
 
   return (
@@ -44,16 +34,7 @@ export function MobileBottomNav({ mode = "mobile" }: MobileBottomNavProps) {
         }
       >
         {navItems.map((item) => {
-          const isEvents = item.href === "/events";
-          const isCreate = item.href === "/events/new";
-          const isMyOrders = item.href === "/myorders";
-          const isActive = isEvents
-            ? pathname === "/events"
-            : isCreate
-              ? pathname === "/events/new"
-              : isMyOrders
-                ? pathname === "/myorders"
-                : pathname === "/" && hash === item.hash;
+          const isActive = pathname === item.href;
 
           return (
             <li key={item.label}>

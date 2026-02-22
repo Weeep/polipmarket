@@ -9,6 +9,19 @@ export type UserAchievementRepository = {
     rewardGranted: number,
     tx?: Prisma.TransactionClient,
   ): Promise<Prisma.UserAchievementGetPayload<object>>;
+  findUnreadByUserId(userId: string): Promise<
+    Prisma.UserAchievementGetPayload<{
+      include: {
+        achievement: true;
+      };
+    }>[
+    ]
+  >;
+  acknowledgeByAchievementId(
+    userId: string,
+    achievementId: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<number>;
 };
 
 export const userAchievementRepository: UserAchievementRepository = {
@@ -31,5 +44,34 @@ export const userAchievementRepository: UserAchievementRepository = {
         rewardGranted,
       },
     });
+  },
+
+  async findUnreadByUserId(userId) {
+    return prisma.userAchievement.findMany({
+      where: {
+        userId,
+        acknowledgedAt: null,
+      },
+      include: {
+        achievement: true,
+      },
+      orderBy: [{ unlockedAt: "asc" }, { createdAt: "asc" }],
+    });
+  },
+
+  async acknowledgeByAchievementId(userId, achievementId, tx) {
+    const client = tx ?? prisma;
+    const result = await client.userAchievement.updateMany({
+      where: {
+        userId,
+        achievementId,
+        acknowledgedAt: null,
+      },
+      data: {
+        acknowledgedAt: new Date(),
+      },
+    });
+
+    return result.count;
   },
 };

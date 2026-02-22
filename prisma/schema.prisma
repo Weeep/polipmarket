@@ -95,6 +95,7 @@ model UserAchievement {
   userId        String
   achievementId String
   unlockedAt    DateTime @default(now())
+  acknowledgedAt DateTime?
   rewardGranted Int
   createdAt     DateTime @default(now())
 
