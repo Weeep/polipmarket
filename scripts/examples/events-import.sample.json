@@ -1,5 +1,5 @@
 {
-  "createdBy": "REPLACE_WITH_EXISTING_USER_ID",
+  "createdBy": "102328005757746507260",
   "events": [
     {
       "question": "Will BTC close above 120k by 2027-01-01?",
@@ -26,8 +26,7 @@
         {
           "name": "Net inflow positive",
           "description": "Falls back to event-level yesStartPercent"
-        },
-        "Net inflow non-positive"
+        }
       ]
     }
   ]
