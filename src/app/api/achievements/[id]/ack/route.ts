@@ -3,15 +3,17 @@ import { withAuth } from "@/lib/withAuth";
 import { userAchievementRepository } from "@/modules/achievement/infrastructure/userAchievementRepository";
 
 type Params = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
 export const POST = withAuth<Params>(async (user, _req, context) => {
+  const { id } = await context.params;
+
   const updatedCount = await userAchievementRepository.acknowledgeByAchievementId(
     user.id,
-    context.params.id,
+    id,
   );
 
   if (updatedCount === 0) {
