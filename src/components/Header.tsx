@@ -41,7 +41,7 @@ export function Header() {
 
   return (
     <header className="bg-zinc-800 px-4 py-4 text-white sm:px-6">
-      <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex items-center gap-3 sm:gap-4 mb-1">
         <Link
           href="/"
           aria-label="Polipmarket home"
@@ -127,7 +127,7 @@ export function Header() {
         </div>
       </div>
 
-      <div className="pt-3">
+      <div className="pt-3 border-t border-stone-700">
         <label className="mx-auto block w-full max-w-3xl">
           <span className="sr-only">Search</span>
           <input
