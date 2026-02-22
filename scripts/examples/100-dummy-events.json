@@ -1,0 +1,1823 @@
+{
+  "createdBy": "102328005757746507260",
+  "events": [
+    {
+      "question": "A piros villamos háromszor csenget holnap reggel? (dummy #1)",
+      "description": "Teszt esemény #1. Kulcsszó ismétlés: csenget csenget. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-01T09:00:00Z",
+      "resolveAt": "2027-01-01T11:00:00Z",
+      "markets": [
+        {
+          "name": "Igen, három csengetés #1",
+          "yesStartPercent": 17,
+          "description": "Dummy leírás 1-1, ismétlés: csenget csenget."
+        }
+      ],
+      "yesStartPercent": 11
+    },
+    {
+      "question": "Lesz-e lila köd a főtéren pénteken? (dummy #2)",
+      "description": "Teszt esemény #2. Kulcsszó ismétlés: lila köd köd. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-01T12:00:00Z",
+      "resolveAt": "2027-01-01T14:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz lila köd #2"
+        },
+        {
+          "name": "Extra válasz 1 #2",
+          "yesStartPercent": 37
+        }
+      ]
+    },
+    {
+      "question": "Hányszor mondja be a rádió, hogy banán? (dummy #3)",
+      "description": "Teszt esemény #3. Kulcsszó ismétlés: banán banán. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-01T15:00:00Z",
+      "resolveAt": "2027-01-01T17:00:00Z",
+      "markets": [
+        {
+          "name": "Egyszer #3",
+          "yesStartPercent": 31
+        },
+        {
+          "name": "Kétszer #3",
+          "description": "Dummy leírás 3-2, ismétlés: banán banán."
+        },
+        {
+          "name": "Háromszor #3",
+          "yesStartPercent": 57
+        }
+      ]
+    },
+    {
+      "question": "Melyik állat nyer a képzeletbeli futamon? (dummy #4)",
+      "description": "Teszt esemény #4. Kulcsszó ismétlés: futam futam. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-01T18:00:00Z",
+      "resolveAt": "2027-01-01T20:00:00Z",
+      "markets": [
+        {
+          "name": "Lassú csiga #4",
+          "description": "Dummy leírás 4-1, ismétlés: futam futam."
+        },
+        {
+          "name": "Gyors teknős #4",
+          "yesStartPercent": 51
+        },
+        {
+          "name": "Ugráló béka #4"
+        },
+        {
+          "name": "Zajos kacsa #4",
+          "yesStartPercent": 77,
+          "description": "Dummy leírás 4-4, ismétlés: futam futam."
+        }
+      ],
+      "yesStartPercent": 38
+    },
+    {
+      "question": "Kinyit-e a képzeletbeli pékség 06:06-kor? (dummy #5)",
+      "description": "Teszt esemény #5. Kulcsszó ismétlés: pékség pékség. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-01T21:00:00Z",
+      "resolveAt": "2027-01-01T23:00:00Z",
+      "markets": [
+        {
+          "name": "Kinyit #5",
+          "yesStartPercent": 45
+        }
+      ]
+    },
+    {
+      "question": "Milyen színű lesz az esti felhő? (dummy #6)",
+      "description": "Teszt esemény #6. Kulcsszó ismétlés: felhő felhő. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-02T00:00:00Z",
+      "resolveAt": "2027-01-02T02:00:00Z",
+      "markets": [
+        {
+          "name": "Neonzöld #6"
+        },
+        {
+          "name": "Narancs #6",
+          "yesStartPercent": 65,
+          "description": "Dummy leírás 6-2, ismétlés: felhő felhő."
+        }
+      ]
+    },
+    {
+      "question": "Elromlik-e a beszélő kávégép hétfőn? (dummy #7)",
+      "description": "Teszt esemény #7. Kulcsszó ismétlés: kávégép kávégép. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-02T03:00:00Z",
+      "resolveAt": "2027-01-02T05:00:00Z",
+      "markets": [
+        {
+          "name": "Elromlik #7",
+          "yesStartPercent": 59,
+          "description": "Dummy leírás 7-1, ismétlés: kávégép kávégép."
+        },
+        {
+          "name": "Nem romlik el #7"
+        },
+        {
+          "name": "Részben romlik el #7",
+          "yesStartPercent": 18
+        }
+      ],
+      "yesStartPercent": 65
+    },
+    {
+      "question": "Megérkezik-e időben a láthatatlan busz? (dummy #8)",
+      "description": "Teszt esemény #8. Kulcsszó ismétlés: busz busz. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-02T06:00:00Z",
+      "resolveAt": "2027-01-02T08:00:00Z",
+      "markets": [
+        {
+          "name": "Igen #8"
+        },
+        {
+          "name": "Nem #8",
+          "yesStartPercent": 79
+        },
+        {
+          "name": "Extra válasz 1 #8",
+          "description": "Dummy leírás 8-3, ismétlés: busz busz."
+        },
+        {
+          "name": "Extra válasz 2 #8",
+          "yesStartPercent": 38
+        }
+      ]
+    },
+    {
+      "question": "Melyik szó hangzik el többször a meetingen? (dummy #9)",
+      "description": "Teszt esemény #9. Kulcsszó ismétlés: alma alma. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-02T09:00:00Z",
+      "resolveAt": "2027-01-02T11:00:00Z",
+      "markets": [
+        {
+          "name": "alma #9",
+          "yesStartPercent": 73
+        }
+      ]
+    },
+    {
+      "question": "Lesz-e szivárvány a szerverteremben? (dummy #10)",
+      "description": "Teszt esemény #10. Kulcsszó ismétlés: szivárvány szivárvány. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-02T12:00:00Z",
+      "resolveAt": "2027-01-02T14:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz #10",
+          "description": "Dummy leírás 10-1, ismétlés: szivárvány szivárvány."
+        },
+        {
+          "name": "Extra válasz 1 #10",
+          "yesStartPercent": 26
+        }
+      ],
+      "yesStartPercent": 13
+    },
+    {
+      "question": "A piros villamos háromszor csenget holnap reggel? (dummy #11)",
+      "description": "Teszt esemény #11. Kulcsszó ismétlés: csenget csenget. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-02T15:00:00Z",
+      "resolveAt": "2027-01-02T17:00:00Z",
+      "markets": [
+        {
+          "name": "Igen, három csengetés #11",
+          "yesStartPercent": 20
+        },
+        {
+          "name": "Nem, csak kettő #11"
+        },
+        {
+          "name": "Extra válasz 1 #11",
+          "yesStartPercent": 46,
+          "description": "Dummy leírás 11-3, ismétlés: csenget csenget."
+        }
+      ]
+    },
+    {
+      "question": "Lesz-e lila köd a főtéren pénteken? (dummy #12)",
+      "description": "Teszt esemény #12. Kulcsszó ismétlés: lila köd köd. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-02T18:00:00Z",
+      "resolveAt": "2027-01-02T20:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz lila köd #12"
+        },
+        {
+          "name": "Extra válasz 1 #12",
+          "yesStartPercent": 40,
+          "description": "Dummy leírás 12-2, ismétlés: lila köd köd."
+        },
+        {
+          "name": "Extra válasz 2 #12"
+        },
+        {
+          "name": "Extra válasz 3 #12",
+          "yesStartPercent": 66
+        }
+      ]
+    },
+    {
+      "question": "Hányszor mondja be a rádió, hogy banán? (dummy #13)",
+      "description": "Teszt esemény #13. Kulcsszó ismétlés: banán banán. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-02T21:00:00Z",
+      "resolveAt": "2027-01-02T23:00:00Z",
+      "markets": [
+        {
+          "name": "Egyszer #13",
+          "yesStartPercent": 34,
+          "description": "Dummy leírás 13-1, ismétlés: banán banán."
+        }
+      ],
+      "yesStartPercent": 40
+    },
+    {
+      "question": "Melyik állat nyer a képzeletbeli futamon? (dummy #14)",
+      "description": "Teszt esemény #14. Kulcsszó ismétlés: futam futam. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-03T00:00:00Z",
+      "resolveAt": "2027-01-03T02:00:00Z",
+      "markets": [
+        {
+          "name": "Lassú csiga #14"
+        },
+        {
+          "name": "Gyors teknős #14",
+          "yesStartPercent": 54
+        }
+      ]
+    },
+    {
+      "question": "Kinyit-e a képzeletbeli pékség 06:06-kor? (dummy #15)",
+      "description": "Teszt esemény #15. Kulcsszó ismétlés: pékség pékség. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-03T03:00:00Z",
+      "resolveAt": "2027-01-03T05:00:00Z",
+      "markets": [
+        {
+          "name": "Kinyit #15",
+          "yesStartPercent": 48
+        },
+        {
+          "name": "Nem nyit ki #15",
+          "description": "Dummy leírás 15-2, ismétlés: pékség pékség."
+        },
+        {
+          "name": "Extra válasz 1 #15",
+          "yesStartPercent": 74
+        }
+      ]
+    },
+    {
+      "question": "Milyen színű lesz az esti felhő? (dummy #16)",
+      "description": "Teszt esemény #16. Kulcsszó ismétlés: felhő felhő. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-03T06:00:00Z",
+      "resolveAt": "2027-01-03T08:00:00Z",
+      "markets": [
+        {
+          "name": "Neonzöld #16",
+          "description": "Dummy leírás 16-1, ismétlés: felhő felhő."
+        },
+        {
+          "name": "Narancs #16",
+          "yesStartPercent": 68
+        },
+        {
+          "name": "Kockás #16"
+        },
+        {
+          "name": "Extra válasz 1 #16",
+          "yesStartPercent": 27,
+          "description": "Dummy leírás 16-4, ismétlés: felhő felhő."
+        }
+      ],
+      "yesStartPercent": 67
+    },
+    {
+      "question": "Elromlik-e a beszélő kávégép hétfőn? (dummy #17)",
+      "description": "Teszt esemény #17. Kulcsszó ismétlés: kávégép kávégép. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-03T09:00:00Z",
+      "resolveAt": "2027-01-03T11:00:00Z",
+      "markets": [
+        {
+          "name": "Elromlik #17",
+          "yesStartPercent": 62
+        }
+      ]
+    },
+    {
+      "question": "Megérkezik-e időben a láthatatlan busz? (dummy #18)",
+      "description": "Teszt esemény #18. Kulcsszó ismétlés: busz busz. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-03T12:00:00Z",
+      "resolveAt": "2027-01-03T14:00:00Z",
+      "markets": [
+        {
+          "name": "Igen #18"
+        },
+        {
+          "name": "Nem #18",
+          "yesStartPercent": 82,
+          "description": "Dummy leírás 18-2, ismétlés: busz busz."
+        }
+      ]
+    },
+    {
+      "question": "Melyik szó hangzik el többször a meetingen? (dummy #19)",
+      "description": "Teszt esemény #19. Kulcsszó ismétlés: alma alma. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-03T15:00:00Z",
+      "resolveAt": "2027-01-03T17:00:00Z",
+      "markets": [
+        {
+          "name": "alma #19",
+          "yesStartPercent": 76,
+          "description": "Dummy leírás 19-1, ismétlés: alma alma."
+        },
+        {
+          "name": "körte #19"
+        },
+        {
+          "name": "alma körte #19",
+          "yesStartPercent": 35
+        }
+      ],
+      "yesStartPercent": 15
+    },
+    {
+      "question": "Lesz-e szivárvány a szerverteremben? (dummy #20)",
+      "description": "Teszt esemény #20. Kulcsszó ismétlés: szivárvány szivárvány. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-03T18:00:00Z",
+      "resolveAt": "2027-01-03T20:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz #20"
+        },
+        {
+          "name": "Extra válasz 1 #20",
+          "yesStartPercent": 29
+        },
+        {
+          "name": "Extra válasz 2 #20",
+          "description": "Dummy leírás 20-3, ismétlés: szivárvány szivárvány."
+        },
+        {
+          "name": "Extra válasz 3 #20",
+          "yesStartPercent": 55
+        }
+      ]
+    },
+    {
+      "question": "A piros villamos háromszor csenget holnap reggel? (dummy #21)",
+      "description": "Teszt esemény #21. Kulcsszó ismétlés: csenget csenget. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-03T21:00:00Z",
+      "resolveAt": "2027-01-03T23:00:00Z",
+      "markets": [
+        {
+          "name": "Igen, három csengetés #21",
+          "yesStartPercent": 23
+        }
+      ]
+    },
+    {
+      "question": "Lesz-e lila köd a főtéren pénteken? (dummy #22)",
+      "description": "Teszt esemény #22. Kulcsszó ismétlés: lila köd köd. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-04T00:00:00Z",
+      "resolveAt": "2027-01-04T02:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz lila köd #22",
+          "description": "Dummy leírás 22-1, ismétlés: lila köd köd."
+        },
+        {
+          "name": "Extra válasz 1 #22",
+          "yesStartPercent": 43
+        }
+      ],
+      "yesStartPercent": 42
+    },
+    {
+      "question": "Hányszor mondja be a rádió, hogy banán? (dummy #23)",
+      "description": "Teszt esemény #23. Kulcsszó ismétlés: banán banán. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-04T03:00:00Z",
+      "resolveAt": "2027-01-04T05:00:00Z",
+      "markets": [
+        {
+          "name": "Egyszer #23",
+          "yesStartPercent": 37
+        },
+        {
+          "name": "Kétszer #23"
+        },
+        {
+          "name": "Háromszor #23",
+          "yesStartPercent": 63,
+          "description": "Dummy leírás 23-3, ismétlés: banán banán."
+        }
+      ]
+    },
+    {
+      "question": "Melyik állat nyer a képzeletbeli futamon? (dummy #24)",
+      "description": "Teszt esemény #24. Kulcsszó ismétlés: futam futam. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-04T06:00:00Z",
+      "resolveAt": "2027-01-04T08:00:00Z",
+      "markets": [
+        {
+          "name": "Lassú csiga #24"
+        },
+        {
+          "name": "Gyors teknős #24",
+          "yesStartPercent": 57,
+          "description": "Dummy leírás 24-2, ismétlés: futam futam."
+        },
+        {
+          "name": "Ugráló béka #24"
+        },
+        {
+          "name": "Zajos kacsa #24",
+          "yesStartPercent": 83
+        }
+      ]
+    },
+    {
+      "question": "Kinyit-e a képzeletbeli pékség 06:06-kor? (dummy #25)",
+      "description": "Teszt esemény #25. Kulcsszó ismétlés: pékség pékség. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-04T09:00:00Z",
+      "resolveAt": "2027-01-04T11:00:00Z",
+      "markets": [
+        {
+          "name": "Kinyit #25",
+          "yesStartPercent": 51,
+          "description": "Dummy leírás 25-1, ismétlés: pékség pékség."
+        }
+      ],
+      "yesStartPercent": 69
+    },
+    {
+      "question": "Milyen színű lesz az esti felhő? (dummy #26)",
+      "description": "Teszt esemény #26. Kulcsszó ismétlés: felhő felhő. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-04T12:00:00Z",
+      "resolveAt": "2027-01-04T14:00:00Z",
+      "markets": [
+        {
+          "name": "Neonzöld #26"
+        },
+        {
+          "name": "Narancs #26",
+          "yesStartPercent": 71
+        }
+      ]
+    },
+    {
+      "question": "Elromlik-e a beszélő kávégép hétfőn? (dummy #27)",
+      "description": "Teszt esemény #27. Kulcsszó ismétlés: kávégép kávégép. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-04T15:00:00Z",
+      "resolveAt": "2027-01-04T17:00:00Z",
+      "markets": [
+        {
+          "name": "Elromlik #27",
+          "yesStartPercent": 65
+        },
+        {
+          "name": "Nem romlik el #27",
+          "description": "Dummy leírás 27-2, ismétlés: kávégép kávégép."
+        },
+        {
+          "name": "Részben romlik el #27",
+          "yesStartPercent": 24
+        }
+      ]
+    },
+    {
+      "question": "Megérkezik-e időben a láthatatlan busz? (dummy #28)",
+      "description": "Teszt esemény #28. Kulcsszó ismétlés: busz busz. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-04T18:00:00Z",
+      "resolveAt": "2027-01-04T20:00:00Z",
+      "markets": [
+        {
+          "name": "Igen #28",
+          "description": "Dummy leírás 28-1, ismétlés: busz busz."
+        },
+        {
+          "name": "Nem #28",
+          "yesStartPercent": 18
+        },
+        {
+          "name": "Extra válasz 1 #28"
+        },
+        {
+          "name": "Extra válasz 2 #28",
+          "yesStartPercent": 44,
+          "description": "Dummy leírás 28-4, ismétlés: busz busz."
+        }
+      ],
+      "yesStartPercent": 17
+    },
+    {
+      "question": "Melyik szó hangzik el többször a meetingen? (dummy #29)",
+      "description": "Teszt esemény #29. Kulcsszó ismétlés: alma alma. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-04T21:00:00Z",
+      "resolveAt": "2027-01-04T23:00:00Z",
+      "markets": [
+        {
+          "name": "alma #29",
+          "yesStartPercent": 79
+        }
+      ]
+    },
+    {
+      "question": "Lesz-e szivárvány a szerverteremben? (dummy #30)",
+      "description": "Teszt esemény #30. Kulcsszó ismétlés: szivárvány szivárvány. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-05T00:00:00Z",
+      "resolveAt": "2027-01-05T02:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz #30"
+        },
+        {
+          "name": "Extra válasz 1 #30",
+          "yesStartPercent": 32,
+          "description": "Dummy leírás 30-2, ismétlés: szivárvány szivárvány."
+        }
+      ]
+    },
+    {
+      "question": "A piros villamos háromszor csenget holnap reggel? (dummy #31)",
+      "description": "Teszt esemény #31. Kulcsszó ismétlés: csenget csenget. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-05T03:00:00Z",
+      "resolveAt": "2027-01-05T05:00:00Z",
+      "markets": [
+        {
+          "name": "Igen, három csengetés #31",
+          "yesStartPercent": 26,
+          "description": "Dummy leírás 31-1, ismétlés: csenget csenget."
+        },
+        {
+          "name": "Nem, csak kettő #31"
+        },
+        {
+          "name": "Extra válasz 1 #31",
+          "yesStartPercent": 52
+        }
+      ],
+      "yesStartPercent": 44
+    },
+    {
+      "question": "Lesz-e lila köd a főtéren pénteken? (dummy #32)",
+      "description": "Teszt esemény #32. Kulcsszó ismétlés: lila köd köd. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-05T06:00:00Z",
+      "resolveAt": "2027-01-05T08:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz lila köd #32"
+        },
+        {
+          "name": "Extra válasz 1 #32",
+          "yesStartPercent": 46
+        },
+        {
+          "name": "Extra válasz 2 #32",
+          "description": "Dummy leírás 32-3, ismétlés: lila köd köd."
+        },
+        {
+          "name": "Extra válasz 3 #32",
+          "yesStartPercent": 72
+        }
+      ]
+    },
+    {
+      "question": "Hányszor mondja be a rádió, hogy banán? (dummy #33)",
+      "description": "Teszt esemény #33. Kulcsszó ismétlés: banán banán. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-05T09:00:00Z",
+      "resolveAt": "2027-01-05T11:00:00Z",
+      "markets": [
+        {
+          "name": "Egyszer #33",
+          "yesStartPercent": 40
+        }
+      ]
+    },
+    {
+      "question": "Melyik állat nyer a képzeletbeli futamon? (dummy #34)",
+      "description": "Teszt esemény #34. Kulcsszó ismétlés: futam futam. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-05T12:00:00Z",
+      "resolveAt": "2027-01-05T14:00:00Z",
+      "markets": [
+        {
+          "name": "Lassú csiga #34",
+          "description": "Dummy leírás 34-1, ismétlés: futam futam."
+        },
+        {
+          "name": "Gyors teknős #34",
+          "yesStartPercent": 60
+        }
+      ],
+      "yesStartPercent": 71
+    },
+    {
+      "question": "Kinyit-e a képzeletbeli pékség 06:06-kor? (dummy #35)",
+      "description": "Teszt esemény #35. Kulcsszó ismétlés: pékség pékség. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-05T15:00:00Z",
+      "resolveAt": "2027-01-05T17:00:00Z",
+      "markets": [
+        {
+          "name": "Kinyit #35",
+          "yesStartPercent": 54
+        },
+        {
+          "name": "Nem nyit ki #35"
+        },
+        {
+          "name": "Extra válasz 1 #35",
+          "yesStartPercent": 80,
+          "description": "Dummy leírás 35-3, ismétlés: pékség pékség."
+        }
+      ]
+    },
+    {
+      "question": "Milyen színű lesz az esti felhő? (dummy #36)",
+      "description": "Teszt esemény #36. Kulcsszó ismétlés: felhő felhő. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-05T18:00:00Z",
+      "resolveAt": "2027-01-05T20:00:00Z",
+      "markets": [
+        {
+          "name": "Neonzöld #36"
+        },
+        {
+          "name": "Narancs #36",
+          "yesStartPercent": 74,
+          "description": "Dummy leírás 36-2, ismétlés: felhő felhő."
+        },
+        {
+          "name": "Kockás #36"
+        },
+        {
+          "name": "Extra válasz 1 #36",
+          "yesStartPercent": 33
+        }
+      ]
+    },
+    {
+      "question": "Elromlik-e a beszélő kávégép hétfőn? (dummy #37)",
+      "description": "Teszt esemény #37. Kulcsszó ismétlés: kávégép kávégép. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-05T21:00:00Z",
+      "resolveAt": "2027-01-05T23:00:00Z",
+      "markets": [
+        {
+          "name": "Elromlik #37",
+          "yesStartPercent": 68,
+          "description": "Dummy leírás 37-1, ismétlés: kávégép kávégép."
+        }
+      ],
+      "yesStartPercent": 19
+    },
+    {
+      "question": "Megérkezik-e időben a láthatatlan busz? (dummy #38)",
+      "description": "Teszt esemény #38. Kulcsszó ismétlés: busz busz. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-06T00:00:00Z",
+      "resolveAt": "2027-01-06T02:00:00Z",
+      "markets": [
+        {
+          "name": "Igen #38"
+        },
+        {
+          "name": "Nem #38",
+          "yesStartPercent": 21
+        }
+      ]
+    },
+    {
+      "question": "Melyik szó hangzik el többször a meetingen? (dummy #39)",
+      "description": "Teszt esemény #39. Kulcsszó ismétlés: alma alma. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-06T03:00:00Z",
+      "resolveAt": "2027-01-06T05:00:00Z",
+      "markets": [
+        {
+          "name": "alma #39",
+          "yesStartPercent": 82
+        },
+        {
+          "name": "körte #39",
+          "description": "Dummy leírás 39-2, ismétlés: alma alma."
+        },
+        {
+          "name": "alma körte #39",
+          "yesStartPercent": 41
+        }
+      ]
+    },
+    {
+      "question": "Lesz-e szivárvány a szerverteremben? (dummy #40)",
+      "description": "Teszt esemény #40. Kulcsszó ismétlés: szivárvány szivárvány. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-06T06:00:00Z",
+      "resolveAt": "2027-01-06T08:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz #40",
+          "description": "Dummy leírás 40-1, ismétlés: szivárvány szivárvány."
+        },
+        {
+          "name": "Extra válasz 1 #40",
+          "yesStartPercent": 35
+        },
+        {
+          "name": "Extra válasz 2 #40"
+        },
+        {
+          "name": "Extra válasz 3 #40",
+          "yesStartPercent": 61,
+          "description": "Dummy leírás 40-4, ismétlés: szivárvány szivárvány."
+        }
+      ],
+      "yesStartPercent": 46
+    },
+    {
+      "question": "A piros villamos háromszor csenget holnap reggel? (dummy #41)",
+      "description": "Teszt esemény #41. Kulcsszó ismétlés: csenget csenget. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-06T09:00:00Z",
+      "resolveAt": "2027-01-06T11:00:00Z",
+      "markets": [
+        {
+          "name": "Igen, három csengetés #41",
+          "yesStartPercent": 29
+        }
+      ]
+    },
+    {
+      "question": "Lesz-e lila köd a főtéren pénteken? (dummy #42)",
+      "description": "Teszt esemény #42. Kulcsszó ismétlés: lila köd köd. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-06T12:00:00Z",
+      "resolveAt": "2027-01-06T14:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz lila köd #42"
+        },
+        {
+          "name": "Extra válasz 1 #42",
+          "yesStartPercent": 49,
+          "description": "Dummy leírás 42-2, ismétlés: lila köd köd."
+        }
+      ]
+    },
+    {
+      "question": "Hányszor mondja be a rádió, hogy banán? (dummy #43)",
+      "description": "Teszt esemény #43. Kulcsszó ismétlés: banán banán. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-06T15:00:00Z",
+      "resolveAt": "2027-01-06T17:00:00Z",
+      "markets": [
+        {
+          "name": "Egyszer #43",
+          "yesStartPercent": 43,
+          "description": "Dummy leírás 43-1, ismétlés: banán banán."
+        },
+        {
+          "name": "Kétszer #43"
+        },
+        {
+          "name": "Háromszor #43",
+          "yesStartPercent": 69
+        }
+      ],
+      "yesStartPercent": 73
+    },
+    {
+      "question": "Melyik állat nyer a képzeletbeli futamon? (dummy #44)",
+      "description": "Teszt esemény #44. Kulcsszó ismétlés: futam futam. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-06T18:00:00Z",
+      "resolveAt": "2027-01-06T20:00:00Z",
+      "markets": [
+        {
+          "name": "Lassú csiga #44"
+        },
+        {
+          "name": "Gyors teknős #44",
+          "yesStartPercent": 63
+        },
+        {
+          "name": "Ugráló béka #44",
+          "description": "Dummy leírás 44-3, ismétlés: futam futam."
+        },
+        {
+          "name": "Zajos kacsa #44",
+          "yesStartPercent": 22
+        }
+      ]
+    },
+    {
+      "question": "Kinyit-e a képzeletbeli pékség 06:06-kor? (dummy #45)",
+      "description": "Teszt esemény #45. Kulcsszó ismétlés: pékség pékség. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-06T21:00:00Z",
+      "resolveAt": "2027-01-06T23:00:00Z",
+      "markets": [
+        {
+          "name": "Kinyit #45",
+          "yesStartPercent": 57
+        }
+      ]
+    },
+    {
+      "question": "Milyen színű lesz az esti felhő? (dummy #46)",
+      "description": "Teszt esemény #46. Kulcsszó ismétlés: felhő felhő. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-07T00:00:00Z",
+      "resolveAt": "2027-01-07T02:00:00Z",
+      "markets": [
+        {
+          "name": "Neonzöld #46",
+          "description": "Dummy leírás 46-1, ismétlés: felhő felhő."
+        },
+        {
+          "name": "Narancs #46",
+          "yesStartPercent": 77
+        }
+      ],
+      "yesStartPercent": 21
+    },
+    {
+      "question": "Elromlik-e a beszélő kávégép hétfőn? (dummy #47)",
+      "description": "Teszt esemény #47. Kulcsszó ismétlés: kávégép kávégép. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-07T03:00:00Z",
+      "resolveAt": "2027-01-07T05:00:00Z",
+      "markets": [
+        {
+          "name": "Elromlik #47",
+          "yesStartPercent": 71
+        },
+        {
+          "name": "Nem romlik el #47"
+        },
+        {
+          "name": "Részben romlik el #47",
+          "yesStartPercent": 30,
+          "description": "Dummy leírás 47-3, ismétlés: kávégép kávégép."
+        }
+      ]
+    },
+    {
+      "question": "Megérkezik-e időben a láthatatlan busz? (dummy #48)",
+      "description": "Teszt esemény #48. Kulcsszó ismétlés: busz busz. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-07T06:00:00Z",
+      "resolveAt": "2027-01-07T08:00:00Z",
+      "markets": [
+        {
+          "name": "Igen #48"
+        },
+        {
+          "name": "Nem #48",
+          "yesStartPercent": 24,
+          "description": "Dummy leírás 48-2, ismétlés: busz busz."
+        },
+        {
+          "name": "Extra válasz 1 #48"
+        },
+        {
+          "name": "Extra válasz 2 #48",
+          "yesStartPercent": 50
+        }
+      ]
+    },
+    {
+      "question": "Melyik szó hangzik el többször a meetingen? (dummy #49)",
+      "description": "Teszt esemény #49. Kulcsszó ismétlés: alma alma. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-07T09:00:00Z",
+      "resolveAt": "2027-01-07T11:00:00Z",
+      "markets": [
+        {
+          "name": "alma #49",
+          "yesStartPercent": 18,
+          "description": "Dummy leírás 49-1, ismétlés: alma alma."
+        }
+      ],
+      "yesStartPercent": 48
+    },
+    {
+      "question": "Lesz-e szivárvány a szerverteremben? (dummy #50)",
+      "description": "Teszt esemény #50. Kulcsszó ismétlés: szivárvány szivárvány. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-07T12:00:00Z",
+      "resolveAt": "2027-01-07T14:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz #50"
+        },
+        {
+          "name": "Extra válasz 1 #50",
+          "yesStartPercent": 38
+        }
+      ]
+    },
+    {
+      "question": "A piros villamos háromszor csenget holnap reggel? (dummy #51)",
+      "description": "Teszt esemény #51. Kulcsszó ismétlés: csenget csenget. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-07T15:00:00Z",
+      "resolveAt": "2027-01-07T17:00:00Z",
+      "markets": [
+        {
+          "name": "Igen, három csengetés #51",
+          "yesStartPercent": 32
+        },
+        {
+          "name": "Nem, csak kettő #51",
+          "description": "Dummy leírás 51-2, ismétlés: csenget csenget."
+        },
+        {
+          "name": "Extra válasz 1 #51",
+          "yesStartPercent": 58
+        }
+      ]
+    },
+    {
+      "question": "Lesz-e lila köd a főtéren pénteken? (dummy #52)",
+      "description": "Teszt esemény #52. Kulcsszó ismétlés: lila köd köd. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-07T18:00:00Z",
+      "resolveAt": "2027-01-07T20:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz lila köd #52",
+          "description": "Dummy leírás 52-1, ismétlés: lila köd köd."
+        },
+        {
+          "name": "Extra válasz 1 #52",
+          "yesStartPercent": 52
+        },
+        {
+          "name": "Extra válasz 2 #52"
+        },
+        {
+          "name": "Extra válasz 3 #52",
+          "yesStartPercent": 78,
+          "description": "Dummy leírás 52-4, ismétlés: lila köd köd."
+        }
+      ],
+      "yesStartPercent": 75
+    },
+    {
+      "question": "Hányszor mondja be a rádió, hogy banán? (dummy #53)",
+      "description": "Teszt esemény #53. Kulcsszó ismétlés: banán banán. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-07T21:00:00Z",
+      "resolveAt": "2027-01-07T23:00:00Z",
+      "markets": [
+        {
+          "name": "Egyszer #53",
+          "yesStartPercent": 46
+        }
+      ]
+    },
+    {
+      "question": "Melyik állat nyer a képzeletbeli futamon? (dummy #54)",
+      "description": "Teszt esemény #54. Kulcsszó ismétlés: futam futam. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-08T00:00:00Z",
+      "resolveAt": "2027-01-08T02:00:00Z",
+      "markets": [
+        {
+          "name": "Lassú csiga #54"
+        },
+        {
+          "name": "Gyors teknős #54",
+          "yesStartPercent": 66,
+          "description": "Dummy leírás 54-2, ismétlés: futam futam."
+        }
+      ]
+    },
+    {
+      "question": "Kinyit-e a képzeletbeli pékség 06:06-kor? (dummy #55)",
+      "description": "Teszt esemény #55. Kulcsszó ismétlés: pékség pékség. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-08T03:00:00Z",
+      "resolveAt": "2027-01-08T05:00:00Z",
+      "markets": [
+        {
+          "name": "Kinyit #55",
+          "yesStartPercent": 60,
+          "description": "Dummy leírás 55-1, ismétlés: pékség pékség."
+        },
+        {
+          "name": "Nem nyit ki #55"
+        },
+        {
+          "name": "Extra válasz 1 #55",
+          "yesStartPercent": 19
+        }
+      ],
+      "yesStartPercent": 23
+    },
+    {
+      "question": "Milyen színű lesz az esti felhő? (dummy #56)",
+      "description": "Teszt esemény #56. Kulcsszó ismétlés: felhő felhő. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-08T06:00:00Z",
+      "resolveAt": "2027-01-08T08:00:00Z",
+      "markets": [
+        {
+          "name": "Neonzöld #56"
+        },
+        {
+          "name": "Narancs #56",
+          "yesStartPercent": 80
+        },
+        {
+          "name": "Kockás #56",
+          "description": "Dummy leírás 56-3, ismétlés: felhő felhő."
+        },
+        {
+          "name": "Extra válasz 1 #56",
+          "yesStartPercent": 39
+        }
+      ]
+    },
+    {
+      "question": "Elromlik-e a beszélő kávégép hétfőn? (dummy #57)",
+      "description": "Teszt esemény #57. Kulcsszó ismétlés: kávégép kávégép. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-08T09:00:00Z",
+      "resolveAt": "2027-01-08T11:00:00Z",
+      "markets": [
+        {
+          "name": "Elromlik #57",
+          "yesStartPercent": 74
+        }
+      ]
+    },
+    {
+      "question": "Megérkezik-e időben a láthatatlan busz? (dummy #58)",
+      "description": "Teszt esemény #58. Kulcsszó ismétlés: busz busz. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-08T12:00:00Z",
+      "resolveAt": "2027-01-08T14:00:00Z",
+      "markets": [
+        {
+          "name": "Igen #58",
+          "description": "Dummy leírás 58-1, ismétlés: busz busz."
+        },
+        {
+          "name": "Nem #58",
+          "yesStartPercent": 27
+        }
+      ],
+      "yesStartPercent": 50
+    },
+    {
+      "question": "Melyik szó hangzik el többször a meetingen? (dummy #59)",
+      "description": "Teszt esemény #59. Kulcsszó ismétlés: alma alma. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-08T15:00:00Z",
+      "resolveAt": "2027-01-08T17:00:00Z",
+      "markets": [
+        {
+          "name": "alma #59",
+          "yesStartPercent": 21
+        },
+        {
+          "name": "körte #59"
+        },
+        {
+          "name": "alma körte #59",
+          "yesStartPercent": 47,
+          "description": "Dummy leírás 59-3, ismétlés: alma alma."
+        }
+      ]
+    },
+    {
+      "question": "Lesz-e szivárvány a szerverteremben? (dummy #60)",
+      "description": "Teszt esemény #60. Kulcsszó ismétlés: szivárvány szivárvány. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-08T18:00:00Z",
+      "resolveAt": "2027-01-08T20:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz #60"
+        },
+        {
+          "name": "Extra válasz 1 #60",
+          "yesStartPercent": 41,
+          "description": "Dummy leírás 60-2, ismétlés: szivárvány szivárvány."
+        },
+        {
+          "name": "Extra válasz 2 #60"
+        },
+        {
+          "name": "Extra válasz 3 #60",
+          "yesStartPercent": 67
+        }
+      ]
+    },
+    {
+      "question": "A piros villamos háromszor csenget holnap reggel? (dummy #61)",
+      "description": "Teszt esemény #61. Kulcsszó ismétlés: csenget csenget. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-08T21:00:00Z",
+      "resolveAt": "2027-01-08T23:00:00Z",
+      "markets": [
+        {
+          "name": "Igen, három csengetés #61",
+          "yesStartPercent": 35,
+          "description": "Dummy leírás 61-1, ismétlés: csenget csenget."
+        }
+      ],
+      "yesStartPercent": 77
+    },
+    {
+      "question": "Lesz-e lila köd a főtéren pénteken? (dummy #62)",
+      "description": "Teszt esemény #62. Kulcsszó ismétlés: lila köd köd. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-09T00:00:00Z",
+      "resolveAt": "2027-01-09T02:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz lila köd #62"
+        },
+        {
+          "name": "Extra válasz 1 #62",
+          "yesStartPercent": 55
+        }
+      ]
+    },
+    {
+      "question": "Hányszor mondja be a rádió, hogy banán? (dummy #63)",
+      "description": "Teszt esemény #63. Kulcsszó ismétlés: banán banán. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-09T03:00:00Z",
+      "resolveAt": "2027-01-09T05:00:00Z",
+      "markets": [
+        {
+          "name": "Egyszer #63",
+          "yesStartPercent": 49
+        },
+        {
+          "name": "Kétszer #63",
+          "description": "Dummy leírás 63-2, ismétlés: banán banán."
+        },
+        {
+          "name": "Háromszor #63",
+          "yesStartPercent": 75
+        }
+      ]
+    },
+    {
+      "question": "Melyik állat nyer a képzeletbeli futamon? (dummy #64)",
+      "description": "Teszt esemény #64. Kulcsszó ismétlés: futam futam. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-09T06:00:00Z",
+      "resolveAt": "2027-01-09T08:00:00Z",
+      "markets": [
+        {
+          "name": "Lassú csiga #64",
+          "description": "Dummy leírás 64-1, ismétlés: futam futam."
+        },
+        {
+          "name": "Gyors teknős #64",
+          "yesStartPercent": 69
+        },
+        {
+          "name": "Ugráló béka #64"
+        },
+        {
+          "name": "Zajos kacsa #64",
+          "yesStartPercent": 28,
+          "description": "Dummy leírás 64-4, ismétlés: futam futam."
+        }
+      ],
+      "yesStartPercent": 25
+    },
+    {
+      "question": "Kinyit-e a képzeletbeli pékség 06:06-kor? (dummy #65)",
+      "description": "Teszt esemény #65. Kulcsszó ismétlés: pékség pékség. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-09T09:00:00Z",
+      "resolveAt": "2027-01-09T11:00:00Z",
+      "markets": [
+        {
+          "name": "Kinyit #65",
+          "yesStartPercent": 63
+        }
+      ]
+    },
+    {
+      "question": "Milyen színű lesz az esti felhő? (dummy #66)",
+      "description": "Teszt esemény #66. Kulcsszó ismétlés: felhő felhő. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-09T12:00:00Z",
+      "resolveAt": "2027-01-09T14:00:00Z",
+      "markets": [
+        {
+          "name": "Neonzöld #66"
+        },
+        {
+          "name": "Narancs #66",
+          "yesStartPercent": 83,
+          "description": "Dummy leírás 66-2, ismétlés: felhő felhő."
+        }
+      ]
+    },
+    {
+      "question": "Elromlik-e a beszélő kávégép hétfőn? (dummy #67)",
+      "description": "Teszt esemény #67. Kulcsszó ismétlés: kávégép kávégép. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-09T15:00:00Z",
+      "resolveAt": "2027-01-09T17:00:00Z",
+      "markets": [
+        {
+          "name": "Elromlik #67",
+          "yesStartPercent": 77,
+          "description": "Dummy leírás 67-1, ismétlés: kávégép kávégép."
+        },
+        {
+          "name": "Nem romlik el #67"
+        },
+        {
+          "name": "Részben romlik el #67",
+          "yesStartPercent": 36
+        }
+      ],
+      "yesStartPercent": 52
+    },
+    {
+      "question": "Megérkezik-e időben a láthatatlan busz? (dummy #68)",
+      "description": "Teszt esemény #68. Kulcsszó ismétlés: busz busz. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-09T18:00:00Z",
+      "resolveAt": "2027-01-09T20:00:00Z",
+      "markets": [
+        {
+          "name": "Igen #68"
+        },
+        {
+          "name": "Nem #68",
+          "yesStartPercent": 30
+        },
+        {
+          "name": "Extra válasz 1 #68",
+          "description": "Dummy leírás 68-3, ismétlés: busz busz."
+        },
+        {
+          "name": "Extra válasz 2 #68",
+          "yesStartPercent": 56
+        }
+      ]
+    },
+    {
+      "question": "Melyik szó hangzik el többször a meetingen? (dummy #69)",
+      "description": "Teszt esemény #69. Kulcsszó ismétlés: alma alma. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-09T21:00:00Z",
+      "resolveAt": "2027-01-09T23:00:00Z",
+      "markets": [
+        {
+          "name": "alma #69",
+          "yesStartPercent": 24
+        }
+      ]
+    },
+    {
+      "question": "Lesz-e szivárvány a szerverteremben? (dummy #70)",
+      "description": "Teszt esemény #70. Kulcsszó ismétlés: szivárvány szivárvány. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-10T00:00:00Z",
+      "resolveAt": "2027-01-10T02:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz #70",
+          "description": "Dummy leírás 70-1, ismétlés: szivárvány szivárvány."
+        },
+        {
+          "name": "Extra válasz 1 #70",
+          "yesStartPercent": 44
+        }
+      ],
+      "yesStartPercent": 79
+    },
+    {
+      "question": "A piros villamos háromszor csenget holnap reggel? (dummy #71)",
+      "description": "Teszt esemény #71. Kulcsszó ismétlés: csenget csenget. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-10T03:00:00Z",
+      "resolveAt": "2027-01-10T05:00:00Z",
+      "markets": [
+        {
+          "name": "Igen, három csengetés #71",
+          "yesStartPercent": 38
+        },
+        {
+          "name": "Nem, csak kettő #71"
+        },
+        {
+          "name": "Extra válasz 1 #71",
+          "yesStartPercent": 64,
+          "description": "Dummy leírás 71-3, ismétlés: csenget csenget."
+        }
+      ]
+    },
+    {
+      "question": "Lesz-e lila köd a főtéren pénteken? (dummy #72)",
+      "description": "Teszt esemény #72. Kulcsszó ismétlés: lila köd köd. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-10T06:00:00Z",
+      "resolveAt": "2027-01-10T08:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz lila köd #72"
+        },
+        {
+          "name": "Extra válasz 1 #72",
+          "yesStartPercent": 58,
+          "description": "Dummy leírás 72-2, ismétlés: lila köd köd."
+        },
+        {
+          "name": "Extra válasz 2 #72"
+        },
+        {
+          "name": "Extra válasz 3 #72",
+          "yesStartPercent": 17
+        }
+      ]
+    },
+    {
+      "question": "Hányszor mondja be a rádió, hogy banán? (dummy #73)",
+      "description": "Teszt esemény #73. Kulcsszó ismétlés: banán banán. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-10T09:00:00Z",
+      "resolveAt": "2027-01-10T11:00:00Z",
+      "markets": [
+        {
+          "name": "Egyszer #73",
+          "yesStartPercent": 52,
+          "description": "Dummy leírás 73-1, ismétlés: banán banán."
+        }
+      ],
+      "yesStartPercent": 27
+    },
+    {
+      "question": "Melyik állat nyer a képzeletbeli futamon? (dummy #74)",
+      "description": "Teszt esemény #74. Kulcsszó ismétlés: futam futam. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-10T12:00:00Z",
+      "resolveAt": "2027-01-10T14:00:00Z",
+      "markets": [
+        {
+          "name": "Lassú csiga #74"
+        },
+        {
+          "name": "Gyors teknős #74",
+          "yesStartPercent": 72
+        }
+      ]
+    },
+    {
+      "question": "Kinyit-e a képzeletbeli pékség 06:06-kor? (dummy #75)",
+      "description": "Teszt esemény #75. Kulcsszó ismétlés: pékség pékség. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-10T15:00:00Z",
+      "resolveAt": "2027-01-10T17:00:00Z",
+      "markets": [
+        {
+          "name": "Kinyit #75",
+          "yesStartPercent": 66
+        },
+        {
+          "name": "Nem nyit ki #75",
+          "description": "Dummy leírás 75-2, ismétlés: pékség pékség."
+        },
+        {
+          "name": "Extra válasz 1 #75",
+          "yesStartPercent": 25
+        }
+      ]
+    },
+    {
+      "question": "Milyen színű lesz az esti felhő? (dummy #76)",
+      "description": "Teszt esemény #76. Kulcsszó ismétlés: felhő felhő. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-10T18:00:00Z",
+      "resolveAt": "2027-01-10T20:00:00Z",
+      "markets": [
+        {
+          "name": "Neonzöld #76",
+          "description": "Dummy leírás 76-1, ismétlés: felhő felhő."
+        },
+        {
+          "name": "Narancs #76",
+          "yesStartPercent": 19
+        },
+        {
+          "name": "Kockás #76"
+        },
+        {
+          "name": "Extra válasz 1 #76",
+          "yesStartPercent": 45,
+          "description": "Dummy leírás 76-4, ismétlés: felhő felhő."
+        }
+      ],
+      "yesStartPercent": 54
+    },
+    {
+      "question": "Elromlik-e a beszélő kávégép hétfőn? (dummy #77)",
+      "description": "Teszt esemény #77. Kulcsszó ismétlés: kávégép kávégép. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-10T21:00:00Z",
+      "resolveAt": "2027-01-10T23:00:00Z",
+      "markets": [
+        {
+          "name": "Elromlik #77",
+          "yesStartPercent": 80
+        }
+      ]
+    },
+    {
+      "question": "Megérkezik-e időben a láthatatlan busz? (dummy #78)",
+      "description": "Teszt esemény #78. Kulcsszó ismétlés: busz busz. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-11T00:00:00Z",
+      "resolveAt": "2027-01-11T02:00:00Z",
+      "markets": [
+        {
+          "name": "Igen #78"
+        },
+        {
+          "name": "Nem #78",
+          "yesStartPercent": 33,
+          "description": "Dummy leírás 78-2, ismétlés: busz busz."
+        }
+      ]
+    },
+    {
+      "question": "Melyik szó hangzik el többször a meetingen? (dummy #79)",
+      "description": "Teszt esemény #79. Kulcsszó ismétlés: alma alma. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-11T03:00:00Z",
+      "resolveAt": "2027-01-11T05:00:00Z",
+      "markets": [
+        {
+          "name": "alma #79",
+          "yesStartPercent": 27,
+          "description": "Dummy leírás 79-1, ismétlés: alma alma."
+        },
+        {
+          "name": "körte #79"
+        },
+        {
+          "name": "alma körte #79",
+          "yesStartPercent": 53
+        }
+      ],
+      "yesStartPercent": 81
+    },
+    {
+      "question": "Lesz-e szivárvány a szerverteremben? (dummy #80)",
+      "description": "Teszt esemény #80. Kulcsszó ismétlés: szivárvány szivárvány. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-11T06:00:00Z",
+      "resolveAt": "2027-01-11T08:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz #80"
+        },
+        {
+          "name": "Extra válasz 1 #80",
+          "yesStartPercent": 47
+        },
+        {
+          "name": "Extra válasz 2 #80",
+          "description": "Dummy leírás 80-3, ismétlés: szivárvány szivárvány."
+        },
+        {
+          "name": "Extra válasz 3 #80",
+          "yesStartPercent": 73
+        }
+      ]
+    },
+    {
+      "question": "A piros villamos háromszor csenget holnap reggel? (dummy #81)",
+      "description": "Teszt esemény #81. Kulcsszó ismétlés: csenget csenget. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-11T09:00:00Z",
+      "resolveAt": "2027-01-11T11:00:00Z",
+      "markets": [
+        {
+          "name": "Igen, három csengetés #81",
+          "yesStartPercent": 41
+        }
+      ]
+    },
+    {
+      "question": "Lesz-e lila köd a főtéren pénteken? (dummy #82)",
+      "description": "Teszt esemény #82. Kulcsszó ismétlés: lila köd köd. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-11T12:00:00Z",
+      "resolveAt": "2027-01-11T14:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz lila köd #82",
+          "description": "Dummy leírás 82-1, ismétlés: lila köd köd."
+        },
+        {
+          "name": "Extra válasz 1 #82",
+          "yesStartPercent": 61
+        }
+      ],
+      "yesStartPercent": 29
+    },
+    {
+      "question": "Hányszor mondja be a rádió, hogy banán? (dummy #83)",
+      "description": "Teszt esemény #83. Kulcsszó ismétlés: banán banán. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-11T15:00:00Z",
+      "resolveAt": "2027-01-11T17:00:00Z",
+      "markets": [
+        {
+          "name": "Egyszer #83",
+          "yesStartPercent": 55
+        },
+        {
+          "name": "Kétszer #83"
+        },
+        {
+          "name": "Háromszor #83",
+          "yesStartPercent": 81,
+          "description": "Dummy leírás 83-3, ismétlés: banán banán."
+        }
+      ]
+    },
+    {
+      "question": "Melyik állat nyer a képzeletbeli futamon? (dummy #84)",
+      "description": "Teszt esemény #84. Kulcsszó ismétlés: futam futam. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-11T18:00:00Z",
+      "resolveAt": "2027-01-11T20:00:00Z",
+      "markets": [
+        {
+          "name": "Lassú csiga #84"
+        },
+        {
+          "name": "Gyors teknős #84",
+          "yesStartPercent": 75,
+          "description": "Dummy leírás 84-2, ismétlés: futam futam."
+        },
+        {
+          "name": "Ugráló béka #84"
+        },
+        {
+          "name": "Zajos kacsa #84",
+          "yesStartPercent": 34
+        }
+      ]
+    },
+    {
+      "question": "Kinyit-e a képzeletbeli pékség 06:06-kor? (dummy #85)",
+      "description": "Teszt esemény #85. Kulcsszó ismétlés: pékség pékség. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-11T21:00:00Z",
+      "resolveAt": "2027-01-11T23:00:00Z",
+      "markets": [
+        {
+          "name": "Kinyit #85",
+          "yesStartPercent": 69,
+          "description": "Dummy leírás 85-1, ismétlés: pékség pékség."
+        }
+      ],
+      "yesStartPercent": 56
+    },
+    {
+      "question": "Milyen színű lesz az esti felhő? (dummy #86)",
+      "description": "Teszt esemény #86. Kulcsszó ismétlés: felhő felhő. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-12T00:00:00Z",
+      "resolveAt": "2027-01-12T02:00:00Z",
+      "markets": [
+        {
+          "name": "Neonzöld #86"
+        },
+        {
+          "name": "Narancs #86",
+          "yesStartPercent": 22
+        }
+      ]
+    },
+    {
+      "question": "Elromlik-e a beszélő kávégép hétfőn? (dummy #87)",
+      "description": "Teszt esemény #87. Kulcsszó ismétlés: kávégép kávégép. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-12T03:00:00Z",
+      "resolveAt": "2027-01-12T05:00:00Z",
+      "markets": [
+        {
+          "name": "Elromlik #87",
+          "yesStartPercent": 83
+        },
+        {
+          "name": "Nem romlik el #87",
+          "description": "Dummy leírás 87-2, ismétlés: kávégép kávégép."
+        },
+        {
+          "name": "Részben romlik el #87",
+          "yesStartPercent": 42
+        }
+      ]
+    },
+    {
+      "question": "Megérkezik-e időben a láthatatlan busz? (dummy #88)",
+      "description": "Teszt esemény #88. Kulcsszó ismétlés: busz busz. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-12T06:00:00Z",
+      "resolveAt": "2027-01-12T08:00:00Z",
+      "markets": [
+        {
+          "name": "Igen #88",
+          "description": "Dummy leírás 88-1, ismétlés: busz busz."
+        },
+        {
+          "name": "Nem #88",
+          "yesStartPercent": 36
+        },
+        {
+          "name": "Extra válasz 1 #88"
+        },
+        {
+          "name": "Extra válasz 2 #88",
+          "yesStartPercent": 62,
+          "description": "Dummy leírás 88-4, ismétlés: busz busz."
+        }
+      ],
+      "yesStartPercent": 83
+    },
+    {
+      "question": "Melyik szó hangzik el többször a meetingen? (dummy #89)",
+      "description": "Teszt esemény #89. Kulcsszó ismétlés: alma alma. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-12T09:00:00Z",
+      "resolveAt": "2027-01-12T11:00:00Z",
+      "markets": [
+        {
+          "name": "alma #89",
+          "yesStartPercent": 30
+        }
+      ]
+    },
+    {
+      "question": "Lesz-e szivárvány a szerverteremben? (dummy #90)",
+      "description": "Teszt esemény #90. Kulcsszó ismétlés: szivárvány szivárvány. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-12T12:00:00Z",
+      "resolveAt": "2027-01-12T14:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz #90"
+        },
+        {
+          "name": "Extra válasz 1 #90",
+          "yesStartPercent": 50,
+          "description": "Dummy leírás 90-2, ismétlés: szivárvány szivárvány."
+        }
+      ]
+    },
+    {
+      "question": "A piros villamos háromszor csenget holnap reggel? (dummy #91)",
+      "description": "Teszt esemény #91. Kulcsszó ismétlés: csenget csenget. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-12T15:00:00Z",
+      "resolveAt": "2027-01-12T17:00:00Z",
+      "markets": [
+        {
+          "name": "Igen, három csengetés #91",
+          "yesStartPercent": 44,
+          "description": "Dummy leírás 91-1, ismétlés: csenget csenget."
+        },
+        {
+          "name": "Nem, csak kettő #91"
+        },
+        {
+          "name": "Extra válasz 1 #91",
+          "yesStartPercent": 70
+        }
+      ],
+      "yesStartPercent": 31
+    },
+    {
+      "question": "Lesz-e lila köd a főtéren pénteken? (dummy #92)",
+      "description": "Teszt esemény #92. Kulcsszó ismétlés: lila köd köd. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-12T18:00:00Z",
+      "resolveAt": "2027-01-12T20:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz lila köd #92"
+        },
+        {
+          "name": "Extra válasz 1 #92",
+          "yesStartPercent": 64
+        },
+        {
+          "name": "Extra válasz 2 #92",
+          "description": "Dummy leírás 92-3, ismétlés: lila köd köd."
+        },
+        {
+          "name": "Extra válasz 3 #92",
+          "yesStartPercent": 23
+        }
+      ]
+    },
+    {
+      "question": "Hányszor mondja be a rádió, hogy banán? (dummy #93)",
+      "description": "Teszt esemény #93. Kulcsszó ismétlés: banán banán. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-12T21:00:00Z",
+      "resolveAt": "2027-01-12T23:00:00Z",
+      "markets": [
+        {
+          "name": "Egyszer #93",
+          "yesStartPercent": 58
+        }
+      ]
+    },
+    {
+      "question": "Melyik állat nyer a képzeletbeli futamon? (dummy #94)",
+      "description": "Teszt esemény #94. Kulcsszó ismétlés: futam futam. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-13T00:00:00Z",
+      "resolveAt": "2027-01-13T02:00:00Z",
+      "markets": [
+        {
+          "name": "Lassú csiga #94",
+          "description": "Dummy leírás 94-1, ismétlés: futam futam."
+        },
+        {
+          "name": "Gyors teknős #94",
+          "yesStartPercent": 78
+        }
+      ],
+      "yesStartPercent": 58
+    },
+    {
+      "question": "Kinyit-e a képzeletbeli pékség 06:06-kor? (dummy #95)",
+      "description": "Teszt esemény #95. Kulcsszó ismétlés: pékség pékség. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-13T03:00:00Z",
+      "resolveAt": "2027-01-13T05:00:00Z",
+      "markets": [
+        {
+          "name": "Kinyit #95",
+          "yesStartPercent": 72
+        },
+        {
+          "name": "Nem nyit ki #95"
+        },
+        {
+          "name": "Extra válasz 1 #95",
+          "yesStartPercent": 31,
+          "description": "Dummy leírás 95-3, ismétlés: pékség pékség."
+        }
+      ]
+    },
+    {
+      "question": "Milyen színű lesz az esti felhő? (dummy #96)",
+      "description": "Teszt esemény #96. Kulcsszó ismétlés: felhő felhő. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-13T06:00:00Z",
+      "resolveAt": "2027-01-13T08:00:00Z",
+      "markets": [
+        {
+          "name": "Neonzöld #96"
+        },
+        {
+          "name": "Narancs #96",
+          "yesStartPercent": 25,
+          "description": "Dummy leírás 96-2, ismétlés: felhő felhő."
+        },
+        {
+          "name": "Kockás #96"
+        },
+        {
+          "name": "Extra válasz 1 #96",
+          "yesStartPercent": 51
+        }
+      ]
+    },
+    {
+      "question": "Elromlik-e a beszélő kávégép hétfőn? (dummy #97)",
+      "description": "Teszt esemény #97. Kulcsszó ismétlés: kávégép kávégép. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-13T09:00:00Z",
+      "resolveAt": "2027-01-13T11:00:00Z",
+      "markets": [
+        {
+          "name": "Elromlik #97",
+          "yesStartPercent": 19,
+          "description": "Dummy leírás 97-1, ismétlés: kávégép kávégép."
+        }
+      ],
+      "yesStartPercent": 85
+    },
+    {
+      "question": "Megérkezik-e időben a láthatatlan busz? (dummy #98)",
+      "description": "Teszt esemény #98. Kulcsszó ismétlés: busz busz. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-13T12:00:00Z",
+      "resolveAt": "2027-01-13T14:00:00Z",
+      "markets": [
+        {
+          "name": "Igen #98"
+        },
+        {
+          "name": "Nem #98",
+          "yesStartPercent": 39
+        }
+      ]
+    },
+    {
+      "question": "Melyik szó hangzik el többször a meetingen? (dummy #99)",
+      "description": "Teszt esemény #99. Kulcsszó ismétlés: alma alma. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-13T15:00:00Z",
+      "resolveAt": "2027-01-13T17:00:00Z",
+      "markets": [
+        {
+          "name": "alma #99",
+          "yesStartPercent": 33
+        },
+        {
+          "name": "körte #99",
+          "description": "Dummy leírás 99-2, ismétlés: alma alma."
+        },
+        {
+          "name": "alma körte #99",
+          "yesStartPercent": 59
+        }
+      ]
+    },
+    {
+      "question": "Lesz-e szivárvány a szerverteremben? (dummy #100)",
+      "description": "Teszt esemény #100. Kulcsszó ismétlés: szivárvány szivárvány. Kereséshez: próba próba.",
+      "bettingCloseAt": "2027-01-13T18:00:00Z",
+      "resolveAt": "2027-01-13T20:00:00Z",
+      "markets": [
+        {
+          "name": "Lesz #100",
+          "description": "Dummy leírás 100-1, ismétlés: szivárvány szivárvány."
+        },
+        {
+          "name": "Extra válasz 1 #100",
+          "yesStartPercent": 53
+        },
+        {
+          "name": "Extra válasz 2 #100"
+        },
+        {
+          "name": "Extra válasz 3 #100",
+          "yesStartPercent": 79,
+          "description": "Dummy leírás 100-4, ismétlés: szivárvány szivárvány."
+        }
+      ],
+      "yesStartPercent": 33
+    }
+  ]
+}
