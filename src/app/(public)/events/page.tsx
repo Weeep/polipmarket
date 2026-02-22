@@ -22,7 +22,7 @@ export default function EventsPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-white">Events</h1>
+        <h1 className="text-2xl font-bold text-stone-100">Események</h1>
 
         <Link href="/events/new" className="button-gold">
           New event

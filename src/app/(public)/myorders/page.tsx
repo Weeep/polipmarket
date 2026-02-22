@@ -18,17 +18,26 @@ function groupMarketsByEvent(markets: MyEventMarketBetDTO[]) {
   });
 
   return Array.from(grouped.values()).sort((a, b) => {
-    const aLatest = Math.max(...a.map((market) => new Date(market.latestBetAt).getTime()));
-    const bLatest = Math.max(...b.map((market) => new Date(market.latestBetAt).getTime()));
+    const aLatest = Math.max(
+      ...a.map((market) => new Date(market.latestBetAt).getTime()),
+    );
+    const bLatest = Math.max(
+      ...b.map((market) => new Date(market.latestBetAt).getTime()),
+    );
 
     return bLatest - aLatest;
   });
 }
 
-function filterMarketsByBetStatus(markets: MyEventMarketBetDTO[], statuses: string[]) {
+function filterMarketsByBetStatus(
+  markets: MyEventMarketBetDTO[],
+  statuses: string[],
+) {
   return markets
     .map((market) => {
-      const filteredBets = market.bets.filter((bet) => statuses.includes(bet.status));
+      const filteredBets = market.bets.filter((bet) =>
+        statuses.includes(bet.status),
+      );
 
       if (filteredBets.length === 0) {
         return null;
@@ -45,10 +54,16 @@ function filterMarketsByBetStatus(markets: MyEventMarketBetDTO[], statuses: stri
       };
     })
     .filter((market): market is MyEventMarketBetDTO => market !== null)
-    .sort((a, b) => new Date(b.latestBetAt).getTime() - new Date(a.latestBetAt).getTime());
+    .sort(
+      (a, b) =>
+        new Date(b.latestBetAt).getTime() - new Date(a.latestBetAt).getTime(),
+    );
 }
 
-function limitMarketsByBetCount(markets: MyEventMarketBetDTO[], limit: number): MyEventMarketBetDTO[] {
+function limitMarketsByBetCount(
+  markets: MyEventMarketBetDTO[],
+  limit: number,
+): MyEventMarketBetDTO[] {
   if (limit <= 0) {
     return [];
   }
@@ -86,11 +101,17 @@ function mergeUpdatedMarket(
   currentMarket: MyEventMarketBetDTO,
   updatedMarket: MyEventMarketBetDTO,
 ): MyEventMarketBetDTO {
-  const updatedBetsByLotId = new Map(updatedMarket.bets.map((bet) => [bet.lotId, bet]));
+  const updatedBetsByLotId = new Map(
+    updatedMarket.bets.map((bet) => [bet.lotId, bet]),
+  );
 
-  const mergedCurrentBets = currentMarket.bets.map((bet) => updatedBetsByLotId.get(bet.lotId) ?? bet);
+  const mergedCurrentBets = currentMarket.bets.map(
+    (bet) => updatedBetsByLotId.get(bet.lotId) ?? bet,
+  );
   const currentLotIds = new Set(currentMarket.bets.map((bet) => bet.lotId));
-  const newBets = updatedMarket.bets.filter((bet) => !currentLotIds.has(bet.lotId));
+  const newBets = updatedMarket.bets.filter(
+    (bet) => !currentLotIds.has(bet.lotId),
+  );
 
   return {
     ...currentMarket,
@@ -102,7 +123,9 @@ function mergeUpdatedMarket(
 export default function MyOrdersPage() {
   const [myMarkets, setMyMarkets] = useState<MyEventMarketBetDTO[]>([]);
   const [loading, setLoading] = useState(true);
-  const [visibleClosedBetCount, setVisibleClosedBetCount] = useState(INITIAL_CLOSED_BETS_LIMIT);
+  const [visibleClosedBetCount, setVisibleClosedBetCount] = useState(
+    INITIAL_CLOSED_BETS_LIMIT,
+  );
 
   useEffect(() => {
     apiFetch("/api/events/my")
@@ -111,35 +134,54 @@ export default function MyOrdersPage() {
       .finally(() => setLoading(false));
   }, []);
 
-
-  function updateMarket(marketId: string, updatedMarket: MyEventMarketBetDTO | null) {
+  function updateMarket(
+    marketId: string,
+    updatedMarket: MyEventMarketBetDTO | null,
+  ) {
     setMyMarkets((prev) =>
       updatedMarket === null
         ? prev.filter((market) => market.marketId !== marketId)
         : prev.map((market) =>
-            market.marketId === marketId ? mergeUpdatedMarket(market, updatedMarket) : market,
+            market.marketId === marketId
+              ? mergeUpdatedMarket(market, updatedMarket)
+              : market,
           ),
     );
   }
 
   if (loading) {
-    return <div className="mx-auto max-w-6xl px-6 py-10 text-stone-300">Loading…</div>;
+    return (
+      <div className="mx-auto max-w-6xl px-6 py-10 text-stone-300">
+        Loading…
+      </div>
+    );
   }
 
   const openMarkets = filterMarketsByBetStatus(myMarkets, ["OPEN"]);
-  const closedMarkets = filterMarketsByBetStatus(myMarkets, ["FILLED", "CANCELLED"]);
-  const totalClosedBetCount = closedMarkets.reduce((sum, market) => sum + market.bets.length, 0);
+  const closedMarkets = filterMarketsByBetStatus(myMarkets, [
+    "FILLED",
+    "CANCELLED",
+  ]);
+  const totalClosedBetCount = closedMarkets.reduce(
+    (sum, market) => sum + market.bets.length,
+    0,
+  );
 
   const openMarketGroups = groupMarketsByEvent(openMarkets);
-  const visibleClosedMarkets = limitMarketsByBetCount(closedMarkets, visibleClosedBetCount);
+  const visibleClosedMarkets = limitMarketsByBetCount(
+    closedMarkets,
+    visibleClosedBetCount,
+  );
   const closedMarketGroups = groupMarketsByEvent(visibleClosedMarkets);
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-8 px-4 py-6 sm:px-6 sm:py-10">
-      <section className="marketcard-base space-y-4">
-        <h1 className="text-2xl font-bold text-stone-100">Fogadásaim</h1>
+      <h1 className="text-2xl font-bold text-stone-100">Fogadásaim</h1>
 
-        <h2 className="text-lg font-semibold text-stone-200">Aktív fogadások</h2>
+      <section className="marketcard-base space-y-4">
+        <h2 className="text-lg font-semibold text-stone-200">
+          Aktív fogadások
+        </h2>
         {openMarketGroups.length === 0 ? (
           <p className="text-sm text-stone-400">Nincs aktív fogadásod.</p>
         ) : (
@@ -156,7 +198,9 @@ export default function MyOrdersPage() {
       </section>
 
       <section className="marketcard-base space-y-4">
-        <h2 className="text-lg font-semibold text-stone-200">Lezárt fogadások</h2>
+        <h2 className="text-lg font-semibold text-stone-200">
+          Lezárt fogadások
+        </h2>
         {closedMarketGroups.length === 0 ? (
           <p className="text-sm text-stone-400">Nincs lezárt fogadásod.</p>
         ) : (
@@ -176,7 +220,9 @@ export default function MyOrdersPage() {
                 <button
                   type="button"
                   onClick={() =>
-                    setVisibleClosedBetCount((prev) => prev + CLOSED_BETS_PAGE_SIZE)
+                    setVisibleClosedBetCount(
+                      (prev) => prev + CLOSED_BETS_PAGE_SIZE,
+                    )
                   }
                   className="button-gold px-5 py-2 text-sm"
                 >

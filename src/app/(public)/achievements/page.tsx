@@ -30,17 +30,22 @@ export default function AchievementsPage() {
   }, []);
 
   if (loading) {
-    return <main className="max-w-4xl mx-auto px-4 py-8 text-stone-300">Loading…</main>;
+    return (
+      <main className="max-w-4xl mx-auto px-4 py-8 text-stone-300">
+        Loading…
+      </main>
+    );
   }
 
   const unlockedCount = items.filter((item) => item.unlockedAt).length;
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+      <h1 className="text-2xl font-bold text-stone-100">Sikerek</h1>
+
       <div className="marketcard-base">
-        <h1 className="text-2xl font-bold text-stone-100">Sikerek</h1>
         <p className="mt-2 text-stone-300 text-sm">
-          Megszerzett achievementek: <strong>{unlockedCount}</strong> / {items.length}
+          Sikerek száma: <strong>{unlockedCount}</strong> / {items.length}
         </p>
       </div>
 
@@ -59,15 +64,19 @@ export default function AchievementsPage() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-stone-400">#{item.number}</p>
-                  <h2 className="text-base font-semibold text-stone-100">{item.title}</h2>
+                  <h2 className="text-base font-semibold text-stone-100">
+                    {item.title}
+                  </h2>
                   {item.description && (
-                    <p className="mt-1 text-sm text-stone-300">{item.description}</p>
+                    <p className="mt-1 text-sm text-stone-300">
+                      {item.description}
+                    </p>
                   )}
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-amber-300 font-semibold">+{item.reward}ଳ</p>
-                  <p className="text-xs text-stone-400">{item.category}</p>
+                  <p className="text-amber-300 font-semibold">
+                    +{item.reward}ଳ
+                  </p>
                 </div>
               </div>
               <div className="mt-3 text-xs text-stone-400">
