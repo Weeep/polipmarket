@@ -4,9 +4,19 @@
       "number": 100,
       "code": "first_login",
       "title": "Első belépés",
-      "description": "Sikeresen bejelentkeztél először.",
-      "reward": 100,
+      "description": "Gratulálunk! Sikeresen bejelentkeztél!",
+      "reward": 1000,
       "category": "LOGIN",
+      "targetValue": 1,
+      "isActive": true
+    },
+    {
+      "number": 115,
+      "code": "bet_1_events",
+      "title": "1 eseményre fogadás",
+      "description": "Gratulálunk! Megvan az első sikeres fogadásod!",
+      "reward": 100,
+      "category": "BET_EVENTS",
       "targetValue": 1,
       "isActive": true
     },
@@ -48,6 +58,16 @@
       "reward": 250,
       "category": "WIN_BETS",
       "targetValue": 5,
+      "isActive": true
+    },
+    {
+      "number": 500,
+      "code": "win_10_bets",
+      "title": "10 nyertes fogadás",
+      "description": "Legyen legalább 10 nyertes fogadásod lezárt piacokon.",
+      "reward": 500,
+      "category": "WIN_BETS",
+      "targetValue": 10,
       "isActive": true
     }
   ]

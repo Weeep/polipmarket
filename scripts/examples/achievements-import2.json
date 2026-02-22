@@ -1,0 +1,84 @@
+{
+  "achievements": [
+    {
+      "number": 120,
+      "code": "bet_2_events",
+      "title": "2 eseményre fogadás",
+      "description": "Gratulálunk! Megvan az első sikeres fogadásod!",
+      "reward": 100,
+      "category": "BET_EVENTS",
+      "targetValue": 2,
+      "isActive": true
+    },
+    {
+      "number": 121,
+      "code": "bet_3_events",
+      "title": "3 eseményre fogadás",
+      "description": "Gratulálunk! Megvan az első sikeres fogadásod!",
+      "reward": 100,
+      "category": "BET_EVENTS",
+      "targetValue": 3,
+      "isActive": true
+    },
+    {
+      "number": 122,
+      "code": "bet_4_events",
+      "title": "4 eseményre fogadás",
+      "description": "Gratulálunk! Megvan az első sikeres fogadásod!",
+      "reward": 100,
+      "category": "BET_EVENTS",
+      "targetValue": 4,
+      "isActive": true
+    },
+    {
+      "number": 125,
+      "code": "bet_5_events",
+      "title": "5 eseményre fogadás",
+      "description": "Gratulálunk! Megvan az első sikeres fogadásod!",
+      "reward": 100,
+      "category": "BET_EVENTS",
+      "targetValue": 5,
+      "isActive": true
+    },
+    {
+      "number": 126,
+      "code": "bet_6_events",
+      "title": "6 eseményre fogadás",
+      "description": "Gratulálunk! Megvan az első sikeres fogadásod!",
+      "reward": 100,
+      "category": "BET_EVENTS",
+      "targetValue": 6,
+      "isActive": true
+    },
+    {
+      "number": 127,
+      "code": "bet_7_events",
+      "title": "7 eseményre fogadás",
+      "description": "Gratulálunk! Megvan az első sikeres fogadásod!",
+      "reward": 100,
+      "category": "BET_EVENTS",
+      "targetValue": 7,
+      "isActive": true
+    },
+    {
+      "number": 128,
+      "code": "bet_8_events",
+      "title": "8 eseményre fogadás",
+      "description": "Gratulálunk! Megvan az 8adik sikeres fogadásod!",
+      "reward": 100,
+      "category": "BET_EVENTS",
+      "targetValue": 8,
+      "isActive": true
+    },
+    {
+      "number": 129,
+      "code": "bet_9_events",
+      "title": "9 eseményre fogadás",
+      "description": "Gratulálunk! Megvan az 9edik sikeres fogadásod!",
+      "reward": 100,
+      "category": "BET_EVENTS",
+      "targetValue": 9,
+      "isActive": true
+    }
+  ]
+}
