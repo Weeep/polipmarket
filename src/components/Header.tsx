@@ -4,10 +4,15 @@ import Link from "next/link";
 import { useMe } from "@/context/MeContext";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export function Header() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentQuery = pathname === "/events" ? (searchParams.get("q") ?? "") : "";
   const { data: session, update } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -35,6 +40,22 @@ export function Header() {
 
   async function handleLogout() {
     await signOut({ callbackUrl: "/" });
+  }
+
+  function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const rawValue = formData.get("search");
+    const normalized = typeof rawValue === "string" ? rawValue.trim() : "";
+
+    if (normalized.length < 2) {
+      router.push("/events");
+      return;
+    }
+
+    const params = new URLSearchParams();
+    params.set("q", normalized);
+    router.push(`/events?${params.toString()}`);
   }
 
   if (!me) return null;
@@ -128,14 +149,19 @@ export function Header() {
       </div>
 
       <div className="pt-3 border-t border-stone-700">
-        <label className="mx-auto block w-full max-w-3xl">
-          <span className="sr-only">Search</span>
-          <input
-            type="search"
-            placeholder="Keresés események között..."
-            className="w-full rounded-2xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-stone-100 placeholder:text-stone-400 focus:border-amber-400 focus:outline-none"
-          />
-        </label>
+        <form onSubmit={handleSearchSubmit} className="mx-auto w-full max-w-3xl">
+          <label className="block w-full">
+            <span className="sr-only">Search</span>
+            <input
+              key={`${pathname}-${currentQuery}`}
+              type="search"
+              name="search"
+              defaultValue={currentQuery}
+              placeholder="Keresés események és marketek között..."
+              className="w-full rounded-2xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-stone-100 placeholder:text-stone-400 focus:border-amber-400 focus:outline-none"
+            />
+          </label>
+        </form>
       </div>
     </header>
   );
