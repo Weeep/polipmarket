@@ -48,14 +48,20 @@ export function AchievementPopupQueue() {
       }
     }
 
+    function handleRefresh() {
+      void loadUnread();
+    }
+
     void loadUnread();
     const timer = setInterval(() => {
       void loadUnread();
     }, 30000);
+    window.addEventListener("achievements:refresh-unread", handleRefresh);
 
     return () => {
       active = false;
       clearInterval(timer);
+      window.removeEventListener("achievements:refresh-unread", handleRefresh);
     };
   }, [status]);
 
