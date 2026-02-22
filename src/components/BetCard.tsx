@@ -103,7 +103,7 @@ export function BetCard({
         </div>
       </div>
 
-      {isFilled && (
+      {isFilled && !isResolved && (
         <p className="text-s text-stone-400 text-center">
           Eladva {soldMetrics.shares.toFixed(2)} · Átlagár:{" "}
           {soldMetrics.executionPrice.toFixed(4)}ଳ · Bevétel:{" "}
@@ -122,11 +122,10 @@ export function BetCard({
         </p>
       )}
 
-      {isCancelled && <p className="text-xs text-stone-400">Törölt megbízás</p>}
-
       {isResolved && (
-        <p className="text-xs text-stone-400">
-          Elszámolás: {payout.toFixed(2)}
+        <p className="text-s text-stone-400 text-center">
+          Lezárva. {isWinning ? "NYERTES!" : "VESZTES."} · Bevétel:{" "}
+          {payout.toFixed(2)}ଳ · Profit:{" "}
           <span
             className={
               resolvedEventProfit > 0
@@ -136,19 +135,35 @@ export function BetCard({
                   : "text-stone-400"
             }
           >
-            {` (${resolvedEventProfitLabel})`}
+            {` ${resolvedEventProfitLabel}ଳ`}
           </span>
         </p>
       )}
 
+      {isCancelled && (
+        <p className="text-xs text-stone-400">
+          Törölve. Tét {payout}ଳ visszautalva.
+        </p>
+      )}
+
       <div className="flex items-center justify-between border-t border-stone-800 pt-2 px-4">
-        <span
-          className="text-stone-300"
-          title={`Fogadás lezárásáig hátralévő idő: ${closeTime.longLabel}`}
-          aria-label={`Fogadás lezárásáig hátralévő idő: ${closeTime.longLabel}`}
-        >
-          {closeTime.shortLabel}
-        </span>
+        {isCancelled ? (
+          <span
+            className="text-stone-300"
+            title={`Esemény törölve`}
+            aria-label={`Esemény törölve`}
+          >
+            ❌
+          </span>
+        ) : (
+          <span
+            className="text-stone-300"
+            title={`Fogadás lezárásáig hátralévő idő: ${closeTime.longLabel}`}
+            aria-label={`Fogadás lezárásáig hátralévő idő: ${closeTime.longLabel}`}
+          >
+            {closeTime.shortLabel}
+          </span>
+        )}
 
         {isActive && (
           <button
