@@ -115,6 +115,16 @@ function normalizeMarkets(markets, fallbackYesStartPercent, eventIndex) {
   });
 }
 
+function collectCreatorIds(events, createdByArg, payloadCreatedBy) {
+  return [
+    ...new Set(
+      events
+        .map((event) => event?.createdBy ?? createdByArg ?? payloadCreatedBy)
+        .filter((value) => typeof value === "string" && value.trim().length > 0),
+    ),
+  ];
+}
+
 async function main() {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required");
@@ -137,6 +147,25 @@ async function main() {
   const prisma = new PrismaClient({ adapter, log: ["error", "warn"] });
 
   try {
+    const creatorIds = collectCreatorIds(events, createdByArg, payloadCreatedBy);
+    const existingCreators = await prisma.user.findMany({
+      where: {
+        id: {
+          in: creatorIds,
+        },
+      },
+      select: { id: true },
+    });
+    const existingCreatorIds = new Set(existingCreators.map((user) => user.id));
+    const missingCreatorIds = creatorIds.filter((id) => !existingCreatorIds.has(id));
+
+    if (missingCreatorIds.length > 0) {
+      throw new Error(
+        `Unknown createdBy user id(s): ${missingCreatorIds.join(", ")}. ` +
+          "The importer only accepts existing User ids, because Event.createdBy and Market.createdBy have foreign-key constraints.",
+      );
+    }
+
     let imported = 0;
 
     for (const [index, event] of events.entries()) {
