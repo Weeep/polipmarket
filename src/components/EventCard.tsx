@@ -60,10 +60,6 @@ export function EventCard({ event }: Props) {
         }),
       });
 
-      await apiFetch("/api/achievements/evaluate", {
-        method: "POST",
-      });
-
       window.dispatchEvent(new Event("achievements:refresh-unread"));
 
       await refreshMe();
