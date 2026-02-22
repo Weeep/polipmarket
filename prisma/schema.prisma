@@ -64,9 +64,60 @@ model User {
   orders    Order[]
   positions Position[]
   positionLots PositionLot[]
+  achievements UserAchievement[]
+  walletLedgerEntries WalletLedger[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AchievementDefinition {
+  id          String   @id @default(cuid())
+  number      Int      @unique
+  code        String   @unique
+  title       String
+  description String?
+  reward      Int
+  category    String
+  targetValue Int?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userAchievements UserAchievement[]
+
+  @@index([isActive, number])
+  @@index([category, targetValue])
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+  rewardGranted Int
+  createdAt     DateTime @default(now())
+
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement AchievementDefinition @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId, unlockedAt])
+}
+
+model WalletLedger {
+  id            String   @id @default(cuid())
+  userId        String
+  amount        Int
+  reason        String
+  referenceType String?
+  referenceId   String?
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([referenceType, referenceId])
 }
 
 model Wallet {

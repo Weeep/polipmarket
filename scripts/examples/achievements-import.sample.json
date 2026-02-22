@@ -1,0 +1,54 @@
+{
+  "achievements": [
+    {
+      "number": 100,
+      "code": "first_login",
+      "title": "Első belépés",
+      "description": "Sikeresen bejelentkeztél először.",
+      "reward": 100,
+      "category": "LOGIN",
+      "targetValue": 1,
+      "isActive": true
+    },
+    {
+      "number": 200,
+      "code": "bet_10_events",
+      "title": "10 eseményre fogadás",
+      "description": "Fogadj legalább 10 különböző eseményre.",
+      "reward": 300,
+      "category": "BET_EVENTS",
+      "targetValue": 10,
+      "isActive": true
+    },
+    {
+      "number": 250,
+      "code": "lose_10_bets",
+      "title": "10 vesztes fogadás",
+      "description": "Legyen legalább 10 vesztes fogadásod lezárt piacokon.",
+      "reward": 200,
+      "category": "LOSE_BETS",
+      "targetValue": 10,
+      "isActive": false
+    },
+    {
+      "number": 300,
+      "code": "bet_20_events",
+      "title": "20 eseményre fogadás",
+      "description": "Fogadj legalább 20 különböző eseményre.",
+      "reward": 500,
+      "category": "BET_EVENTS",
+      "targetValue": 20,
+      "isActive": true
+    },
+    {
+      "number": 400,
+      "code": "win_5_bets",
+      "title": "5 nyertes fogadás",
+      "description": "Legyen legalább 5 nyertes fogadásod lezárt piacokon.",
+      "reward": 250,
+      "category": "WIN_BETS",
+      "targetValue": 5,
+      "isActive": true
+    }
+  ]
+}
