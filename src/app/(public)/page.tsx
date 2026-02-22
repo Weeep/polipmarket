@@ -81,21 +81,6 @@ function mergeUpdatedMarket(
   };
 }
 
-function HomeSearchBar() {
-  return (
-    <div className="px-4 pt-3">
-      <label className="block mx-auto w-full max-w-md">
-        <span className="sr-only">Search</span>
-        <input
-          type="search"
-          placeholder="Keresés események között..."
-          className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-stone-100 placeholder:text-stone-400 focus:border-amber-400 focus:outline-none"
-        />
-      </label>
-    </div>
-  );
-}
-
 export default function HomePage() {
   const [myMarkets, setMyMarkets] = useState<MyEventMarketBetDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,7 +123,6 @@ export default function HomePage() {
 
   return (
     <main className="p-0 sm:p-8">
-      <HomeSearchBar />
       <div className="max-w-6xl mx-auto py-0 sm:px-6 sm:py-10 space-y-6 sm:space-y-10 pt-2">
         <ActiveEventsTabsTable />
 
