@@ -36,9 +36,13 @@ export function BetCard({
       ? shares * settlePrice
       : 0
     : bet.amount;
-  const profit = payout - bet.amount;
-  const profitLabel =
-    profit > 0 ? `+${profit.toFixed(2)}` : profit < 0 ? profit.toFixed(2) : "0";
+  const resolvedEventProfit = payout - bet.amount;
+  const resolvedEventProfitLabel =
+    resolvedEventProfit > 0
+      ? `+${resolvedEventProfit.toFixed(2)}`
+      : resolvedEventProfit < 0
+        ? resolvedEventProfit.toFixed(2)
+        : "0";
 
   const soldMetrics = getSellDisplayMetricsFromBet({
     shares,
@@ -50,6 +54,14 @@ export function BetCard({
     soldAmount: bet.soldAmount,
     amount: bet.amount,
   });
+
+  const selledShareProfit = soldMetrics.netAmount - bet.amount;
+  const selledShareProfitLabel =
+    selledShareProfit > 0
+      ? `+${selledShareProfit.toFixed(2)}ଳ`
+      : selledShareProfit < 0
+        ? `${selledShareProfit.toFixed(2)}ଳ`
+        : "0ଳ";
 
   return (
     <div className="rounded-lg border border-stone-800 bg-stone-950/60 px-4 py-3 text-sm text-stone-300 space-y-3">
@@ -79,11 +91,11 @@ export function BetCard({
         </div>
         <div>
           <p className="text-stone-500">Tét</p>
-          <p>{bet.amount.toFixed(2)}</p>
+          <p>{bet.amount.toFixed(2)}ଳ</p>
         </div>
         <div>
           <p className="text-stone-500">Ár</p>
-          <p>{bet.price.toFixed(4)}</p>
+          <p>{bet.price.toFixed(4)}ଳ</p>
         </div>
         <div>
           <p className="text-stone-500">Shares</p>
@@ -92,10 +104,21 @@ export function BetCard({
       </div>
 
       {isFilled && (
-        <p className="text-xs text-stone-400">
-          Eladott {soldMetrics.shares.toFixed(2)} · Átlagár:{" "}
-          {soldMetrics.executionPrice.toFixed(4)} · Nettó:{" "}
-          {soldMetrics.netAmount.toFixed(2)}
+        <p className="text-s text-stone-400 text-center">
+          Eladva {soldMetrics.shares.toFixed(2)} · Átlagár:{" "}
+          {soldMetrics.executionPrice.toFixed(4)}ଳ · Bevétel:{" "}
+          {soldMetrics.netAmount.toFixed(2)}ଳ · Profit:{" "}
+          <span
+            className={
+              selledShareProfit > 0
+                ? "text-emerald-400"
+                : selledShareProfit < 0
+                  ? "text-rose-400"
+                  : "text-stone-400"
+            }
+          >
+            {` ${selledShareProfitLabel}`}
+          </span>
         </p>
       )}
 
@@ -106,14 +129,14 @@ export function BetCard({
           Elszámolás: {payout.toFixed(2)}
           <span
             className={
-              profit > 0
+              resolvedEventProfit > 0
                 ? "text-emerald-400"
-                : profit < 0
+                : resolvedEventProfit < 0
                   ? "text-rose-400"
                   : "text-stone-400"
             }
           >
-            {` (${profitLabel})`}
+            {` (${resolvedEventProfitLabel})`}
           </span>
         </p>
       )}

@@ -1,0 +1,15 @@
+{
+  "achievements": 
+  [
+	  {
+      "number": 350,
+      "code": "win_1_bets",
+      "title": "1 nyertes fogadás",
+      "description": "Legyen legalább 1 nyertes fogadásod lezárt piacokon.",
+      "reward": 250,
+      "category": "WIN_BETS",
+      "targetValue": 1,
+      "isActive": true
+    }
+  ]
+}
