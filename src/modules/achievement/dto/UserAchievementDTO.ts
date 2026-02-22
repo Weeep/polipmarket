@@ -3,6 +3,7 @@ export type UserAchievementDTO = {
   userId: string;
   achievementId: string;
   unlockedAt: Date;
+  acknowledgedAt: Date | null;
   rewardGranted: number;
   createdAt: Date;
 };
