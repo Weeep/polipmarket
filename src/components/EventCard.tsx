@@ -69,7 +69,7 @@ export function EventCard({ event }: Props) {
     } catch (err: unknown) {
       const message = getErrorMessage(err, "Order failed");
       if (message === "Unauthorized") {
-        redirect("/login");
+        redirect("/about");
       } else {
         setError(message);
       }
