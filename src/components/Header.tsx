@@ -18,9 +18,40 @@ export function Header() {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { me } = useMe();
+  const previousAmountsRef = useRef<{ balance: number; locked: number } | null>(null);
+  const balanceAmountRef = useRef<HTMLDivElement>(null);
+  const lockedAmountRef = useRef<HTMLDivElement>(null);
 
   const isImpersonating = Boolean(session?.user?.impersonatedBy);
   const isAdmin = me?.role === "ADMIN";
+
+  useEffect(() => {
+    if (!me) {
+      return;
+    }
+
+    const previous = previousAmountsRef.current;
+
+    function triggerWalletAnimation(target: HTMLDivElement | null) {
+      if (!target) {
+        return;
+      }
+      target.classList.remove("wallet-amount--changed");
+      void target.offsetWidth;
+      target.classList.add("wallet-amount--changed");
+    }
+
+    if (previous) {
+      if (previous.balance !== me.balance) {
+        triggerWalletAnimation(balanceAmountRef.current);
+      }
+      if (previous.locked !== me.locked) {
+        triggerWalletAnimation(lockedAmountRef.current);
+      }
+    }
+
+    previousAmountsRef.current = { balance: me.balance, locked: me.locked };
+  }, [me]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -80,8 +111,12 @@ export function Header() {
 
         <div className="ml-auto flex items-center gap-3 sm:gap-4">
           <div className="text-right text-xs text-stone-200 sm:text-sm">
-            <div>💰 {me.balance.toLocaleString()}ଳ</div>
-            <div>🔒 {me.locked.toLocaleString()}ଳ</div>
+            <div ref={balanceAmountRef} className="wallet-amount">
+              💰 {me.balance.toLocaleString()}ଳ
+            </div>
+            <div ref={lockedAmountRef} className="wallet-amount">
+              🔒 {me.locked.toLocaleString()}ଳ
+            </div>
           </div>
 
           <div className="relative" ref={menuRef}>
