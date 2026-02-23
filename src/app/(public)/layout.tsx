@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { MeProvider } from "@/context/MeContext";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { AchievementPopupQueue } from "@/components/AchievementPopupQueue";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -21,7 +22,9 @@ export default function RootLayout({
       <body className="bg-zinc-950 text-slate-900 min-h-screen">
         <Providers>
           <MeProvider>
-            <Header />
+            <Suspense fallback={null}>
+              <Header />
+            </Suspense>
             <AchievementPopupQueue />
             <div className="pb-20 md:pb-0">{children}</div>
             <MobileBottomNav />

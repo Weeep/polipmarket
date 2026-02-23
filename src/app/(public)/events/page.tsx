@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
 import { EventCard } from "@/components/EventCard";
@@ -11,7 +11,7 @@ function normalizeSearchTerm(value: string | null) {
   return (value ?? "").trim().toLocaleLowerCase();
 }
 
-export default function EventsPage() {
+function EventsPageContent() {
   const searchParams = useSearchParams();
   const [events, setEvents] = useState<EventSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,5 +66,13 @@ export default function EventsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function EventsPage() {
+  return (
+    <Suspense fallback={<p>Loading events…</p>}>
+      <EventsPageContent />
+    </Suspense>
   );
 }
