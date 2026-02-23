@@ -73,7 +73,7 @@ export function ActiveEventsTabsTable() {
         ))}
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto px-[.5rem]">
         <table className="min-w-full text-sm text-stone-200">
           <thead className="text-left text-stone-400">
             <tr className="border-b border-stone-700">
@@ -114,7 +114,7 @@ export function ActiveEventsTabsTable() {
                   </tr>
                   <tr className="border-b border-stone-800">
                     <td className="pb-3 pr-4 text-stone-300">
-                      {formatVolume(event.eventStats?.totalVolume)}
+                      {formatVolume(event.eventStats?.totalVolume)}ଳ
                     </td>
                     <td className="pb-3 pr-4 text-stone-300">
                       {getRemainingTimeInfo(event.bettingCloseAt).longLabel}
