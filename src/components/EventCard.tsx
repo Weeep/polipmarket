@@ -17,6 +17,10 @@ function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
 
+function formatVolume(value: number) {
+  return Math.round(value).toLocaleString("hu-HU");
+}
+
 export function EventCard({ event }: Props) {
   const presetAmounts = [10, 50, 100, 200];
   const [amount, setAmount] = useState(10);
@@ -193,7 +197,7 @@ export function EventCard({ event }: Props) {
                 {marketStats && (
                   <div className="text-xs text-stone-300">
                     Bets: {marketStats.totalBets} · Volume:{" "}
-                    {marketStats.totalVolume}
+                    {formatVolume(marketStats.totalVolume)}
                   </div>
                 )}
               </div>
@@ -205,7 +209,7 @@ export function EventCard({ event }: Props) {
       {event.eventStats && (
         <div className="marketcard-statusbar justify-center">
           Bets: {event.eventStats.totalBets} · Volume:{" "}
-          {event.eventStats.totalVolume}
+          {formatVolume(event.eventStats.totalVolume)}
         </div>
       )}
 

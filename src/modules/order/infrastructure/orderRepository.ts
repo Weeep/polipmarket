@@ -60,19 +60,28 @@ async function fetchMarketStats(marketId: string, userId?: string) {
     ...(userId ? { userId } : {}),
   };
 
-  const [totalBets, totalVolumeAgg] = await Promise.all([
-    prisma.order.count({ where }),
-    prisma.order.aggregate({
-      where,
-      _sum: {
-        amount: true,
-      },
-    }),
-  ]);
+  const sideStats = await prisma.order.groupBy({
+    by: ["side"],
+    where,
+    _count: {
+      _all: true,
+    },
+    _sum: {
+      amount: true,
+    },
+  });
+
+  const buyStats = sideStats.find((stat) => stat.side === "BUY");
+  const sellStats = sideStats.find((stat) => stat.side === "SELL");
+
+  const buyCount = buyStats?._count._all ?? 0;
+  const sellCount = sellStats?._count._all ?? 0;
+  const buyVolume = buyStats?._sum.amount ?? 0;
+  const sellVolume = sellStats?._sum.amount ?? 0;
 
   return {
-    totalBets,
-    totalVolume: totalVolumeAgg._sum.amount ?? 0,
+    totalBets: Math.max(0, buyCount - sellCount),
+    totalVolume: Math.max(0, buyVolume - sellVolume),
   };
 }
 
