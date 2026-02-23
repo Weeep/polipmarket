@@ -18,9 +18,30 @@ export function Header() {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { me } = useMe();
+  const [animateBalance, setAnimateBalance] = useState(false);
+  const [animateLocked, setAnimateLocked] = useState(false);
+  const previousAmountsRef = useRef<{ balance: number; locked: number } | null>(null);
 
   const isImpersonating = Boolean(session?.user?.impersonatedBy);
   const isAdmin = me?.role === "ADMIN";
+
+  useEffect(() => {
+    if (!me) {
+      return;
+    }
+
+    const previous = previousAmountsRef.current;
+    if (previous) {
+      if (previous.balance !== me.balance) {
+        window.setTimeout(() => setAnimateBalance(true), 0);
+      }
+      if (previous.locked !== me.locked) {
+        window.setTimeout(() => setAnimateLocked(true), 0);
+      }
+    }
+
+    previousAmountsRef.current = { balance: me.balance, locked: me.locked };
+  }, [me]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -80,8 +101,18 @@ export function Header() {
 
         <div className="ml-auto flex items-center gap-3 sm:gap-4">
           <div className="text-right text-xs text-stone-200 sm:text-sm">
-            <div>💰 {me.balance.toLocaleString()}ଳ</div>
-            <div>🔒 {me.locked.toLocaleString()}ଳ</div>
+            <div
+              className={animateBalance ? "wallet-amount wallet-amount--changed" : "wallet-amount"}
+              onAnimationEnd={() => setAnimateBalance(false)}
+            >
+              💰 {me.balance.toLocaleString()}ଳ
+            </div>
+            <div
+              className={animateLocked ? "wallet-amount wallet-amount--changed" : "wallet-amount"}
+              onAnimationEnd={() => setAnimateLocked(false)}
+            >
+              🔒 {me.locked.toLocaleString()}ଳ
+            </div>
           </div>
 
           <div className="relative" ref={menuRef}>

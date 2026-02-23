@@ -10,6 +10,27 @@ body {
   color: #e7e5e4;
 }
 
+@keyframes walletShake {
+  0% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-2px);
+  }
+  40% {
+    transform: translateX(2px);
+  }
+  60% {
+    transform: translateX(-2px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
 @layer components {
   .button-gold {
     @apply bg-yellow-500 text-stone-900 px-4 py-2 rounded-lg font-bold
@@ -98,5 +119,13 @@ body {
 
   .marketcard-no-button .marketcard-price {
     @apply text-stone-300;
+  }
+
+  .wallet-amount {
+    @apply inline-block;
+  }
+
+  .wallet-amount--changed {
+    animation: walletShake 280ms ease-in-out;
   }
 }
