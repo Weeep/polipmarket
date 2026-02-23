@@ -148,9 +148,9 @@ export function EventCard({ event }: Props) {
           )}
         </div>
 
-        <div className="marketcard-amount">
+        <div className="marketcard-amount justify-center text-center sm:justify-start sm:text-left">
           <span className="marketcard-amount-label">Amount (ଳ)</span>
-          <div className="marketcard-amount-bar">
+          <div className="marketcard-amount-bar justify-center rounded-3xl sm:justify-start sm:rounded-full">
             {presetAmounts.map((value) => (
               <button
                 key={value}
@@ -191,9 +191,9 @@ export function EventCard({ event }: Props) {
             return (
               <div
                 key={market.id}
-                className="marketcard-outcome flex flex-wrap items-center justify-between gap-4"
+                className="marketcard-outcome flex flex-wrap items-center justify-center gap-4 sm:justify-between"
               >
-                <div className="space-y-1">
+                <div className="space-y-1 text-center sm:text-left">
                   <div className="marketcard-outcome-label">
                     {market.question}
                   </div>
@@ -202,8 +202,8 @@ export function EventCard({ event }: Props) {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-4">
-                  <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-start">
+                  <div className="flex flex-wrap justify-center gap-3 sm:justify-start">
                     <button
                       className="marketcard-yes-button disabled:opacity-50"
                       disabled={
