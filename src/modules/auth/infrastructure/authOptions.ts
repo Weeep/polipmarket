@@ -82,6 +82,27 @@ export const authOptions: AuthOptions = {
       return token;
     },
 
+    async redirect({ url, baseUrl }) {
+      console.log("sssssssssss");
+      console.log(process.env.NEXTAUTH_URL);
+      console.log(baseUrl);
+      const appUrl = process.env.NEXTAUTH_URL ?? baseUrl;
+
+      if (url.startsWith("/")) {
+        return `${appUrl}${url}`;
+      }
+
+      try {
+        if (new URL(url).origin === new URL(appUrl).origin) {
+          return url;
+        }
+      } catch {
+        return appUrl;
+      }
+
+      return appUrl;
+    },
+
     async session({ session, token }) {
       if (session.user && typeof token.sub === "string") {
         const appToken = token as AppToken;
