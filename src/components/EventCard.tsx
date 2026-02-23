@@ -149,7 +149,7 @@ export function EventCard({ event }: Props) {
         </div>
 
         <div className="marketcard-amount">
-          <span className="marketcard-amount-label">Amount</span>
+          <span className="marketcard-amount-label">Amount (ଳ)</span>
           <div className="marketcard-amount-bar">
             {presetAmounts.map((value) => (
               <button
@@ -194,7 +194,9 @@ export function EventCard({ event }: Props) {
                 className="marketcard-outcome flex flex-wrap items-center justify-between gap-4"
               >
                 <div className="space-y-1">
-                  <div className="marketcard-outcome-label">{market.question}</div>
+                  <div className="marketcard-outcome-label">
+                    {market.question}
+                  </div>
                   <div className="text-xs uppercase text-stone-400">
                     {market.status}
                   </div>
@@ -248,8 +250,8 @@ export function EventCard({ event }: Props) {
 
                   {marketStats && (
                     <div className="text-xs text-stone-300">
-                      Bets: {marketStats.totalBets} · Volume: {" "}
-                      {formatVolume(marketStats.totalVolume)}
+                      Bets: {marketStats.totalBets} · Volume:{"  "}
+                      {formatVolume(marketStats.totalVolume)}ଳ
                     </div>
                   )}
                 </div>
@@ -260,8 +262,8 @@ export function EventCard({ event }: Props) {
 
         {eventData.eventStats && (
           <div className="marketcard-statusbar justify-center">
-            Bets: {eventData.eventStats.totalBets} · Volume: {" "}
-            {formatVolume(eventData.eventStats.totalVolume)}
+            Bets: {eventData.eventStats.totalBets} · Volume:{"  "}
+            {formatVolume(eventData.eventStats.totalVolume)}ଳ
           </div>
         )}
 
@@ -283,15 +285,50 @@ export function EventCard({ event }: Props) {
       {buyDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
           <div className="w-full max-w-md rounded-xl border border-stone-700 bg-stone-900 p-5 text-stone-200 shadow-2xl">
-            <h3 className="mb-3 text-lg font-bold text-stone-100">Vásárlás megerősítése</h3>
+            <h3 className="mb-3 text-lg font-bold text-stone-100">
+              Vásárlás megerősítése
+            </h3>
             <div className="space-y-1 text-sm">
-              <p>Összeg: <span className="font-semibold">{buyDialog.quote.amount.toFixed(2)}</span></p>
-              <p>Várható átlagár: <span className="font-semibold">{buyDialog.quote.executionPrice.toFixed(4)}</span></p>
-              <p>Várható részvény db: <span className="font-semibold">{buyDialog.quote.estimatedShares.toFixed(2)}</span></p>
-              <p>Pozíció: <span className="font-semibold">{buyDialog.position}</span></p>
-              <p>Fee: <span className="font-semibold">{buyDialog.quote.fee.toFixed(2)}</span></p>
-              <p>Nyereség (ha nyer): <span className="font-semibold text-emerald-400">{winProfit.toFixed(2)}</span></p>
-              <p>Veszteség (ha veszít): <span className="font-semibold text-rose-400">{buyDialog.quote.amount.toFixed(2)}</span></p>
+              <p>
+                Összeg:{" "}
+                <span className="font-semibold">
+                  {buyDialog.quote.amount.toFixed(2)}
+                </span>
+              </p>
+              <p>
+                Várható átlagár:{" "}
+                <span className="font-semibold">
+                  {buyDialog.quote.executionPrice.toFixed(4)}
+                </span>
+              </p>
+              <p>
+                Várható részvény db:{" "}
+                <span className="font-semibold">
+                  {buyDialog.quote.estimatedShares.toFixed(2)}
+                </span>
+              </p>
+              <p>
+                Pozíció:{" "}
+                <span className="font-semibold">{buyDialog.position}</span>
+              </p>
+              <p>
+                Fee:{" "}
+                <span className="font-semibold">
+                  {buyDialog.quote.fee.toFixed(2)}
+                </span>
+              </p>
+              <p>
+                Nyereség (ha nyer):{" "}
+                <span className="font-semibold text-emerald-400">
+                  {winProfit.toFixed(2)}
+                </span>
+              </p>
+              <p>
+                Veszteség (ha veszít):{" "}
+                <span className="font-semibold text-rose-400">
+                  {buyDialog.quote.amount.toFixed(2)}
+                </span>
+              </p>
             </div>
             <div className="mt-5 flex justify-end gap-3">
               <button
