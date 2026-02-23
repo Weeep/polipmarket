@@ -18,9 +18,9 @@ export function Header() {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { me } = useMe();
-  const [animateBalance, setAnimateBalance] = useState(false);
-  const [animateLocked, setAnimateLocked] = useState(false);
   const previousAmountsRef = useRef<{ balance: number; locked: number } | null>(null);
+  const balanceAmountRef = useRef<HTMLDivElement>(null);
+  const lockedAmountRef = useRef<HTMLDivElement>(null);
 
   const isImpersonating = Boolean(session?.user?.impersonatedBy);
   const isAdmin = me?.role === "ADMIN";
@@ -31,12 +31,22 @@ export function Header() {
     }
 
     const previous = previousAmountsRef.current;
+
+    function triggerWalletAnimation(target: HTMLDivElement | null) {
+      if (!target) {
+        return;
+      }
+      target.classList.remove("wallet-amount--changed");
+      void target.offsetWidth;
+      target.classList.add("wallet-amount--changed");
+    }
+
     if (previous) {
       if (previous.balance !== me.balance) {
-        window.setTimeout(() => setAnimateBalance(true), 0);
+        triggerWalletAnimation(balanceAmountRef.current);
       }
       if (previous.locked !== me.locked) {
-        window.setTimeout(() => setAnimateLocked(true), 0);
+        triggerWalletAnimation(lockedAmountRef.current);
       }
     }
 
@@ -101,16 +111,10 @@ export function Header() {
 
         <div className="ml-auto flex items-center gap-3 sm:gap-4">
           <div className="text-right text-xs text-stone-200 sm:text-sm">
-            <div
-              className={animateBalance ? "wallet-amount wallet-amount--changed" : "wallet-amount"}
-              onAnimationEnd={() => setAnimateBalance(false)}
-            >
+            <div ref={balanceAmountRef} className="wallet-amount">
               💰 {me.balance.toLocaleString()}ଳ
             </div>
-            <div
-              className={animateLocked ? "wallet-amount wallet-amount--changed" : "wallet-amount"}
-              onAnimationEnd={() => setAnimateLocked(false)}
-            >
+            <div ref={lockedAmountRef} className="wallet-amount">
               🔒 {me.locked.toLocaleString()}ଳ
             </div>
           </div>
