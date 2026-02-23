@@ -83,9 +83,6 @@ export const authOptions: AuthOptions = {
     },
 
     async redirect({ url, baseUrl }) {
-      console.log("sssssssssss");
-      console.log(process.env.NEXTAUTH_URL);
-      console.log(baseUrl);
       const appUrl = process.env.NEXTAUTH_URL ?? baseUrl;
 
       if (url.startsWith("/")) {
