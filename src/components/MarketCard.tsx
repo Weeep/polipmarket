@@ -21,6 +21,10 @@ function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
 
+function formatVolume(value: number) {
+  return Math.round(value).toLocaleString("hu-HU");
+}
+
 export function MarketCard({ market, marketStats }: Props) {
   const presetAmounts = [10, 50, 100, 200];
   const [amount, setAmount] = useState(10);
@@ -182,7 +186,7 @@ export function MarketCard({ market, marketStats }: Props) {
       {stats && (
         <div className="marketcard-statusbar justify-center">
           Bets: {stats.totalMarketStats.totalBets} · Volume:{" "}
-          {stats.totalMarketStats.totalVolume}
+          {formatVolume(stats.totalMarketStats.totalVolume)}
         </div>
       )}
 
