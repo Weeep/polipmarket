@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useMe } from "@/context/MeContext";
 
 const navItems = [
   { href: "/events", label: "Események", emoji: "📅" },
@@ -17,6 +18,11 @@ type MobileBottomNavProps = {
 export function MobileBottomNav({ mode = "mobile" }: MobileBottomNavProps) {
   const pathname = usePathname();
   const isDesktop = mode === "desktop";
+  const { me } = useMe();
+
+  if (!me) {
+    return null;
+  }
 
   return (
     <nav
