@@ -19,8 +19,9 @@ export default function AboutPage() {
         <div className="space-y-4 text-base leading-relaxed text-stone-300 md:text-lg">
           <p>
             A Polipmarket egy közösségi előrejelző oldal: kérdésekre lehet
-            „IGEN” vagy „NEM” oldalon tippet tenni, például arra, hogy mi fog
-            történni a sportban, a technológiában vagy a világban.
+            „IGEN” vagy „NEM” oldalon tippet tenni, manapság leginkább arra,
+            hogy mi fog történni a magyar politikában, de akár arra is, hogy mi
+            fog a sportban, a technológiában vagy a világban.
           </p>
           <p>
             Nem kell hozzá pénzügyi tudás: egyszerűen kiválasztod, szerinted mi
@@ -28,9 +29,9 @@ export default function AboutPage() {
             tippelsz, növelheted az egyenlegedet.
           </p>
           <p>
-            A bejelentkezés Google-fiókkal történik, így gyorsan és biztonságosan
-            tudsz csatlakozni. Belépés után azonnal láthatod az aktív eseményeket
-            és leadhatod az első tippedet.
+            A bejelentkezés Google-fiókkal történik, így gyorsan és
+            biztonságosan tudsz csatlakozni. Belépés után azonnal láthatod az
+            aktív eseményeket és leadhatod az első tippedet.
           </p>
           <p className="font-semibold text-amber-200">
             A Polipmarketet kizárólag 18 éven felüliek használhatják. Ha még nem
@@ -41,7 +42,9 @@ export default function AboutPage() {
 
       <aside className="flex w-full items-center justify-center md:w-1/3">
         <div className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900/70 p-8 text-center shadow-xl shadow-black/20">
-          <p className="mb-6 text-sm text-stone-300">Kezdd el pár kattintással.</p>
+          <p className="mb-6 text-sm text-stone-300">
+            Kezdd el pár kattintással.
+          </p>
           <button
             disabled={!acceptedLegal}
             onClick={() => signIn("google", { callbackUrl: "/" })}
@@ -65,8 +68,8 @@ export default function AboutPage() {
                 className="text-amber-300 underline hover:text-amber-200"
               >
                 Általános Szerződési Feltételeket
-              </Link>
-              {" "}és az{" "}
+              </Link>{" "}
+              és az{" "}
               <Link
                 href="/assets/adatkezelesi_tajekoztato.pdf"
                 target="_blank"
