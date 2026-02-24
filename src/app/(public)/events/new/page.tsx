@@ -89,13 +89,13 @@ export default function NewEventPage() {
       <div className="mb-4 rounded-lg border border-stone-200/60 bg-stone-800/40 p-4 text-sm text-stone-100">
         <p className="font-semibold">Új esemény beküldése</p>
         <p className="mt-2">
-          Ezen az oldalon új eseményt hozhatsz létre. Kérjük, olyan kérdést adj meg,
-          ahol a végső eredmény objektív és egyértelműen eldönthető IGEN vagy NEM
-          formában.
+          Ezen az oldalon új eseményt hozhatsz létre. Kérjük, olyan kérdést adj
+          meg, ahol a végső eredmény objektív és egyértelműen eldönthető IGEN
+          vagy NEM formában.
         </p>
         <p className="mt-2">
-          A beküldött eseményeket admin ellenőrzi és hagyja jóvá. Jóváhagyott esemény
-          esetén a létrehozó 100 polipot kap.
+          A beküldött eseményeket admin ellenőrzi és hagyja jóvá. Jóváhagyott
+          esemény esetén a létrehozó 100ଳ jutalmat kap.
         </p>
         <p className="mt-2">
           Fontos: jelenleg nem küldünk külön értesítést a jóváhagyásról vagy
