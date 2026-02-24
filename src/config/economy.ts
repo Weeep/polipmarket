@@ -11,6 +11,9 @@ export const DEFAULT_MAX_SLIPPAGE_BPS = 2000;
 // 100 bps = 1%
 export const DEFAULT_AMM_FEE_BPS = 50;
 
+// Reward for creators when an admin approves one of their events
+export const EVENT_APPROVAL_REWARD = 100;
+
 // === Possible improvement later
 // export const ECONOMY = {
 //   default: {
