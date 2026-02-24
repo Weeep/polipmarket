@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
 import { getRemainingTimeInfo } from "@/lib/remainingTime";
 import type { EventSummary } from "@/modules/event/domain/Event";
@@ -47,7 +46,6 @@ function formatVolume(value?: number) {
 }
 
 export function ActiveEventsTabsTable() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<ActiveEventsTab>("NEW_EVENT");
   const [events, setEvents] = useState<EventSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -121,28 +119,26 @@ export function ActiveEventsTabsTable() {
               events.map((event) => (
                 <tr
                   key={event.id}
-                  role="link"
-                  tabIndex={0}
-                  onClick={() => router.push(`/events/${event.id}`)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      router.push(`/events/${event.id}`);
-                    }
-                  }}
-                  className="border-b border-stone-800 cursor-pointer transition-colors hover:bg-stone-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                  className="border-b border-stone-800 transition-colors hover:bg-stone-800/60"
                 >
-                  <td className="py-3 pr-4 font-medium text-stone-100">
-                    {event.question}
-                  </td>
-                  <td className="py-3 pr-4 text-stone-300">
-                    {formatVolume(event.eventStats?.totalVolume)}ଳ
-                  </td>
-                  <td className="py-3 pr-4 text-stone-300">
-                    {getRemainingTimeInfo(event.bettingCloseAt).longLabel}
-                  </td>
-                  <td className="py-3 text-stone-300">
-                    {getRemainingTimeInfo(event.resolveAt).longLabel}
+                  <td className="p-0" colSpan={4}>
+                    <Link
+                      href={`/events/${event.id}`}
+                      className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-x-0 px-0 text-stone-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                    >
+                      <span className="py-3 pr-4 font-medium text-stone-100">
+                        {event.question}
+                      </span>
+                      <span className="py-3 pr-4">
+                        {formatVolume(event.eventStats?.totalVolume)}ଳ
+                      </span>
+                      <span className="py-3 pr-4">
+                        {getRemainingTimeInfo(event.bettingCloseAt).longLabel}
+                      </span>
+                      <span className="py-3">
+                        {getRemainingTimeInfo(event.resolveAt).longLabel}
+                      </span>
+                    </Link>
                   </td>
                 </tr>
               ))}
