@@ -7,17 +7,29 @@ import { apiFetch } from "@/lib/apiFetch";
 import { getRemainingTimeInfo } from "@/lib/remainingTime";
 import type { EventSummary } from "@/modules/event/domain/Event";
 
-type ActiveEventsTab = "TOP_VOLUME" | "BETTING_CLOSE" | "EVENT_CLOSE";
+type ActiveEventsTab =
+  | "NEW_EVENT"
+  | "TOP_VOLUME"
+  | "BETTING_CLOSE"
+  | "EVENT_CLOSE";
 
 const TAB_CONFIG: Record<
   ActiveEventsTab,
   {
     label: string;
-    sort: "volume_desc" | "betting_close_asc" | "event_close_asc";
+    sort:
+      | "created_desc"
+      | "volume_desc"
+      | "betting_close_asc"
+      | "event_close_asc";
   }
 > = {
+  NEW_EVENT: {
+    label: "Új esemény",
+    sort: "created_desc",
+  },
   TOP_VOLUME: {
-    label: "Legtöbb fogadás",
+    label: "Legtöbb tét",
     sort: "volume_desc",
   },
   BETTING_CLOSE: {
@@ -36,7 +48,7 @@ function formatVolume(value?: number) {
 
 export function ActiveEventsTabsTable() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<ActiveEventsTab>("TOP_VOLUME");
+  const [activeTab, setActiveTab] = useState<ActiveEventsTab>("NEW_EVENT");
   const [events, setEvents] = useState<EventSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
