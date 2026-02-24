@@ -64,7 +64,7 @@ export function BetCard({
         : "0ଳ";
 
   return (
-    <div className="rounded-lg border border-stone-800 bg-stone-950/60 px-4 py-3 text-sm text-stone-300 space-y-3">
+    <div className="w-[310px] rounded-lg border border-stone-800 bg-stone-950/60 px-4 py-3 text-sm text-stone-300 space-y-3">
       <div className="space-y-2">
         {market.eventId && market.eventQuestion ? (
           <Link
