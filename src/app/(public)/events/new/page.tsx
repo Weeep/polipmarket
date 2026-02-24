@@ -86,6 +86,24 @@ export default function NewEventPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">
+      <div className="mb-4 rounded-lg border border-stone-200/60 bg-stone-800/40 p-4 text-sm text-stone-100">
+        <p className="font-semibold">Új esemény beküldése</p>
+        <p className="mt-2">
+          Ezen az oldalon új eseményt hozhatsz létre. Kérjük, olyan kérdést adj meg,
+          ahol a végső eredmény objektív és egyértelműen eldönthető IGEN vagy NEM
+          formában.
+        </p>
+        <p className="mt-2">
+          A beküldött eseményeket admin ellenőrzi és hagyja jóvá. Jóváhagyott esemény
+          esetén a létrehozó 100 polipot kap.
+        </p>
+        <p className="mt-2">
+          Fontos: jelenleg nem küldünk külön értesítést a jóváhagyásról vagy
+          elutasításról. A státuszt onnan látod, hogy az esemény megjelenik-e az
+          Események között.
+        </p>
+      </div>
+
       <div className="marketcard-base marketcard-question">
         <form
           onSubmit={onSubmit}
@@ -177,7 +195,7 @@ export default function NewEventPage() {
 
                     <div className="flex gap-2">
                       <label className="text-sm w-1/2">
-                        "Yes" esély (%):
+                        Yes esély (%):
                         <input
                           className="ml-2 border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
                           type="number"
@@ -205,7 +223,7 @@ export default function NewEventPage() {
                       </label>
 
                       <label className="text-sm w-1/2">
-                        "No" esély (%):
+                        No esély (%):
                         <input
                           className="ml-2 mt-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
                           type="number"
