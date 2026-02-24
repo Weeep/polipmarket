@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
 import { getRemainingTimeInfo } from "@/lib/remainingTime";
 import type { EventSummary } from "@/modules/event/domain/Event";
@@ -35,6 +35,7 @@ function formatVolume(value?: number) {
 }
 
 export function ActiveEventsTabsTable() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<ActiveEventsTab>("TOP_VOLUME");
   const [events, setEvents] = useState<EventSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +55,11 @@ export function ActiveEventsTabsTable() {
 
   return (
     <section className="marketcard-base space-y-4">
-      <h2 className="text-lg font-bold text-stone-100">Aktív események</h2>
+      <p className="text-sm text-stone-400">
+        Üdv! Itt láthatsz pár eseményt, csak kattints a neked szimpatikus
+        esemény sorára és már fogadhatsz is!
+      </p>
+      <h2 className="text-lg font-bold text-stone-100">Fogadható események</h2>
 
       <div className="flex flex-wrap gap-2 justify-center">
         {(Object.keys(TAB_CONFIG) as ActiveEventsTab[]).map((tab) => (
@@ -77,6 +82,7 @@ export function ActiveEventsTabsTable() {
         <table className="min-w-full text-sm text-stone-200">
           <thead className="text-left text-stone-400">
             <tr className="border-b border-stone-700">
+              <th className="py-2 pr-4">Esemény</th>
               <th className="py-2 pr-4">Összes tét</th>
               <th className="py-2 pr-4">Fogadás zárás</th>
               <th className="py-2">Esemény zárás</th>
@@ -85,7 +91,7 @@ export function ActiveEventsTabsTable() {
           <tbody>
             {loading && (
               <tr>
-                <td className="py-4 text-stone-400" colSpan={3}>
+                <td className="py-4 text-stone-400" colSpan={4}>
                   Betöltés...
                 </td>
               </tr>
@@ -93,7 +99,7 @@ export function ActiveEventsTabsTable() {
 
             {!loading && events.length === 0 && (
               <tr>
-                <td className="py-4 text-stone-400" colSpan={3}>
+                <td className="py-4 text-stone-400" colSpan={4}>
                   Nincs megjeleníthető aktív esemény.
                 </td>
               </tr>
@@ -101,29 +107,32 @@ export function ActiveEventsTabsTable() {
 
             {!loading &&
               events.map((event) => (
-                <Fragment key={event.id}>
-                  <tr>
-                    <td className="pb-1 pt-3" colSpan={3}>
-                      <Link
-                        href={`/events/${event.id}`}
-                        className="font-medium hover:underline"
-                      >
-                        {event.question}
-                      </Link>
-                    </td>
-                  </tr>
-                  <tr className="border-b border-stone-800">
-                    <td className="pb-3 pr-4 text-stone-300">
-                      {formatVolume(event.eventStats?.totalVolume)}ଳ
-                    </td>
-                    <td className="pb-3 pr-4 text-stone-300">
-                      {getRemainingTimeInfo(event.bettingCloseAt).longLabel}
-                    </td>
-                    <td className="pb-3 text-stone-300">
-                      {getRemainingTimeInfo(event.resolveAt).longLabel}
-                    </td>
-                  </tr>
-                </Fragment>
+                <tr
+                  key={event.id}
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => router.push(`/events/${event.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      router.push(`/events/${event.id}`);
+                    }
+                  }}
+                  className="border-b border-stone-800 cursor-pointer transition-colors hover:bg-stone-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                >
+                  <td className="py-3 pr-4 font-medium text-stone-100">
+                    {event.question}
+                  </td>
+                  <td className="py-3 pr-4 text-stone-300">
+                    {formatVolume(event.eventStats?.totalVolume)}ଳ
+                  </td>
+                  <td className="py-3 pr-4 text-stone-300">
+                    {getRemainingTimeInfo(event.bettingCloseAt).longLabel}
+                  </td>
+                  <td className="py-3 text-stone-300">
+                    {getRemainingTimeInfo(event.resolveAt).longLabel}
+                  </td>
+                </tr>
               ))}
           </tbody>
         </table>
