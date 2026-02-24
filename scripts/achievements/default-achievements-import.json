@@ -1,0 +1,154 @@
+{
+  "achievements": [
+    {
+      "number": 100,
+      "code": "first_login",
+      "title": "Első belépés",
+      "description": "Gratulálunk! Sikeresen bejelentkeztél!",
+      "reward": 200,
+      "category": "LOGIN",
+      "targetValue": 1,
+      "isActive": true
+    },
+    {
+      "number": 115,
+      "code": "bet_1_events",
+      "title": "1 eseményre fogadás",
+      "description": "Fogadj 1 eseményre.",
+      "reward": 100,
+      "category": "BET_EVENTS",
+      "targetValue": 1,
+      "isActive": true
+    },
+    {
+      "number": 200,
+      "code": "bet_10_events",
+      "title": "10 eseményre fogadás",
+      "description": "Fogadj legalább 10 különböző eseményre.",
+      "reward": 100,
+      "category": "BET_EVENTS",
+      "targetValue": 10,
+      "isActive": true
+    },
+    {
+      "number": 300,
+      "code": "win_1_bets",
+      "title": "1 nyertes fogadás",
+      "description": "Legyen legalább 1 nyertes fogadásod lezárt piacokon.",
+      "reward": 250,
+      "category": "WIN_BETS",
+      "targetValue": 1,
+      "isActive": true
+    },
+    {
+      "number": 350,
+      "code": "lose_1_bets",
+      "title": "1 vesztes fogadás",
+      "description": "Legyen legalább 1 vesztes fogadásod lezárt piacokon.",
+      "reward": 250,
+      "category": "LOSE_BETS",
+      "targetValue": 1,
+      "isActive": false
+    },
+    {
+      "number": 400,
+      "code": "bet_20_events",
+      "title": "20 eseményre fogadás",
+      "description": "Fogadj legalább 20 különböző eseményre.",
+      "reward": 200,
+      "category": "BET_EVENTS",
+      "targetValue": 20,
+      "isActive": true
+    },
+    {
+      "number": 500,
+      "code": "win_5_bets",
+      "title": "5 nyertes fogadás",
+      "description": "Legyen legalább 5 nyertes fogadásod lezárt piacokon.",
+      "reward": 250,
+      "category": "WIN_BETS",
+      "targetValue": 5,
+      "isActive": true
+    },
+    {
+      "number": 550,
+      "code": "lose_5_bets",
+      "title": "5 vesztes fogadás",
+      "description": "Legyen legalább 5 vesztes fogadásod lezárt piacokon.",
+      "reward": 250,
+      "category": "LOSE_BETS",
+      "targetValue": 5,
+      "isActive": false
+    },
+    {
+      "number": 600,
+      "code": "bet_50_events",
+      "title": "50 eseményre fogadás",
+      "description": "Fogadj legalább 50 különböző eseményre.",
+      "reward": 500,
+      "category": "BET_EVENTS",
+      "targetValue": 50,
+      "isActive": true
+    },
+    {
+      "number": 700,
+      "code": "win_10_bets",
+      "title": "10 nyertes fogadás",
+      "description": "Legyen legalább 10 nyertes fogadásod lezárt piacokon.",
+      "reward": 500,
+      "category": "WIN_BETS",
+      "targetValue": 10,
+      "isActive": true
+    },
+    {
+      "number": 750,
+      "code": "lose_10_bets",
+      "title": "10 vesztes fogadás",
+      "description": "Legyen legalább 10 vesztes fogadásod lezárt piacokon.",
+      "reward": 500,
+      "category": "LOSE_BETS",
+      "targetValue": 10,
+      "isActive": false
+    },
+    {
+      "number": 800,
+      "code": "bet_100_events",
+      "title": "100 eseményre fogadás",
+      "description": "Fogadj legalább 100 különböző eseményre.",
+      "reward": 1000,
+      "category": "BET_EVENTS",
+      "targetValue": 100,
+      "isActive": true
+    },
+    {
+      "number": 900,
+      "code": "win_20_bets",
+      "title": "20 nyertes fogadás",
+      "description": "Legyen legalább 20 nyertes fogadásod lezárt piacokon.",
+      "reward": 2000,
+      "category": "WIN_BETS",
+      "targetValue": 20,
+      "isActive": true
+    },
+    {
+      "number": 950,
+      "code": "lose_20_bets",
+      "title": "20 vesztes fogadás",
+      "description": "Legyen legalább 20 vesztes fogadásod lezárt piacokon.",
+      "reward": 2000,
+      "category": "LOSE_BETS",
+      "targetValue": 20,
+      "isActive": false
+    },
+    {
+      "number": 1000,
+      "code": "bet_200_events",
+      "title": "200 eseményre fogadás",
+      "description": "Fogadj legalább 200 különböző eseményre.",
+      "reward": 5000,
+      "category": "BET_EVENTS",
+      "targetValue": 200,
+      "isActive": true
+    }
+  ]
+}
