@@ -182,6 +182,13 @@ export async function GET(req: Request) {
       );
     }
 
+    if (sort === "created_desc") {
+      visibleEvents.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+    }
+
     if (sort === "betting_close_asc") {
       visibleEvents.sort(
         (a, b) =>

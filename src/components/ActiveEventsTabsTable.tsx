@@ -1,23 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/lib/apiFetch";
 import { getRemainingTimeInfo } from "@/lib/remainingTime";
 import type { EventSummary } from "@/modules/event/domain/Event";
 
-type ActiveEventsTab = "TOP_VOLUME" | "BETTING_CLOSE" | "EVENT_CLOSE";
+type ActiveEventsTab =
+  | "NEW_EVENT"
+  | "TOP_VOLUME"
+  | "BETTING_CLOSE"
+  | "EVENT_CLOSE";
 
 const TAB_CONFIG: Record<
   ActiveEventsTab,
   {
     label: string;
-    sort: "volume_desc" | "betting_close_asc" | "event_close_asc";
+    sort:
+      | "created_desc"
+      | "volume_desc"
+      | "betting_close_asc"
+      | "event_close_asc";
   }
 > = {
+  NEW_EVENT: {
+    label: "Új esemény",
+    sort: "created_desc",
+  },
   TOP_VOLUME: {
-    label: "Legtöbb fogadás",
+    label: "Legtöbb tét",
     sort: "volume_desc",
   },
   BETTING_CLOSE: {
@@ -35,7 +46,7 @@ function formatVolume(value?: number) {
 }
 
 export function ActiveEventsTabsTable() {
-  const [activeTab, setActiveTab] = useState<ActiveEventsTab>("TOP_VOLUME");
+  const [activeTab, setActiveTab] = useState<ActiveEventsTab>("NEW_EVENT");
   const [events, setEvents] = useState<EventSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,7 +65,11 @@ export function ActiveEventsTabsTable() {
 
   return (
     <section className="marketcard-base space-y-4">
-      <h2 className="text-lg font-bold text-stone-100">Aktív események</h2>
+      <p className="text-sm text-stone-400">
+        Üdv! Itt láthatsz pár eseményt, csak kattints a neked szimpatikus
+        esemény sorára és már fogadhatsz is!
+      </p>
+      <h2 className="text-lg font-bold text-stone-100">Fogadható események</h2>
 
       <div className="flex flex-wrap gap-2 justify-center">
         {(Object.keys(TAB_CONFIG) as ActiveEventsTab[]).map((tab) => (
@@ -77,6 +92,7 @@ export function ActiveEventsTabsTable() {
         <table className="min-w-full text-sm text-stone-200">
           <thead className="text-left text-stone-400">
             <tr className="border-b border-stone-700">
+              <th className="py-2 pr-4">Esemény</th>
               <th className="py-2 pr-4">Összes tét</th>
               <th className="py-2 pr-4">Fogadás zárás</th>
               <th className="py-2">Esemény zárás</th>
@@ -85,7 +101,7 @@ export function ActiveEventsTabsTable() {
           <tbody>
             {loading && (
               <tr>
-                <td className="py-4 text-stone-400" colSpan={3}>
+                <td className="py-4 text-stone-400" colSpan={4}>
                   Betöltés...
                 </td>
               </tr>
@@ -93,7 +109,7 @@ export function ActiveEventsTabsTable() {
 
             {!loading && events.length === 0 && (
               <tr>
-                <td className="py-4 text-stone-400" colSpan={3}>
+                <td className="py-4 text-stone-400" colSpan={4}>
                   Nincs megjeleníthető aktív esemény.
                 </td>
               </tr>
@@ -101,29 +117,30 @@ export function ActiveEventsTabsTable() {
 
             {!loading &&
               events.map((event) => (
-                <Fragment key={event.id}>
-                  <tr>
-                    <td className="pb-1 pt-3" colSpan={3}>
-                      <Link
-                        href={`/events/${event.id}`}
-                        className="font-medium hover:underline"
-                      >
+                <tr
+                  key={event.id}
+                  className="border-b border-stone-800 transition-colors hover:bg-stone-800/60"
+                >
+                  <td className="p-0" colSpan={4}>
+                    <Link
+                      href={`/events/${event.id}`}
+                      className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-x-0 px-0 text-stone-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                    >
+                      <span className="py-3 pr-4 font-medium text-stone-100">
                         {event.question}
-                      </Link>
-                    </td>
-                  </tr>
-                  <tr className="border-b border-stone-800">
-                    <td className="pb-3 pr-4 text-stone-300">
-                      {formatVolume(event.eventStats?.totalVolume)}ଳ
-                    </td>
-                    <td className="pb-3 pr-4 text-stone-300">
-                      {getRemainingTimeInfo(event.bettingCloseAt).longLabel}
-                    </td>
-                    <td className="pb-3 text-stone-300">
-                      {getRemainingTimeInfo(event.resolveAt).longLabel}
-                    </td>
-                  </tr>
-                </Fragment>
+                      </span>
+                      <span className="py-3 pr-4">
+                        {formatVolume(event.eventStats?.totalVolume)}ଳ
+                      </span>
+                      <span className="py-3 pr-4">
+                        {getRemainingTimeInfo(event.bettingCloseAt).longLabel}
+                      </span>
+                      <span className="py-3">
+                        {getRemainingTimeInfo(event.resolveAt).longLabel}
+                      </span>
+                    </Link>
+                  </td>
+                </tr>
               ))}
           </tbody>
         </table>
