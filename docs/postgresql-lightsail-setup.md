@@ -5,11 +5,11 @@ Ez az útmutató arra készült, hogy fejlesztésben maradhasson SQLite, product
 ## 1) PostgreSQL telepítése
 
 ```bash
-sudo apt update
-sudo apt install -y postgresql postgresql-contrib
-sudo systemctl enable postgresql
-sudo systemctl start postgresql
-sudo systemctl status postgresql
+sudo apt update &&
+sudo apt install -y postgresql postgresql-contrib &&
+sudo systemctl enable postgresql &&
+sudo systemctl start postgresql &&
+sudo systemctl status postgresql &&
 ```
 
 ## 2) Adatbázis és felhasználó létrehozása
@@ -26,6 +26,21 @@ A psql shellben:
 CREATE DATABASE polipmarket;
 CREATE USER polip_user WITH ENCRYPTED PASSWORD 'EROS_JELSZO';
 GRANT ALL PRIVILEGES ON DATABASE polipmarket TO polip_user;
+ALTER USER polip_user CREATEDB;
+-- legyen a schema tulajdonosa a polip_user (egyszerű és tiszta)
+ALTER SCHEMA public OWNER TO polip_user;
+
+-- biztos, ami biztos: alap jogok
+GRANT USAGE, CREATE ON SCHEMA public TO polip_user;
+
+-- ha már vannak táblák, ezekre is jog (opcionális)
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO polip_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO polip_user;
+
+-- és hogy az újonnan létrejövőkre is automatikusan meglegyen (opcionális, hasznos)
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO polip_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO polip_user;
+
 \q
 ```
 
