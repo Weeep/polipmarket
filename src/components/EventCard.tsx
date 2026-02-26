@@ -149,7 +149,7 @@ export function EventCard({ event }: Props) {
         </div>
 
         <div className="marketcard-amount justify-center text-center sm:justify-start sm:text-left">
-          <span className="marketcard-amount-label">Amount (ଳ)</span>
+          <span className="marketcard-amount-label">Összeg (ଳ)</span>
           <div className="marketcard-amount-bar justify-center rounded-3xl sm:justify-start sm:rounded-full">
             {presetAmounts.map((value) => (
               <button
@@ -170,7 +170,7 @@ export function EventCard({ event }: Props) {
               type="number"
               min="1"
               value={customAmount}
-              placeholder="Custom"
+              placeholder="Egyedi"
               onFocus={() => setIsCustomAmount(true)}
               onChange={(e) => {
                 const nextValue = e.target.value;
@@ -218,7 +218,7 @@ export function EventCard({ event }: Props) {
                         outcome && openBuyDialog(market.id, outcome.id, "YES")
                       }
                     >
-                      <span>YES&nbsp;</span>
+                      <span>IGEN&nbsp;</span>
                       <span className="marketcard-price">
                         {outcome?.yesPrice != null
                           ? `(${outcome.yesPrice.toFixed(2)})`
@@ -239,7 +239,7 @@ export function EventCard({ event }: Props) {
                         outcome && openBuyDialog(market.id, outcome.id, "NO")
                       }
                     >
-                      <span>NO&nbsp;</span>
+                      <span>NEM&nbsp;</span>
                       <span className="marketcard-price">
                         {outcome?.noPrice != null
                           ? `(${outcome.noPrice.toFixed(2)})`
@@ -249,7 +249,7 @@ export function EventCard({ event }: Props) {
                   </div>
 
                   {marketStats && (
-                    <div className="text-xs text-stone-300">
+                    <div className="hidden text-xs text-stone-300">
                       Bets: {marketStats.totalBets} · Volume:{"  "}
                       {formatVolume(marketStats.totalVolume)}ଳ
                     </div>
@@ -262,7 +262,7 @@ export function EventCard({ event }: Props) {
 
         {eventData.eventStats && (
           <div className="marketcard-statusbar justify-center">
-            Bets: {eventData.eventStats.totalBets} · Volume:{"  "}
+            Összes fogadás: {eventData.eventStats.totalBets} · Összeg :{"  "}
             {formatVolume(eventData.eventStats.totalVolume)}ଳ
           </div>
         )}

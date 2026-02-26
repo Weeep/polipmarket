@@ -18,6 +18,9 @@ Példa: adatbázis neve `polipmarket`, user neve `polip_user`.
 
 ```bash
 sudo -u postgres psql
+
+sudo -u postgres psql -d polipmarket
+
 ```
 
 A psql shellben:
