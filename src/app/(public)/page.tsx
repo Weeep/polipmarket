@@ -1,31 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { EventMarketGroup } from "@/components/EventMarketGroup";
+import { OpenBetsGrid } from "@/components/OpenBetsGrid";
 import { ActiveEventsTabsTable } from "@/components/ActiveEventsTabsTable";
 import { MyEventMarketBetDTO } from "@/modules/event/dto/myEventMarketBetDTO";
 import { apiFetch } from "@/lib/apiFetch";
-
-function groupMarketsByEvent(markets: MyEventMarketBetDTO[]) {
-  const grouped = new Map<string, MyEventMarketBetDTO[]>();
-
-  markets.forEach((market) => {
-    const key = market.eventId ?? `market-${market.marketId}`;
-    const current = grouped.get(key) ?? [];
-    grouped.set(key, [...current, market]);
-  });
-
-  return Array.from(grouped.values()).sort((a, b) => {
-    const aLatest = Math.max(
-      ...a.map((market) => new Date(market.latestBetAt).getTime()),
-    );
-    const bLatest = Math.max(
-      ...b.map((market) => new Date(market.latestBetAt).getTime()),
-    );
-
-    return bLatest - aLatest;
-  });
-}
 
 function filterMarketsByBetStatus(
   markets: MyEventMarketBetDTO[],
@@ -114,12 +93,6 @@ export default function HomePage() {
   }
 
   const openMarkets = filterMarketsByBetStatus(myMarkets, ["OPEN"]);
-  const closedMarkets = filterMarketsByBetStatus(myMarkets, [
-    "FILLED",
-    "CANCELLED",
-  ]);
-  const openMarketGroups = groupMarketsByEvent(openMarkets);
-  const closedMarketGroups = groupMarketsByEvent(closedMarkets);
 
   return (
     <main className="p-0 sm:p-8">
@@ -129,19 +102,11 @@ export default function HomePage() {
         <div className="marketcard-base space-y-4 scroll-mt-24">
           <h2 className="text-lg font-bold text-stone-100">Fogadásaim</h2>
 
-          {openMarketGroups.length === 0 && (
-            <p className="text-stone-400 text-sm">Nincs nyitott fogadásod</p>
-          )}
-
-          <div className="space-y-4">
-            {openMarketGroups.map((markets) => (
-              <EventMarketGroup
-                key={markets[0].eventId ?? markets[0].marketId}
-                markets={markets}
-                onUpdateMarket={updateMarket}
-              />
-            ))}
-          </div>
+          <OpenBetsGrid
+            markets={openMarkets}
+            onUpdateMarket={updateMarket}
+            emptyMessage="Nincs nyitott fogadásod"
+          />
         </div>
       </div>
     </main>

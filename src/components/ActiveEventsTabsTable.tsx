@@ -89,7 +89,7 @@ export function ActiveEventsTabsTable() {
       </div>
 
       <div className="overflow-x-auto px-[.5rem]">
-        <table className="min-w-full text-sm text-stone-200">
+        <table className="min-w-full table-fixed text-sm text-stone-200">
           <thead className="text-left text-stone-400">
             <tr className="border-b border-stone-700">
               <th className="py-2 pr-4">Esemény</th>
@@ -121,23 +121,27 @@ export function ActiveEventsTabsTable() {
                   key={event.id}
                   className="border-b border-stone-800 transition-colors hover:bg-stone-800/60"
                 >
-                  <td className="p-0" colSpan={4}>
+                  <td className="py-3 pr-4 font-medium text-stone-100">
                     <Link
                       href={`/events/${event.id}`}
-                      className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-x-0 px-0 text-stone-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                      className="block text-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
                     >
-                      <span className="py-3 pr-4 font-medium text-stone-100">
-                        {event.question}
-                      </span>
-                      <span className="py-3 pr-4">
-                        {formatVolume(event.eventStats?.totalVolume)}ଳ
-                      </span>
-                      <span className="py-3 pr-4">
-                        {getRemainingTimeInfo(event.bettingCloseAt).longLabel}
-                      </span>
-                      <span className="py-3">
-                        {getRemainingTimeInfo(event.resolveAt).longLabel}
-                      </span>
+                      {event.question}
+                    </Link>
+                  </td>
+                  <td className="py-3 pr-4">
+                    <Link href={`/events/${event.id}`} className="block text-stone-300 hover:text-stone-100">
+                      {formatVolume(event.eventStats?.totalVolume)} Ft
+                    </Link>
+                  </td>
+                  <td className="py-3 pr-4">
+                    <Link href={`/events/${event.id}`} className="block text-stone-300 hover:text-stone-100">
+                      {getRemainingTimeInfo(event.bettingCloseAt).longLabel}
+                    </Link>
+                  </td>
+                  <td className="py-3">
+                    <Link href={`/events/${event.id}`} className="block text-stone-300 hover:text-stone-100">
+                      {getRemainingTimeInfo(event.resolveAt).longLabel}
                     </Link>
                   </td>
                 </tr>
