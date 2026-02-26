@@ -130,17 +130,26 @@ export function ActiveEventsTabsTable() {
                     </Link>
                   </td>
                   <td className="py-3 pr-4">
-                    <Link href={`/events/${event.id}`} className="block text-stone-300 hover:text-stone-100">
-                      {formatVolume(event.eventStats?.totalVolume)} Ft
+                    <Link
+                      href={`/events/${event.id}`}
+                      className="block text-stone-300 hover:text-stone-100"
+                    >
+                      {formatVolume(event.eventStats?.totalVolume)} ଳ
                     </Link>
                   </td>
                   <td className="py-3 pr-4">
-                    <Link href={`/events/${event.id}`} className="block text-stone-300 hover:text-stone-100">
+                    <Link
+                      href={`/events/${event.id}`}
+                      className="block text-stone-300 hover:text-stone-100"
+                    >
                       {getRemainingTimeInfo(event.bettingCloseAt).longLabel}
                     </Link>
                   </td>
                   <td className="py-3">
-                    <Link href={`/events/${event.id}`} className="block text-stone-300 hover:text-stone-100">
+                    <Link
+                      href={`/events/${event.id}`}
+                      className="block text-stone-300 hover:text-stone-100"
+                    >
                       {getRemainingTimeInfo(event.resolveAt).longLabel}
                     </Link>
                   </td>
