@@ -1,10 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { Pool } from "pg";
 import prismaPkg from "@prisma/client";
-import * as adapterPkg from "@prisma/adapter-better-sqlite3";
+import * as adapterPkg from "@prisma/adapter-pg";
 
 const { PrismaClient } = prismaPkg;
-const { PrismaBetterSqlite3 } = adapterPkg;
+const { PrismaPg } = adapterPkg;
 
 function usage() {
   console.log(
@@ -123,9 +124,8 @@ async function main() {
   const definitions = achievements.map(normalizeAchievement);
   validateUnique(definitions);
 
-  const adapter = new PrismaBetterSqlite3({
-    url: process.env.DATABASE_URL,
-  });
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const adapter = new PrismaPg(pool);
   const prisma = new PrismaClient({ adapter, log: ["error", "warn"] });
 
   try {
