@@ -1,0 +1,211 @@
+{
+  "createdBy": "replace_w_valid_user_id",
+  "events": [
+    {
+      "question": "Melyik párt kapja listán a legtöbb szavazatot?",
+      "description": "",
+      "bettingCloseAt": "2026-04-11T22:00:00.000Z",
+      "resolveAt": "2026-04-14T13:30:00.000Z",
+      "markets": [
+        {
+          "name": "Tisza",
+          "yesStartPercent": 55
+        },
+        {
+          "name": "Fidesz",
+          "yesStartPercent": 45
+        }
+      ]
+    },
+    {
+      "question": "Ki lesz az ország következő miniszterelnöke?",
+      "description": "",
+      "bettingCloseAt": "2026-04-11T22:00:00.000Z",
+      "resolveAt": "2026-05-11T22:00:00.000Z",
+      "yesStartPercent": 45,
+      "markets": [
+        {
+          "name": "Magyar Péter",
+          "yesStartPercent": 50
+        },
+        {
+          "name": "Orbán Viktor",
+          "yesStartPercent": 50
+        },
+        {
+          "name": "Más",
+          "yesStartPercent": 5
+        }
+      ]
+    },
+    {
+      "question": "Melyik párt(ok) jut(nak) a parlamentbe?",
+      "description": "",
+      "bettingCloseAt": "2026-04-11T22:00:00.000Z",
+      "resolveAt": "2026-04-13T22:00:00.000Z",
+      "markets": [
+        {
+          "name": "Mi Hazánk",
+          "yesStartPercent": 75
+        },
+        {
+          "name": "Magyar Kétfarkú Kutyapárt",
+          "yesStartPercent": 40
+        },
+        {
+          "name": "Demokratikus Koalíció",
+          "yesStartPercent": 40
+        }
+      ]
+    },
+    {
+      "question": "Melyik párt lesz legalább 3%os októberben?",
+      "description": "Melyik pártot fogja legalább két ismert közvéleménykutató októberben legalább 3%ra mérni",
+      "bettingCloseAt": "2026-10-10T22:00:00.000Z",
+      "resolveAt": "2026-11-10T22:00:00.000Z",
+      "markets": [
+        {
+          "name": "Demokratikus Koalíció",
+          "yesStartPercent": 50
+        },
+        {
+          "name": "Jobbik",
+          "yesStartPercent": 10
+        },
+        {
+          "name": "Magyar Kétfarkú Kutyapárt",
+          "yesStartPercent": 40
+        },
+        {
+          "name": "Második Reformkor Párt",
+          "yesStartPercent": 40
+        },
+        {
+          "name": "Momentum",
+          "yesStartPercent": 40
+        },
+        {
+          "name": "MSZP",
+          "yesStartPercent": 30
+        }
+      ]
+    },
+    {
+      "question": "Milyen lesz a nERDŐ második részének általános megitélése?",
+      "description": "",
+      "bettingCloseAt": "2026-03-15T22:00:00.000Z",
+      "resolveAt": "2026-04-10T22:00:00.000Z",
+      "markets": [
+        {
+          "name": "Rosszabb, mint az elsőé",
+          "yesStartPercent": 20
+        },
+        {
+          "name": "Ugyanolyan, mint az elsőé",
+          "yesStartPercent": 30
+        },
+        {
+          "name": "Valamivel jobb, mint az elsőé, de még mindig lesúlytó",
+          "yesStartPercent": 40
+        },
+        {
+          "name": "Határozottan jobb, mint az elsőé",
+          "yesStartPercent": 30
+        }
+      ]
+    },
+
+    {
+      "question": "Lesz e Magyar Péternek 60 ezer reakciót elérő Facebook posztja 02.28án?",
+      "description": "",
+      "bettingCloseAt": "2026-02-27T23:59:00.000Z",
+      "resolveAt": "2026-03-01T10:00:00.000Z",
+      "markets": [
+        {
+          "name": "Lesz!",
+          "yesStartPercent": 50
+        }
+      ]
+    },
+    {
+      "question": "Lesz e Orbán Viktornak 20 ezer reakciót elérő Facebook posztja 02.28án?",
+      "description": "",
+      "bettingCloseAt": "2026-02-27T23:59:00.000Z",
+      "resolveAt": "2026-03-01T10:00:00.000Z",
+      "markets": [
+        {
+          "name": "Lesz!",
+          "yesStartPercent": 50
+        }
+      ]
+    },
+    {
+      "question": "Melyik kutatóközpont mérése lesz a legpontosabb?",
+      "description": "Melyik közvélemény-kutató mérése közelíti majd leginkább a 2026-os listás szavazás tényleges eredményét?",
+      "bettingCloseAt": "2026-04-11T22:00:00.000Z",
+      "resolveAt": "2026-04-13T11:00:00.000Z",
+      "markets": [
+        {
+          "name": "21 Kutatóközpont",
+          "yesStartPercent": 50
+        },
+        {
+          "name": "Idea",
+          "yesStartPercent": 30
+        },
+        {
+          "name": "Medián",
+          "yesStartPercent": 50
+        },
+        {
+          "name": "Publicus",
+          "yesStartPercent": 30
+        },
+        {
+          "name": "Republikon",
+          "yesStartPercent": 40
+        },
+        {
+          "name": "Závecz",
+          "yesStartPercent": 40
+        }
+      ]
+    },
+    {
+      "question": "Melyik párt lesz ott a szavazólapon?",
+      "description": "",
+      "bettingCloseAt": "2026-03-01T23:59:00.000Z",
+      "resolveAt": "2026-03-06T10:00:00.000Z",
+      "markets": [
+        {
+          "name": "Demokratikus Koalíció",
+          "yesStartPercent": 80
+        },
+        {
+          "name": "Magyar Kétfarkú Kutyapárt",
+          "yesStartPercent": 70
+        },
+        {
+          "name": "Jobbik",
+          "yesStartPercent": 30
+        }
+      ]
+    },
+    {
+      "question": "Ki nyeri a választást Kelet-Nógrádban (Nógrád 01 OEVK)?",
+      "description": "",
+      "bettingCloseAt": "2026-04-11T22:00:00.000Z",
+      "resolveAt": "2026-04-13T10:00:00.000Z",
+      "markets": [
+        {
+          "name": "Becsó Zsolt (Fidesz)",
+          "yesStartPercent": 55
+        },
+        {
+          "name": "Szafkó Zoltán (Tisza)",
+          "yesStartPercent": 45
+        }
+      ]
+    }
+  ]
+}
