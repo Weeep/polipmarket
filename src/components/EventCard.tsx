@@ -205,7 +205,7 @@ export function EventCard({ event }: Props) {
                 <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-start">
                   <div className="flex flex-wrap justify-center gap-3 sm:justify-start">
                     <button
-                      className="marketcard-yes-button disabled:opacity-50"
+                      className="marketcard-no-button disabled:opacity-50"
                       disabled={
                         submitting ||
                         buyDialogLoading ||
