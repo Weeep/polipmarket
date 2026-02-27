@@ -431,8 +431,9 @@ export function EventCard({ event }: Props) {
               </button>
               <p>
                 az azt jelenti: a piac jelenleg kb. 55% esélyt ad annak, hogy az
-                adott jelölt nyer, ezért az ára 0.55ଳ. Ha te úgy gondolod, hogy
-                ez alul- vagy túl van árazva, akkor tudsz vásárolni belőle.
+                esemény bekövetkezik (pl: adott jelölt nyer), ezért az ára
+                0.55ଳ. Ha te úgy gondolod, hogy ez alul- vagy túl van árazva,
+                akkor tudsz vásárolni belőle.
               </p>
               <p>De ehhez el kell döntened:</p>
               <p className="ml-8">💰 Mennyi pénzzel szeretnél beszállni.</p>
