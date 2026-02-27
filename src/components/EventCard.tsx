@@ -29,7 +29,6 @@ function formatVolume(value: number) {
 }
 
 export function EventCard({ event }: Props) {
-  const explainerDismissedStorageKey = "event-card-yes-explainer-dismissed";
   const presetAmounts = [10, 50, 100, 200];
   const [eventData, setEventData] = useState(event);
   const [amount, setAmount] = useState(10);
@@ -38,9 +37,6 @@ export function EventCard({ event }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [buyDialogLoading, setBuyDialogLoading] = useState(false);
   const [buyDialog, setBuyDialog] = useState<BuyDialogState | null>(null);
-  const [showYesExplainerLink, setShowYesExplainerLink] = useState(false);
-  const [showYesExplainerDialog, setShowYesExplainerDialog] = useState(false);
-  const [hideYesExplainerForever, setHideYesExplainerForever] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const { refreshMe } = useMe();
@@ -48,11 +44,6 @@ export function EventCard({ event }: Props) {
   useEffect(() => {
     setEventData(event);
   }, [event]);
-
-  useEffect(() => {
-    const shouldHide = window.localStorage.getItem(explainerDismissedStorageKey);
-    setShowYesExplainerLink(!shouldHide);
-  }, [explainerDismissedStorageKey]);
 
   async function refreshEventCard() {
     const res = await apiFetch(`/api/events/${event.id}`);
@@ -142,16 +133,6 @@ export function EventCard({ event }: Props) {
     ? Math.max(buyDialog.quote.estimatedShares - buyDialog.quote.amount, 0)
     : 0;
 
-  function closeYesExplainer() {
-    if (hideYesExplainerForever) {
-      window.localStorage.setItem(explainerDismissedStorageKey, "true");
-      setShowYesExplainerLink(false);
-    }
-
-    setShowYesExplainerDialog(false);
-    setHideYesExplainerForever(false);
-  }
-
   return (
     <>
       <section className="marketcard-base space-y-6">
@@ -164,15 +145,6 @@ export function EventCard({ event }: Props) {
           </Link>
           {eventData.description && (
             <p className="marketcard-description">{eventData.description}</p>
-          )}
-          {showYesExplainerLink && (
-            <button
-              type="button"
-              className="text-sm font-medium text-amber-300 underline decoration-amber-400/70 underline-offset-4 transition hover:text-amber-200"
-              onClick={() => setShowYesExplainerDialog(true)}
-            >
-              Mi történik, ha az IGEN-re nyomok?
-            </button>
           )}
         </div>
 
@@ -374,79 +346,6 @@ export function EventCard({ event }: Props) {
                 className="button-gold disabled:opacity-50"
               >
                 {submitting ? "Folyamatban..." : "MEHET"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-
-      {showYesExplainerDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-          <div className="w-full max-w-2xl rounded-2xl border border-stone-700 bg-stone-900 p-6 text-stone-200 shadow-2xl">
-            <h3 className="text-xl font-bold text-stone-100">
-              Mi történik, ha IGEN-t vagy NEM-et vásárolsz?
-            </h3>
-
-            <div className="mt-4 space-y-4 text-sm leading-relaxed text-stone-300">
-              <p>
-                Ha az <span className="font-semibold text-stone-100">IGEN</span> gombot választod,
-                akkor az IGEN aktuális ára mellett, az itt kiválasztott összegért vásárolsz IGEN
-                részvényeket.
-              </p>
-              <p>
-                A piac lezárásakor a helyes kimenetel részvényei
-                <span className="font-semibold text-emerald-300"> 1.00 </span>
-                értéken váltódnak vissza, a helytelenek pedig
-                <span className="font-semibold text-rose-300"> 0.00 </span>
-                értéken.
-              </p>
-              <p>
-                Példa: ha 100ଳ-ért 0.50 átlagáron veszel IGEN részvényt, akkor körülbelül 200
-                darab részvényed lesz. Ha az esemény vége tényleg IGEN, akkor kb. 200ଳ-t kapsz
-                vissza. Ha NEM lesz az eredmény, akkor az IGEN-re költött összeget elveszíted.
-                Ugyanez igaz fordítva a NEM-re is.
-              </p>
-              <p>
-                A vásárlások mozgatják az árakat: minél többen vesznek egy oldalt, annál magasabb
-                lesz az ára. Ez azt jelenti, hogy a később beszállók általában kisebb várható
-                hozammal tudnak vásárolni.
-              </p>
-              <p>
-                A <span className="font-semibold text-stone-100">Fogadásaim</span> menüpontban a
-                részvényeidet bármikor eladhatod a fogadási időszak zárása előtt. Ha például
-                korábban alacsonyabb áron vásároltál, és közben emelkedett az ár, akkor nyereséggel
-                is ki tudsz szállni még az esemény lezárása előtt.
-              </p>
-            </div>
-
-            <label className="mt-6 flex items-center gap-3 text-sm text-stone-300">
-              <input
-                type="checkbox"
-                checked={hideYesExplainerForever}
-                onChange={(e) => setHideYesExplainerForever(e.target.checked)}
-                className="h-4 w-4 rounded border-stone-600 bg-stone-800 text-amber-400"
-              />
-              Többet ne jelenjen meg
-            </label>
-
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowYesExplainerDialog(false);
-                  setHideYesExplainerForever(false);
-                }}
-                className="rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 font-semibold text-stone-100 hover:bg-slate-700"
-              >
-                Mégse
-              </button>
-              <button
-                type="button"
-                onClick={closeYesExplainer}
-                className="button-gold"
-              >
-                ÉRTEM
               </button>
             </div>
           </div>

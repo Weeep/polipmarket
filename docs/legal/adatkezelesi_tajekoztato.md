@@ -84,10 +84,7 @@ Az opcionális adatok megadása nem kötelező, a szolgáltatás ezek nélkül i
 
 ## 7. Sütik és hasonló technológiák
 
-A szolgáltatás kizárólag technikailag szükséges sütiket és helyi tárolási megoldásokat (pl. böngésző `localStorage`) használ. Ezek célja a működéshez szükséges állapotok és felhasználói beállítások megőrzése (pl. bejelentkezés, biztonság, illetve egyes tájékoztató felugrók elrejtésének megjegyzése, mint a „Többet ne jelenjen meg” beállítás). Analitikai és marketing célú sütik jelenleg nincsenek használatban.
-
-- **Jogalap:** GDPR 6. cikk (1) f) pont – jogos érdek (a szolgáltatás biztonságos és rendeltetésszerű működésének biztosítása).
-- **Megőrzési idő:** a böngészőben tárolt technikai adatok a böngésző beállításaitól, illetve a felhasználó törlésétől függően maradnak meg.
+A szolgáltatás kizárólag technikailag szükséges sütiket használ (pl. bejelentkezés és biztonság). Analitikai és marketing célú sütik jelenleg nincsenek használatban.
 
 ## 8. Adatfeldolgozók
 
