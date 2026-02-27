@@ -31,9 +31,11 @@ function formatVolume(value: number) {
 export function EventCard({ event }: Props) {
   const presetAmounts = [10, 50, 100, 200];
   const [eventData, setEventData] = useState(event);
-  const [amount, setAmount] = useState(10);
+  const [amount, setAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
   const [isCustomAmount, setIsCustomAmount] = useState(false);
+  const [amountError, setAmountError] = useState<string | null>(null);
+  const [isAmountHelpOpen, setIsAmountHelpOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [buyDialogLoading, setBuyDialogLoading] = useState(false);
   const [buyDialog, setBuyDialog] = useState<BuyDialogState | null>(null);
@@ -59,6 +61,7 @@ export function EventCard({ event }: Props) {
     marketId: string,
     outcomeId: string,
     position: "YES" | "NO",
+    selectedAmount: number,
   ) {
     try {
       setBuyDialogLoading(true);
@@ -71,7 +74,7 @@ export function EventCard({ event }: Props) {
         body: JSON.stringify({
           outcomeId,
           position,
-          amount,
+          amount: selectedAmount,
         }),
       });
       const quote = (await quoteRes.json()) as QuoteOrderResult;
@@ -86,6 +89,20 @@ export function EventCard({ event }: Props) {
     } finally {
       setBuyDialogLoading(false);
     }
+  }
+
+  function handleBuyClick(
+    marketId: string,
+    outcomeId: string,
+    position: "YES" | "NO",
+  ) {
+    if (amount == null || !Number.isFinite(amount) || amount <= 0) {
+      setAmountError("← Add meg milyen összegben szeretnél vásárolni.");
+      return;
+    }
+
+    setAmountError(null);
+    openBuyDialog(marketId, outcomeId, position, amount);
   }
 
   async function placeOrder() {
@@ -114,7 +131,7 @@ export function EventCard({ event }: Props) {
 
       await Promise.all([refreshMe(), refreshEventCard()]);
       setSuccess(
-        `Pontosan ${buyDialog.quote.amount.toFixed(2)} összegért, ${buyDialog.quote.executionPrice.toFixed(4)} átlagáron, ${buyDialog.quote.estimatedShares.toFixed(2)} darab részvényt vettél (${buyDialog.position}), Fee: ${buyDialog.quote.fee.toFixed(2)}`,
+        `${buyDialog.quote.amount.toFixed(2)}ଳ összegért, ${buyDialog.quote.executionPrice.toFixed(4)}ଳ átlagáron, ${buyDialog.quote.estimatedShares.toFixed(2)} darab részvényt vettél (${toHun(buyDialog.position)}), Illeték: ${buyDialog.quote.fee.toFixed(2)}ଳ`,
       );
       setBuyDialog(null);
     } catch (err: unknown) {
@@ -126,6 +143,16 @@ export function EventCard({ event }: Props) {
       }
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  function toHun(position: string): string {
+    if (position === "YES") {
+      return "IGEN";
+    } else if (position === "NO") {
+      return "NEM";
+    } else {
+      return position;
     }
   }
 
@@ -161,6 +188,7 @@ export function EventCard({ event }: Props) {
                   setAmount(value);
                   setIsCustomAmount(false);
                   setCustomAmount("");
+                  setAmountError(null);
                 }}
               >
                 {value}
@@ -176,12 +204,36 @@ export function EventCard({ event }: Props) {
                 const nextValue = e.target.value;
                 setCustomAmount(nextValue);
                 setIsCustomAmount(true);
-                setAmount(Number(nextValue));
+                const parsedAmount = Number(nextValue);
+                if (
+                  !nextValue ||
+                  !Number.isFinite(parsedAmount) ||
+                  parsedAmount <= 0
+                ) {
+                  setAmount(null);
+                } else {
+                  setAmount(parsedAmount);
+                  setAmountError(null);
+                }
               }}
               data-active={isCustomAmount}
               className="marketcard-amount-input"
             />
           </div>
+          {amountError && (
+            <div className="text-center sm:text-left">
+              <p className="text-sm text-yellow-600">
+                {amountError}{" "}
+                <button
+                  type="button"
+                  onClick={() => setIsAmountHelpOpen(true)}
+                  className="mt-1 text-sm font-semibold text-yellow-500 underline hover:text-red-600"
+                >
+                  Tessék?!
+                </button>
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="space-y-3">
@@ -209,13 +261,12 @@ export function EventCard({ event }: Props) {
                       disabled={
                         submitting ||
                         buyDialogLoading ||
-                        amount <= 0 ||
                         market.status !== "OPEN" ||
                         outcome?.yesPrice == null ||
                         !outcome
                       }
                       onClick={() =>
-                        outcome && openBuyDialog(market.id, outcome.id, "YES")
+                        outcome && handleBuyClick(market.id, outcome.id, "YES")
                       }
                     >
                       <span>IGEN&nbsp;</span>
@@ -230,13 +281,12 @@ export function EventCard({ event }: Props) {
                       disabled={
                         submitting ||
                         buyDialogLoading ||
-                        amount <= 0 ||
                         market.status !== "OPEN" ||
                         outcome?.noPrice == null ||
                         !outcome
                       }
                       onClick={() =>
-                        outcome && openBuyDialog(market.id, outcome.id, "NO")
+                        outcome && handleBuyClick(market.id, outcome.id, "NO")
                       }
                     >
                       <span>NEM&nbsp;</span>
@@ -292,41 +342,48 @@ export function EventCard({ event }: Props) {
               <p>
                 Összeg:{" "}
                 <span className="font-semibold">
-                  {buyDialog.quote.amount.toFixed(2)}
+                  {buyDialog.quote.amount.toFixed(2)}ଳ
                 </span>
               </p>
               <p>
                 Várható átlagár:{" "}
                 <span className="font-semibold">
-                  {buyDialog.quote.executionPrice.toFixed(4)}
+                  {buyDialog.quote.executionPrice.toFixed(4)}ଳ
                 </span>
               </p>
               <p>
-                Várható részvény db:{" "}
+                Várható részvény:{" "}
                 <span className="font-semibold">
-                  {buyDialog.quote.estimatedShares.toFixed(2)}
+                  {buyDialog.quote.estimatedShares.toFixed(2)} db
                 </span>
               </p>
               <p>
                 Pozíció:{" "}
-                <span className="font-semibold">{buyDialog.position}</span>
+                <span className="font-semibold">
+                  {toHun(buyDialog.position)}
+                </span>
               </p>
               <p>
-                Fee:{" "}
+                Illeték:{" "}
                 <span className="font-semibold">
-                  {buyDialog.quote.fee.toFixed(2)}
+                  {buyDialog.quote.fee.toFixed(2)}ଳ
                 </span>
               </p>
               <p>
                 Nyereség (ha nyer):{" "}
                 <span className="font-semibold text-emerald-400">
-                  {winProfit.toFixed(2)}
+                  {buyDialog.quote.estimatedShares.toFixed(2)}ଳ
+                </span>{" "}
+                <span>(Profit: </span>
+                <span className="font-semibold text-emerald-400">
+                  {winProfit.toFixed(2)}ଳ
                 </span>
+                <span>)</span>
               </p>
               <p>
                 Veszteség (ha veszít):{" "}
                 <span className="font-semibold text-rose-400">
-                  {buyDialog.quote.amount.toFixed(2)}
+                  {buyDialog.quote.amount.toFixed(2)}ଳ
                 </span>
               </p>
             </div>
@@ -346,6 +403,77 @@ export function EventCard({ event }: Props) {
                 className="button-gold disabled:opacity-50"
               >
                 {submitting ? "Folyamatban..." : "MEHET"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isAmountHelpOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-lg rounded-xl border border-yellow-500/50 bg-stone-900 p-5 text-stone-200 shadow-2xl">
+            <h3 className="mb-3 text-lg font-bold text-yellow-500">
+              Miért kell összeget választani?
+            </h3>
+            <div className="space-y-3 text-sm leading-relaxed text-stone-300">
+              <p>
+                Ez nem egy sima szavazás, hanem egy előrejelzési piac
+                (prediction market).
+              </p>
+              <p>
+                Itt nem csak azt mondod meg, szerinted ki nyer — hanem pénzt is
+                teszel rá, vásárolsz.
+              </p>
+              <p className="py-2 font-bold">Hogyan működik?</p>
+              <p>Például, ha azt látod:</p>
+              <button className="ml-8 marketcard-no-button disabled:opacity-50">
+                IGEN (0.55)
+              </button>
+              <p>
+                az azt jelenti: a piac jelenleg kb. 55% esélyt ad annak, hogy az
+                adott jelölt nyer, ezért az ára 0.55ଳ. Ha te úgy gondolod, hogy
+                ez alul- vagy túl van árazva, akkor tudsz vásárolni belőle.
+              </p>
+              <p>De ehhez el kell döntened:</p>
+              <p className="ml-8">💰 Mennyi pénzzel szeretnél beszállni.</p>
+              <p className="py-2 font-bold">Miért fontos az összeg?</p>
+              <p>Az összeg határozza meg:</p>
+              <ul className="ml-8">
+                <li>📈 Mennyit nyerhetsz, ha igazad lesz</li>
+                <li>📉 Mennyit veszíthetsz, ha nem</li>
+              </ul>{" "}
+              <p>Ez olyan, mint részvényt venni:</p>
+              <ul className="ml-8">
+                <li>
+                  Ha kevés pénzt teszel be → kisebb kockázat, kisebb nyereség
+                </li>
+                <li>
+                  Ha többet → nagyobb kockázat, nagyobb potenciális nyereség
+                </li>
+              </ul>
+              <p className="py-2 font-bold">Konkrét példa</p>
+              <p>Ha az</p>
+              <ul className="ml-8">
+                <li>- IGEN ára 0.55ଳ</li>
+                <li>- Te 55ଳ-ért veszel 100at belőle</li>
+              </ul>
+              <p>
+                és tényleg az történik, amire fogadtál (pl: a jelölt valóban
+                nyer) → minden részvényed 1.00-et fog érni, így 100ଳ-ot kapsz
+                vissza az esemény végén, a nyereséged: 45ଳ.
+              </p>
+              <p>
+                Ha nem az történik (pl: a jelölt nem nyer) → 0-t ér, így a
+                befektetett 55ଳ-ot elvesztetted.
+              </p>
+            </div>
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsAmountHelpOpen(false)}
+                className="button-gold"
+              >
+                Értem
               </button>
             </div>
           </div>
