@@ -10,8 +10,11 @@ export default function AboutPage() {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-10 md:min-h-[calc(100vh-9rem)] md:flex-row md:items-center md:gap-16">
       <section className="w-full space-y-6 md:w-2/3">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-300">
-          Üdv a Polipmarketen
+        <p className="text-m font-semibold uppercase tracking-[0.2em] text-amber-300">
+          <b>Üdv a Polipmarketen! </b>
+          <span className="text-sm">
+            a polymarket virtuális pénzes magyar verzióján
+          </span>
         </p>
         <h1 className="text-3xl font-bold leading-tight text-stone-100 md:text-5xl">
           Itt játékosan fogadhatsz valós események kimenetelére.
