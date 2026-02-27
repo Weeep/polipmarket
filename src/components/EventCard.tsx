@@ -31,9 +31,11 @@ function formatVolume(value: number) {
 export function EventCard({ event }: Props) {
   const presetAmounts = [10, 50, 100, 200];
   const [eventData, setEventData] = useState(event);
-  const [amount, setAmount] = useState(10);
+  const [amount, setAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
   const [isCustomAmount, setIsCustomAmount] = useState(false);
+  const [amountError, setAmountError] = useState<string | null>(null);
+  const [isAmountHelpOpen, setIsAmountHelpOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [buyDialogLoading, setBuyDialogLoading] = useState(false);
   const [buyDialog, setBuyDialog] = useState<BuyDialogState | null>(null);
@@ -59,6 +61,7 @@ export function EventCard({ event }: Props) {
     marketId: string,
     outcomeId: string,
     position: "YES" | "NO",
+    selectedAmount: number,
   ) {
     try {
       setBuyDialogLoading(true);
@@ -71,7 +74,7 @@ export function EventCard({ event }: Props) {
         body: JSON.stringify({
           outcomeId,
           position,
-          amount,
+          amount: selectedAmount,
         }),
       });
       const quote = (await quoteRes.json()) as QuoteOrderResult;
@@ -86,6 +89,20 @@ export function EventCard({ event }: Props) {
     } finally {
       setBuyDialogLoading(false);
     }
+  }
+
+  function handleBuyClick(
+    marketId: string,
+    outcomeId: string,
+    position: "YES" | "NO",
+  ) {
+    if (amount == null || !Number.isFinite(amount) || amount <= 0) {
+      setAmountError("Add meg milyen összegben szeretnél vásárolni.");
+      return;
+    }
+
+    setAmountError(null);
+    openBuyDialog(marketId, outcomeId, position, amount);
   }
 
   async function placeOrder() {
@@ -161,6 +178,7 @@ export function EventCard({ event }: Props) {
                   setAmount(value);
                   setIsCustomAmount(false);
                   setCustomAmount("");
+                  setAmountError(null);
                 }}
               >
                 {value}
@@ -176,12 +194,30 @@ export function EventCard({ event }: Props) {
                 const nextValue = e.target.value;
                 setCustomAmount(nextValue);
                 setIsCustomAmount(true);
-                setAmount(Number(nextValue));
+                const parsedAmount = Number(nextValue);
+                if (!nextValue || !Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+                  setAmount(null);
+                } else {
+                  setAmount(parsedAmount);
+                  setAmountError(null);
+                }
               }}
               data-active={isCustomAmount}
               className="marketcard-amount-input"
             />
           </div>
+          {amountError && (
+            <div className="mt-2 text-center sm:text-left">
+              <p className="text-sm text-red-500">{amountError}</p>
+              <button
+                type="button"
+                onClick={() => setIsAmountHelpOpen(true)}
+                className="mt-1 text-sm font-semibold text-red-700 underline hover:text-red-600"
+              >
+                Tessék?
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="space-y-3">
@@ -209,13 +245,12 @@ export function EventCard({ event }: Props) {
                       disabled={
                         submitting ||
                         buyDialogLoading ||
-                        amount <= 0 ||
                         market.status !== "OPEN" ||
                         outcome?.yesPrice == null ||
                         !outcome
                       }
                       onClick={() =>
-                        outcome && openBuyDialog(market.id, outcome.id, "YES")
+                        outcome && handleBuyClick(market.id, outcome.id, "YES")
                       }
                     >
                       <span>IGEN&nbsp;</span>
@@ -230,13 +265,12 @@ export function EventCard({ event }: Props) {
                       disabled={
                         submitting ||
                         buyDialogLoading ||
-                        amount <= 0 ||
                         market.status !== "OPEN" ||
                         outcome?.noPrice == null ||
                         !outcome
                       }
                       onClick={() =>
-                        outcome && openBuyDialog(market.id, outcome.id, "NO")
+                        outcome && handleBuyClick(market.id, outcome.id, "NO")
                       }
                     >
                       <span>NEM&nbsp;</span>
@@ -346,6 +380,39 @@ export function EventCard({ event }: Props) {
                 className="button-gold disabled:opacity-50"
               >
                 {submitting ? "Folyamatban..." : "MEHET"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isAmountHelpOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-lg rounded-xl border border-red-900/70 bg-stone-900 p-5 text-stone-200 shadow-2xl">
+            <h3 className="mb-3 text-lg font-bold text-red-400">Miért kell összeget választani?</h3>
+            <div className="space-y-3 text-sm leading-relaxed text-stone-300">
+              <p>
+                Azért kell összeget választani, mert ez nem egy sima szavazás: itt
+                a rendelkezésre álló virtuális pénzből (POLIP) vásárolsz IGEN vagy
+                NEM pozíciót.
+              </p>
+              <p>
+                Az árak valószínűséget tükröznek, ezért minél több POLIP-ot teszel
+                egy kimenetre, annál nagyobb a kitettséged arra, hogy igazad lesz.
+              </p>
+              <p>
+                Ha az általad választott kimenet nyer, a pozíciód értéke nőhet; ha
+                nem, az elköltött összeg veszteség lehet. Ezért fontos előre
+                meghatározni, mekkora összeget szeretnél használni.
+              </p>
+            </div>
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsAmountHelpOpen(false)}
+                className="rounded-lg border border-red-800 bg-red-900/40 px-4 py-2 font-semibold text-red-200 hover:bg-red-900/60"
+              >
+                Értem
               </button>
             </div>
           </div>
