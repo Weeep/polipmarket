@@ -410,8 +410,8 @@ export function EventCard({ event }: Props) {
       )}
 
       {isAmountHelpOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-          <div className="w-full max-w-lg rounded-xl border border-yellow-500/50 bg-stone-900 p-5 text-stone-200 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 px-4 py-6">
+          <div className="max-h-[calc(100vh-3rem)] w-full max-w-lg overflow-y-auto rounded-xl border border-yellow-500/50 bg-stone-900 p-5 text-stone-200 shadow-2xl">
             <h3 className="mb-3 text-lg font-bold text-yellow-500">
               Miért kell összeget választani?
             </h3>
@@ -431,8 +431,9 @@ export function EventCard({ event }: Props) {
               </button>
               <p>
                 az azt jelenti: a piac jelenleg kb. 55% esélyt ad annak, hogy az
-                adott jelölt nyer, ezért az ára 0.55ଳ. Ha te úgy gondolod, hogy
-                ez alul- vagy túl van árazva, akkor tudsz vásárolni belőle.
+                esemény bekövetkezik (pl: adott jelölt nyer), ezért az ára
+                0.55ଳ. Ha te úgy gondolod, hogy ez alul- vagy túl van árazva,
+                akkor tudsz vásárolni belőle.
               </p>
               <p>De ehhez el kell döntened:</p>
               <p className="ml-8">💰 Mennyi pénzzel szeretnél beszállni.</p>
