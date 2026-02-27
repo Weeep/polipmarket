@@ -262,7 +262,7 @@ export function EventCard({ event }: Props) {
 
         {eventData.eventStats && (
           <div className="marketcard-statusbar justify-center">
-            Összes fogadás: {eventData.eventStats.totalBets} · Összeg :{"  "}
+            Összes vásárlás: {eventData.eventStats.totalBets} · Összeg :{"  "}
             {formatVolume(eventData.eventStats.totalVolume)}ଳ
           </div>
         )}
