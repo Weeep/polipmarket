@@ -6,11 +6,13 @@ import { evaluateAchievementsForUser } from "@/modules/achievement/application/e
 type AppToken = {
   sub?: string;
   impersonatedUserId?: string | null;
+  sessionVersion?: number;
 };
 
 type AppSessionUser = {
   id?: string;
   impersonatedBy?: string | null;
+  sessionVersion?: number;
 };
 
 export const authOptions: AuthOptions = {
@@ -31,6 +33,15 @@ export const authOptions: AuthOptions = {
 
       const googleId = account.providerAccountId;
       if (!googleId) return false;
+
+      const existingUser = await prisma.user.findUnique({
+        where: { id: googleId },
+        select: { deletedAt: true },
+      });
+
+      if (existingUser?.deletedAt) {
+        return false;
+      }
 
       const email = user.email ?? undefined;
 
@@ -73,6 +84,13 @@ export const authOptions: AuthOptions = {
 
       if (account?.provider === "google") {
         appToken.sub = account.providerAccountId;
+
+        const dbUser = await prisma.user.findUnique({
+          where: { id: account.providerAccountId },
+          select: { sessionVersion: true },
+        });
+
+        appToken.sessionVersion = dbUser?.sessionVersion ?? 0;
       }
 
       if (trigger === "update" && session?.impersonatedUserId !== undefined) {
@@ -107,9 +125,8 @@ export const authOptions: AuthOptions = {
         const actingUserId = appToken.impersonatedUserId ?? token.sub;
 
         sessionUser.id = actingUserId;
-        sessionUser.impersonatedBy = appToken.impersonatedUserId
-          ? token.sub
-          : null;
+        sessionUser.impersonatedBy = appToken.impersonatedUserId ? token.sub : null;
+        sessionUser.sessionVersion = appToken.sessionVersion ?? 0;
       }
 
       return session;
