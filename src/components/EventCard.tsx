@@ -85,13 +85,27 @@ export function EventCard({ event }: Props) {
   const [buyDialog, setBuyDialog] = useState<BuyDialogState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [nowTimestamp, setNowTimestamp] = useState(() => Date.now());
   const { refreshMe } = useMe();
-  const isBettingClosed =
-    new Date(eventData.bettingCloseAt).getTime() <= Date.now();
+  const bettingCloseTimestamp = new Date(eventData.bettingCloseAt).getTime();
+  const isBettingClosed = bettingCloseTimestamp <= nowTimestamp;
 
   useEffect(() => {
     setEventData(event);
   }, [event]);
+
+  useEffect(() => {
+    if (isBettingClosed) {
+      return;
+    }
+
+    const timeoutMs = Math.max(bettingCloseTimestamp - Date.now(), 0) + 25;
+    const timeoutId = window.setTimeout(() => {
+      setNowTimestamp(Date.now());
+    }, timeoutMs);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [bettingCloseTimestamp, isBettingClosed]);
 
   async function refreshEventCard() {
     const res = await apiFetch(`/api/events/${event.id}`);
