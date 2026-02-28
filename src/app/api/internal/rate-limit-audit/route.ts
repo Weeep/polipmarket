@@ -200,6 +200,10 @@ export async function POST(req: Request) {
 
   const payload = body;
 
+  if (payload.eventType === "DECISION" && payload.allowed !== false) {
+    return NextResponse.json({ ok: true, skipped: true });
+  }
+
   await prisma.rateLimitAuditEvent.create({
     data: {
       eventType: payload.eventType,
