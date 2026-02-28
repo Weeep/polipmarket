@@ -147,18 +147,38 @@ async function sendOnce(endpoint) {
   };
 }
 
-async function runBurst(endpoint, requestCount) {
-  console.log(`\nBurst támadás indul: ${requestCount} kérés azonnal...`);
-  const jobs = Array.from({ length: requestCount }, () => sendOnce(endpoint));
-  const results = await Promise.all(jobs);
+async function runBurst(endpoint, requestCount, concurrency) {
+  console.log(`\nBurst támadás indul: ${requestCount} kérés, concurrency=${concurrency}...`);
+
+  const results = [];
+  let sent = 0;
+
+  async function worker() {
+    while (sent < requestCount) {
+      const current = sent;
+      sent += 1;
+      const result = await sendOnce(endpoint);
+      results[current] = result;
+    }
+  }
+
+  const workerCount = Math.max(1, Math.min(concurrency, requestCount));
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
 
   const first429 = results.find((result) => result.status === 429);
+  const firstResult = results[0];
   const statusHistogram = results.reduce((acc, result) => {
     acc[result.status] = (acc[result.status] ?? 0) + 1;
     return acc;
   }, {});
 
   console.log("Státusz eloszlás:", statusHistogram);
+  if (firstResult) {
+    console.log("Első válasz rate-limit headerek:", {
+      endpointType: firstResult.endpointType,
+      retryAfter: firstResult.retryAfter,
+    });
+  }
 
   if (first429) {
     console.log("\n✅ Talált 429 választ:");
@@ -224,9 +244,17 @@ async function main() {
     const mode = Number.parseInt(modeRaw, 10);
 
     if (mode === 1) {
-      const countRaw = await rl.question("Hány kérést küldjön egyszerre? (alap: 120): ");
+      const countRaw = await rl.question("Összes kérés száma? (alap: 120): ");
+      const concRaw = await rl.question("Concurrency (hány párhuzamos kérés)? (alap: 1, javasolt 1-5): ");
+
       const requestCount = Number.parseInt(countRaw || "120", 10);
-      await runBurst(endpoint, Number.isFinite(requestCount) ? requestCount : 120);
+      const concurrency = Number.parseInt(concRaw || "1", 10);
+
+      await runBurst(
+        endpoint,
+        Number.isFinite(requestCount) ? requestCount : 120,
+        Number.isFinite(concurrency) ? concurrency : 1,
+      );
       return;
     }
 
