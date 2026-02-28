@@ -11,6 +11,10 @@ import {
   type RateLimitAuditPayload,
 } from "@/lib/rate-limit/observability";
 
+const globalForRateLimitAudit = globalThis as unknown as {
+  rateLimitAuditConfigWarningLogged?: boolean;
+};
+
 function applyRateLimitHeaders(
   res: NextResponse,
   decision: {
@@ -47,21 +51,66 @@ function shouldSkipRateLimit(pathname: string) {
   return pathname === "/api/internal/rate-limit-audit";
 }
 
-async function sendRateLimitAuditEvent(req: NextRequest, payload: RateLimitAuditPayload) {
+function getAuditToken(): string | undefined {
   const token = process.env.RATE_LIMIT_AUDIT_TOKEN;
+
+  if (!token && !globalForRateLimitAudit.rateLimitAuditConfigWarningLogged) {
+    globalForRateLimitAudit.rateLimitAuditConfigWarningLogged = true;
+    console.warn(
+      JSON.stringify({
+        scope: "rate-limit-audit",
+        type: "config-missing",
+        message:
+          "RATE_LIMIT_AUDIT_TOKEN is not configured, rate-limit audit persistence is disabled.",
+      }),
+    );
+  }
+
+  return token;
+}
+
+async function sendRateLimitAuditEvent(req: NextRequest, payload: RateLimitAuditPayload) {
+  const token = getAuditToken();
 
   if (!token) {
     return;
   }
 
-  await fetch(new URL("/api/internal/rate-limit-audit", req.url), {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-rate-limit-audit-token": token,
-    },
-    body: JSON.stringify(payload),
-  });
+  try {
+    const response = await fetch(new URL("/api/internal/rate-limit-audit", req.url), {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-rate-limit-audit-token": token,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      console.warn(
+        JSON.stringify({
+          scope: "rate-limit-audit",
+          type: "ingest-failed",
+          status: response.status,
+          endpointType: payload.endpointType,
+          eventType: payload.eventType,
+          responseBody: body,
+        }),
+      );
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "audit-delivery-failed";
+    console.warn(
+      JSON.stringify({
+        scope: "rate-limit-audit",
+        type: "delivery-error",
+        endpointType: payload.endpointType,
+        eventType: payload.eventType,
+        errorMessage,
+      }),
+    );
+  }
 }
 
 export async function middleware(req: NextRequest, event: NextFetchEvent) {

@@ -135,5 +135,10 @@ Structured alert logs are emitted when:
 - backend error events are present in the latest 5-minute window
 
 Required environment variables:
-- `RATE_LIMIT_AUDIT_TOKEN`: shared secret between middleware and audit endpoint.
-- `RATE_LIMIT_AUDIT_SALT`: salt used for SHA-256 hashing of IP/user identifiers.
+- `RATE_LIMIT_AUDIT_TOKEN`: shared secret between middleware and audit endpoint. If missing, middleware skips audit delivery and logs a structured `config-missing` warning.
+- `RATE_LIMIT_AUDIT_SALT`: required salt used for SHA-256 hashing of IP/user identifiers. Ingest returns `500` if missing (no insecure fallback).
+
+Troubleshooting when rows are not inserted:
+- verify migration was applied (`RateLimitAuditEvent` exists),
+- verify both required env vars are set in the running process,
+- check logs for `rate-limit-audit` events (`config-missing`, `ingest-failed`, `delivery-error`).

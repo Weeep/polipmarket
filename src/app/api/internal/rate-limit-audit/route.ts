@@ -7,8 +7,7 @@ const ALERT_WINDOW_MINUTES = 5;
 const SPIKE_MIN_DENIES = 20;
 const SPIKE_MULTIPLIER = 2;
 
-function hashIdentifier(value: string): string {
-  const secret = process.env.RATE_LIMIT_AUDIT_SALT ?? "rate-limit-audit";
+function hashIdentifier(value: string, secret: string): string {
   return createHash("sha256").update(`${secret}:${value}`).digest("hex");
 }
 
@@ -152,7 +151,38 @@ async function emitMetricsLog() {
 }
 
 export async function POST(req: Request) {
-  if (req.headers.get("x-rate-limit-audit-token") !== process.env.RATE_LIMIT_AUDIT_TOKEN) {
+  const expectedToken = process.env.RATE_LIMIT_AUDIT_TOKEN;
+  const auditSalt = process.env.RATE_LIMIT_AUDIT_SALT;
+
+  if (!expectedToken) {
+    console.error(
+      JSON.stringify({
+        scope: "rate-limit-audit",
+        type: "config-missing",
+        message: "RATE_LIMIT_AUDIT_TOKEN must be configured.",
+      }),
+    );
+    return NextResponse.json(
+      { error: "Audit ingest unavailable: missing RATE_LIMIT_AUDIT_TOKEN" },
+      { status: 500 },
+    );
+  }
+
+  if (!auditSalt) {
+    console.error(
+      JSON.stringify({
+        scope: "rate-limit-audit",
+        type: "config-missing",
+        message: "RATE_LIMIT_AUDIT_SALT must be configured.",
+      }),
+    );
+    return NextResponse.json(
+      { error: "Audit ingest unavailable: missing RATE_LIMIT_AUDIT_SALT" },
+      { status: 500 },
+    );
+  }
+
+  if (req.headers.get("x-rate-limit-audit-token") !== expectedToken) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -177,8 +207,8 @@ export async function POST(req: Request) {
       path: payload.path,
       method: payload.method,
       region: payload.region ?? "unknown",
-      ipHash: hashIdentifier(payload.ip),
-      userHash: hashIdentifier(payload.userId),
+      ipHash: hashIdentifier(payload.ip, auditSalt),
+      userHash: hashIdentifier(payload.userId, auditSalt),
       allowed: payload.allowed,
       quotaLimit: payload.quotaLimit,
       remaining: payload.remaining,
@@ -189,7 +219,12 @@ export async function POST(req: Request) {
     },
   });
 
-  if (payload.eventType === "DECISION" && payload.allowed === false) {
+  if (payload.eventType === "BACKEND_ERROR") {
+    await emitAlerts();
+    return NextResponse.json({ ok: true });
+  }
+
+  if (payload.allowed === false) {
     await Promise.all([emitAlerts(), emitMetricsLog()]);
   }
 
