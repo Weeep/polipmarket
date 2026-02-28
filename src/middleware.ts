@@ -1,4 +1,4 @@
-import type { NextRequest } from "next/server";
+import type { NextFetchEvent, NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { checkRateLimit } from "@/lib/rate-limit/limiter";
@@ -6,6 +6,10 @@ import {
   classifyEndpointType,
   rateLimitIdentity,
 } from "@/lib/rate-limit/policy";
+import {
+  resolveRequestRegion,
+  type RateLimitAuditPayload,
+} from "@/lib/rate-limit/observability";
 
 function applyRateLimitHeaders(
   res: NextResponse,
@@ -39,27 +43,95 @@ async function getTokenSub(req: NextRequest) {
   }
 }
 
-export async function middleware(req: NextRequest) {
+function shouldSkipRateLimit(pathname: string) {
+  return pathname === "/api/internal/rate-limit-audit";
+}
+
+async function sendRateLimitAuditEvent(req: NextRequest, payload: RateLimitAuditPayload) {
+  const token = process.env.RATE_LIMIT_AUDIT_TOKEN;
+
+  if (!token) {
+    return;
+  }
+
+  await fetch(new URL("/api/internal/rate-limit-audit", req.url), {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-rate-limit-audit-token": token,
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function middleware(req: NextRequest, event: NextFetchEvent) {
+  if (shouldSkipRateLimit(req.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
+
   const endpointType = classifyEndpointType(req.nextUrl.pathname, req.method);
   const tokenSub = await getTokenSub(req);
   const { ip, userId } = rateLimitIdentity(req, tokenSub);
-  const decision = checkRateLimit({ ip, userId, endpointType });
+  const region = resolveRequestRegion(req.headers);
+  const startedAt = Date.now();
 
-  if (!decision.allowed) {
-    return applyRateLimitHeaders(
-      NextResponse.json(
-        {
-          error: "Rate limit exceeded",
-          message: "Too many requests for this endpoint type",
-          endpointType,
-        },
-        { status: 429 },
-      ),
-      decision,
+  try {
+    const decision = checkRateLimit({ ip, userId, endpointType });
+    const decisionLatencyMs = Date.now() - startedAt;
+
+    event.waitUntil(
+      sendRateLimitAuditEvent(req, {
+        eventType: "DECISION",
+        endpointType,
+        path: req.nextUrl.pathname,
+        method: req.method,
+        region,
+        ip,
+        userId,
+        allowed: decision.allowed,
+        quotaLimit: decision.limit,
+        remaining: decision.remaining,
+        retryAfterSeconds: decision.retryAfterSeconds,
+        resetAtUnixSeconds: decision.resetAtUnixSeconds,
+        decisionLatencyMs,
+      }),
     );
-  }
 
-  return applyRateLimitHeaders(NextResponse.next(), decision);
+    if (!decision.allowed) {
+      return applyRateLimitHeaders(
+        NextResponse.json(
+          {
+            error: "Rate limit exceeded",
+            message: "Too many requests for this endpoint type",
+            endpointType,
+          },
+          { status: 429 },
+        ),
+        decision,
+      );
+    }
+
+    return applyRateLimitHeaders(NextResponse.next(), decision);
+  } catch (error) {
+    const decisionLatencyMs = Date.now() - startedAt;
+    const errorMessage = error instanceof Error ? error.message : "unknown-rate-limit-error";
+
+    event.waitUntil(
+      sendRateLimitAuditEvent(req, {
+        eventType: "BACKEND_ERROR",
+        endpointType,
+        path: req.nextUrl.pathname,
+        method: req.method,
+        region,
+        ip,
+        userId,
+        decisionLatencyMs,
+        errorMessage,
+      }),
+    );
+
+    return NextResponse.next();
+  }
 }
 
 export const config = {
