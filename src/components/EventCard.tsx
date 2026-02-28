@@ -378,13 +378,13 @@ export function EventCard({ event }: Props) {
                   {buyDialog.quote.amount.toFixed(2)}ଳ
                 </span>
               </p>
-              <p>
+              <div>
                 Várható átlagár:{" "}
                 {formatSlippageExecutionLine(
                   buyDialog.quote.executionPrice,
                   buyDialog.quote.preTradePrice,
                 )}
-              </p>
+              </div>
               <p>
                 Várható részvény:{" "}
                 <span className="font-semibold">
