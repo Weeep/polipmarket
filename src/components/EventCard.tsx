@@ -7,6 +7,7 @@ import { useMe } from "@/context/MeContext";
 import { QuoteOrderResult } from "@/modules/order/application/quoteOrder";
 import type { EventSummary } from "@/modules/event/domain/Event";
 import Link from "next/link";
+import { CollapsibleInfoText } from "./CollapsibleInfoText";
 
 type Props = {
   event: EventSummary;
@@ -39,10 +40,22 @@ function formatSlippageExecutionLine(
     <>
       <span className="font-semibold">{executionPrice.toFixed(4)}ଳ </span>
       {slippagePercent > 10 && (
-        <span className="text-xs text-stone-400">
-          árfolyamcsúszás +{slippagePriceDelta.toFixed(4)}ଳ (
-          {slippagePercent.toFixed(0)}%)
-        </span>
+        <CollapsibleInfoText
+          label="árfolyamcsúszás"
+          className="inline text-xs text-stone-400"
+          suffix={
+            <span>
+              +{slippagePriceDelta.toFixed(4)}ଳ ({slippagePercent.toFixed(0)}
+              %)
+            </span>
+          }
+        >
+          Az árfolyamcsúszás (angolul: slippage) valós tőzsdei jelenség, ami a
+          vásárláskor látott ár és a tényleges végrehajtási ár közötti
+          különbség. Akkor magas, ha olyan termékből vásárol valaki, amelybe még
+          kevesen fektettek (alacsony a likviditása), jellemzően induló
+          vállalatok, kisebb kriptovaluta-projektek.
+        </CollapsibleInfoText>
       )}
     </>
   );
@@ -249,7 +262,7 @@ export function EventCard({ event }: Props) {
                   onClick={() => setIsAmountHelpOpen(true)}
                   className="mt-1 text-sm font-semibold text-yellow-500 underline hover:text-red-600"
                 >
-                  Tessék?!
+                  Miért?
                 </button>
               </p>
             </div>
