@@ -28,6 +28,17 @@ function formatVolume(value: number) {
   return Math.round(value).toLocaleString("hu-HU");
 }
 
+function formatEventDate(value: Date | string) {
+  const date = new Date(value);
+  const year = String(date.getFullYear()).slice(-2);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${year}-${month}-${day} ${hours}:${minutes}`;
+}
+
 function formatSlippageExecutionLine(
   executionPrice: number,
   preTradePrice: number,
@@ -74,11 +85,27 @@ export function EventCard({ event }: Props) {
   const [buyDialog, setBuyDialog] = useState<BuyDialogState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [nowTimestamp, setNowTimestamp] = useState(() => Date.now());
   const { refreshMe } = useMe();
+  const bettingCloseTimestamp = new Date(eventData.bettingCloseAt).getTime();
+  const isBettingClosed = bettingCloseTimestamp <= nowTimestamp;
 
   useEffect(() => {
     setEventData(event);
   }, [event]);
+
+  useEffect(() => {
+    if (isBettingClosed) {
+      return;
+    }
+
+    const timeoutMs = Math.max(bettingCloseTimestamp - Date.now(), 0) + 25;
+    const timeoutId = window.setTimeout(() => {
+      setNowTimestamp(Date.now());
+    }, timeoutMs);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [bettingCloseTimestamp, isBettingClosed]);
 
   async function refreshEventCard() {
     const res = await apiFetch(`/api/events/${event.id}`);
@@ -294,6 +321,7 @@ export function EventCard({ event }: Props) {
                       disabled={
                         submitting ||
                         buyDialogLoading ||
+                        isBettingClosed ||
                         market.status !== "OPEN" ||
                         outcome?.yesPrice == null ||
                         !outcome
@@ -314,6 +342,7 @@ export function EventCard({ event }: Props) {
                       disabled={
                         submitting ||
                         buyDialogLoading ||
+                        isBettingClosed ||
                         market.status !== "OPEN" ||
                         outcome?.noPrice == null ||
                         !outcome
@@ -352,11 +381,12 @@ export function EventCard({ event }: Props) {
 
         <div className="marketcard-statusbar">
           <span>
-            Fogadás zár: {new Date(eventData.bettingCloseAt).toLocaleString()}
+            Fogadás zár: {formatEventDate(eventData.bettingCloseAt)}
+            {isBettingClosed && <span aria-label="Fogadás zárva"> 🔒</span>}
           </span>
           {eventData.resolveAt && (
             <span>
-              Esemény vége: {new Date(eventData.resolveAt).toLocaleString()}
+              Esemény vége: {formatEventDate(eventData.resolveAt)}
             </span>
           )}
         </div>
