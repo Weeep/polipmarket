@@ -47,6 +47,8 @@ const HEAVY_READ_PATHS = [
   "/api/events/",
 ];
 
+const MAX_XFF_ENTRIES = 5;
+
 function isHeavyRead(pathname: string, method: string) {
   if (method !== "GET" && method !== "POST") {
     return false;
@@ -69,6 +71,49 @@ function isHeavyRead(pathname: string, method: string) {
   }
 
   return false;
+}
+
+function normalizeIpCandidate(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  const withoutPort = trimmed.includes(":") && trimmed.includes(".")
+    ? trimmed.split(":")[0]
+    : trimmed;
+
+  if (withoutPort.startsWith("::ffff:")) {
+    return withoutPort.replace("::ffff:", "");
+  }
+
+  return withoutPort;
+}
+
+function extractTrustedIp(req: NextRequest) {
+  const vercelForwardedFor = req.headers.get("x-vercel-forwarded-for");
+  if (vercelForwardedFor) {
+    return normalizeIpCandidate(vercelForwardedFor) ?? "unknown";
+  }
+
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp) {
+    return normalizeIpCandidate(realIp) ?? "unknown";
+  }
+
+  const xForwardedFor = req.headers.get("x-forwarded-for");
+  if (!xForwardedFor) {
+    return "unknown";
+  }
+
+  const chain = xForwardedFor
+    .split(",")
+    .map((part) => normalizeIpCandidate(part))
+    .filter((part): part is string => Boolean(part));
+
+  if (chain.length === 0 || chain.length > MAX_XFF_ENTRIES) {
+    return "unknown";
+  }
+
+  return chain[0];
 }
 
 export function classifyEndpointType(
@@ -105,8 +150,19 @@ export function rateLimitIdentity(
   ip: string;
   userId: string;
 } {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const ip = extractTrustedIp(req);
   const userId = tokenSub ?? "anonymous";
 
   return { ip, userId };
+}
+
+export function hashIdentifier(value: string) {
+  let hash = 2166136261;
+
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return `h${(hash >>> 0).toString(16)}`;
 }
