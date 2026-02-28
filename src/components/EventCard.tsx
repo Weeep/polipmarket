@@ -35,7 +35,17 @@ function formatSlippageExecutionLine(
   const slippagePercent =
     preTradePrice > 0 ? (slippagePriceDelta / preTradePrice) * 100 : 0;
 
-  return `${executionPrice.toFixed(4)} - árfolyamcsúszás +${slippagePriceDelta.toFixed(4)} (${slippagePercent.toFixed(0)}%)`;
+  return (
+    <>
+      <span className="font-semibold">{executionPrice.toFixed(4)}ଳ </span>
+      {slippagePercent > 10 && (
+        <span className="text-xs text-stone-400">
+          árfolyamcsúszás +{slippagePriceDelta.toFixed(4)}ଳ (
+          {slippagePercent.toFixed(0)}%)
+        </span>
+      )}
+    </>
+  );
 }
 
 export function EventCard({ event }: Props) {
@@ -357,12 +367,10 @@ export function EventCard({ event }: Props) {
               </p>
               <p>
                 Várható átlagár:{" "}
-                <span className="font-semibold">
-                  {formatSlippageExecutionLine(
-                    buyDialog.quote.executionPrice,
-                    buyDialog.quote.preTradePrice,
-                  )}
-                </span>
+                {formatSlippageExecutionLine(
+                  buyDialog.quote.executionPrice,
+                  buyDialog.quote.preTradePrice,
+                )}
               </p>
               <p>
                 Várható részvény:{" "}
