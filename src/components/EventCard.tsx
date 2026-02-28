@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
-import { DEFAULT_MAX_SLIPPAGE_BPS } from "@/config/economy";
 import { useMe } from "@/context/MeContext";
 import { QuoteOrderResult } from "@/modules/order/application/quoteOrder";
 import type { EventSummary } from "@/modules/event/domain/Event";
 import Link from "next/link";
+import { CollapsibleInfoText } from "@/components/CollapsibleInfoText";
 
 type Props = {
   event: EventSummary;
@@ -26,6 +26,18 @@ function getErrorMessage(error: unknown, fallback: string) {
 
 function formatVolume(value: number) {
   return Math.round(value).toLocaleString("hu-HU");
+}
+
+function getSlippageDisplayValues(executionPrice: number, preTradePrice: number) {
+  const slippagePriceDelta = executionPrice - preTradePrice;
+  const slippagePercent =
+    preTradePrice > 0 ? (slippagePriceDelta / preTradePrice) * 100 : 0;
+
+  return {
+    executionPriceLabel: executionPrice.toFixed(4),
+    slippageDeltaLabel: slippagePriceDelta.toFixed(4),
+    slippagePercentLabel: slippagePercent.toFixed(0),
+  };
 }
 
 export function EventCard({ event }: Props) {
@@ -123,7 +135,7 @@ export function EventCard({ event }: Props) {
           outcomeId: buyDialog.outcomeId,
           position: buyDialog.position,
           amount: buyDialog.quote.amount,
-          maxSlippageBps: DEFAULT_MAX_SLIPPAGE_BPS,
+          maxSlippageBps: null,
         }),
       });
 
@@ -159,6 +171,13 @@ export function EventCard({ event }: Props) {
   const winProfit = buyDialog
     ? Math.max(buyDialog.quote.estimatedShares - buyDialog.quote.amount, 0)
     : 0;
+
+  const slippageDisplay = buyDialog
+    ? getSlippageDisplayValues(
+        buyDialog.quote.executionPrice,
+        buyDialog.quote.preTradePrice,
+      )
+    : null;
 
   return (
     <>
@@ -345,12 +364,26 @@ export function EventCard({ event }: Props) {
                   {buyDialog.quote.amount.toFixed(2)}ଳ
                 </span>
               </p>
-              <p>
-                Várható átlagár:{" "}
-                <span className="font-semibold">
-                  {buyDialog.quote.executionPrice.toFixed(4)}ଳ
-                </span>
-              </p>
+              <div>
+                <div>
+                  Várható átlagár:{" "}
+                  <span className="font-semibold">
+                    {slippageDisplay?.executionPriceLabel}
+                  </span>{" "}
+                  -{" "}
+                  <CollapsibleInfoText
+                    label="árfolyamcsúszás"
+                    className="inline-block align-middle"
+                    suffix={
+                      <span className="font-semibold">
+                        +{slippageDisplay?.slippageDeltaLabel} ({slippageDisplay?.slippagePercentLabel}%)
+                      </span>
+                    }
+                  >
+                    Az árfolyamcsúszás (angolul: slippage) valós tőzsdei jelenség, ami a vásárláskor látott ár és a tényleges végrehajtási ár közötti különbség. Ez akkor magas, ha olyan termékből vásárol valaki, amibe még nem sokan fektettek (alacsony a likviditása), jellemzően startupok, kis crypto projectek
+                  </CollapsibleInfoText>
+                </div>
+              </div>
               <p>
                 Várható részvény:{" "}
                 <span className="font-semibold">
