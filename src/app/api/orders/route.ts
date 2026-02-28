@@ -36,9 +36,11 @@ export const POST = withAuth(async (user, req) => {
     const shares = Number(body.shares);
 
     const maxSlippageBps =
-      body.maxSlippageBps == null
-        ? DEFAULT_MAX_SLIPPAGE_BPS
-        : Number(body.maxSlippageBps);
+      body.maxSlippageBps === null
+        ? undefined
+        : body.maxSlippageBps == null
+          ? DEFAULT_MAX_SLIPPAGE_BPS
+          : Number(body.maxSlippageBps);
 
     if (maxSlippageBps != null && !Number.isFinite(maxSlippageBps)) {
       return NextResponse.json(

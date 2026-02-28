@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
-import { DEFAULT_MAX_SLIPPAGE_BPS } from "@/config/economy";
 import { useMe } from "@/context/MeContext";
 import { QuoteOrderResult } from "@/modules/order/application/quoteOrder";
 import type { EventSummary } from "@/modules/event/domain/Event";
@@ -26,6 +25,14 @@ function getErrorMessage(error: unknown, fallback: string) {
 
 function formatVolume(value: number) {
   return Math.round(value).toLocaleString("hu-HU");
+}
+
+function formatSlippageExecutionLine(executionPrice: number, slippageBps: number) {
+  const slippageFraction = slippageBps / 10_000;
+  const slippagePriceDelta = executionPrice * slippageFraction;
+  const slippagePercent = slippageBps / 100;
+
+  return `${executionPrice.toFixed(4)} - árfolyamcsúszás +${slippagePriceDelta.toFixed(3)} (${slippagePercent.toFixed(0)}%)`;
 }
 
 export function EventCard({ event }: Props) {
@@ -123,7 +130,7 @@ export function EventCard({ event }: Props) {
           outcomeId: buyDialog.outcomeId,
           position: buyDialog.position,
           amount: buyDialog.quote.amount,
-          maxSlippageBps: DEFAULT_MAX_SLIPPAGE_BPS,
+          maxSlippageBps: null,
         }),
       });
 
@@ -348,7 +355,10 @@ export function EventCard({ event }: Props) {
               <p>
                 Várható átlagár:{" "}
                 <span className="font-semibold">
-                  {buyDialog.quote.executionPrice.toFixed(4)}ଳ
+                  {formatSlippageExecutionLine(
+                    buyDialog.quote.executionPrice,
+                    buyDialog.quote.slippageBps,
+                  )}
                 </span>
               </p>
               <p>
