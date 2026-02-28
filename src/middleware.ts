@@ -1,41 +1,48 @@
 import { withAuth } from "next-auth/middleware";
 import type { NextRequestWithAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit/limiter";
+import { classifyEndpointType, rateLimitIdentity } from "@/lib/rate-limit/policy";
 
-const RATE_LIMIT = 60;
-const WINDOW_MS = 60_000;
+function applyRateLimitHeaders(
+  res: NextResponse,
+  decision: {
+    limit: number;
+    remaining: number;
+    resetAtUnixSeconds: number;
+    retryAfterSeconds: number;
+    endpointType: string;
+  },
+) {
+  res.headers.set("X-RateLimit-Limit", String(decision.limit));
+  res.headers.set("X-RateLimit-Remaining", String(decision.remaining));
+  res.headers.set("X-RateLimit-Reset", String(decision.resetAtUnixSeconds));
+  res.headers.set("X-RateLimit-Endpoint-Type", decision.endpointType);
+  res.headers.set("Retry-After", String(decision.retryAfterSeconds));
 
-const rateLimitStore = new Map<string, { count: number; expiresAt: number }>();
+  return res;
+}
 
 function rateLimit(req: NextRequestWithAuth) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
-  const userId = req.nextauth.token?.sub ?? "anonymous";
+  const { ip, userId } = rateLimitIdentity(req);
+  const endpointType = classifyEndpointType(req.nextUrl.pathname, req.method);
+  const decision = checkRateLimit({ ip, userId, endpointType });
 
-  const key = `${ip}:${userId}`;
-  const now = Date.now();
-
-  const entry = rateLimitStore.get(key);
-
-  if (!entry || entry.expiresAt < now) {
-    rateLimitStore.set(key, {
-      count: 1,
-      expiresAt: now + WINDOW_MS,
-    });
-    return null;
-  }
-
-  if (entry.count >= RATE_LIMIT) {
-    return NextResponse.json(
-      {
-        error: "Rate limit exceeded",
-        message: `Max ${RATE_LIMIT} requests per minute`,
-      },
-      { status: 429 },
+  if (!decision.allowed) {
+    return applyRateLimitHeaders(
+      NextResponse.json(
+        {
+          error: "Rate limit exceeded",
+          message: "Too many requests for this endpoint type",
+          endpointType,
+        },
+        { status: 429 },
+      ),
+      decision,
     );
   }
 
-  entry.count += 1;
-  return null;
+  return { decision };
 }
 
 export default withAuth(
@@ -43,10 +50,14 @@ export default withAuth(
     const { pathname } = req.nextUrl;
 
     if (pathname.startsWith("/api")) {
-      const rateLimitResponse = rateLimit(req);
-      if (rateLimitResponse) {
-        return rateLimitResponse;
+      const result = rateLimit(req);
+
+      if (result instanceof NextResponse) {
+        return result;
       }
+
+      const response = NextResponse.next();
+      return applyRateLimitHeaders(response, result.decision);
     }
 
     return NextResponse.next();
