@@ -1,4 +1,4 @@
-import type { NextRequestWithAuth } from "next-auth/middleware";
+import type { NextRequest } from "next/server";
 
 export type EndpointType =
   | "auth"
@@ -88,10 +88,6 @@ export function classifyEndpointType(
   }
 
   if (method !== "GET" && method !== "HEAD" && method !== "OPTIONS") {
-    if (pathname.startsWith("/api/orders") || pathname.startsWith("/api/markets")) {
-      return "write";
-    }
-
     return "write";
   }
 
@@ -102,12 +98,15 @@ export function classifyEndpointType(
   return "read";
 }
 
-export function rateLimitIdentity(req: NextRequestWithAuth): {
+export function rateLimitIdentity(
+  req: NextRequest,
+  tokenSub?: string,
+): {
   ip: string;
   userId: string;
 } {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  const userId = req.nextauth.token?.sub ?? "anonymous";
+  const userId = tokenSub ?? "anonymous";
 
   return { ip, userId };
 }

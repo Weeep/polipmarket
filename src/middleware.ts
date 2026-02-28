@@ -1,8 +1,11 @@
-import { withAuth } from "next-auth/middleware";
-import type { NextRequestWithAuth } from "next-auth/middleware";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 import { checkRateLimit } from "@/lib/rate-limit/limiter";
-import { classifyEndpointType, rateLimitIdentity } from "@/lib/rate-limit/policy";
+import {
+  classifyEndpointType,
+  rateLimitIdentity,
+} from "@/lib/rate-limit/policy";
 
 function applyRateLimitHeaders(
   res: NextResponse,
@@ -23,9 +26,23 @@ function applyRateLimitHeaders(
   return res;
 }
 
-function rateLimit(req: NextRequestWithAuth) {
-  const { ip, userId } = rateLimitIdentity(req);
+async function getTokenSub(req: NextRequest) {
+  try {
+    const token = await getToken({
+      req,
+      secret: process.env.NEXTAUTH_SECRET,
+    });
+
+    return typeof token?.sub === "string" ? token.sub : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function middleware(req: NextRequest) {
   const endpointType = classifyEndpointType(req.nextUrl.pathname, req.method);
+  const tokenSub = await getTokenSub(req);
+  const { ip, userId } = rateLimitIdentity(req, tokenSub);
   const decision = checkRateLimit({ ip, userId, endpointType });
 
   if (!decision.allowed) {
@@ -42,33 +59,9 @@ function rateLimit(req: NextRequestWithAuth) {
     );
   }
 
-  return { decision };
+  return applyRateLimitHeaders(NextResponse.next(), decision);
 }
 
-export default withAuth(
-  function middleware(req) {
-    const { pathname } = req.nextUrl;
-
-    if (pathname.startsWith("/api")) {
-      const result = rateLimit(req);
-
-      if (result instanceof NextResponse) {
-        return result;
-      }
-
-      const response = NextResponse.next();
-      return applyRateLimitHeaders(response, result.decision);
-    }
-
-    return NextResponse.next();
-  },
-  {
-    pages: {
-      signIn: "/about",
-    },
-  },
-);
-
 export const config = {
-  matcher: ["/", "/markets/new", "/api/(.*)"],
+  matcher: ["/api/:path*"],
 };

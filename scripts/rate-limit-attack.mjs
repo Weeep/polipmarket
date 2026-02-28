@@ -211,6 +211,26 @@ async function runSustained(endpoint, maxRequests, intervalMs) {
   console.log("\n⚠️ Nem jött 429 a megadott sustained tartományban.");
 }
 
+
+async function checkLimiterHeaders(endpoint) {
+  const probe = await sendOnce(endpoint);
+  const active = Boolean(probe.endpointType);
+
+  console.log("\nMiddleware/rate-limit precheck:", {
+    status: probe.status,
+    endpointTypeHeader: probe.endpointType,
+    retryAfter: probe.retryAfter,
+  });
+
+  if (!active) {
+    console.log(
+      "⚠️ Nem látszanak rate-limit headerek. Lehetséges ok: middleware/proxy nem fut, vagy nem erre a buildre futtatod a scriptet.",
+    );
+  }
+
+  return active;
+}
+
 async function main() {
   const rl = createInterface({ input, output });
 
@@ -239,6 +259,8 @@ async function main() {
     }
 
     console.log(`Kiválasztva: ${endpoint.label} -> ${endpoint.path}`);
+
+    await checkLimiterHeaders(endpoint);
 
     const modeRaw = await rl.question("Mód (1 = burst, 2 = sustained): ");
     const mode = Number.parseInt(modeRaw, 10);
