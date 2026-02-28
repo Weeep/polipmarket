@@ -124,6 +124,7 @@ Rate-limit middleware now emits audit events to `POST /api/internal/rate-limit-a
 - Event types:
   - `DECISION` for deny outcomes.
   - `BACKEND_ERROR` for limiter backend errors (future Redis migration compatibility).
+- The ingest endpoint hard-drops `DECISION` events unless `allowed === false` (defense-in-depth if any caller accidentally submits allow events).
 
 Structured metrics logging is computed from the audit table (rolling 15-minute window):
 - blocking rate
