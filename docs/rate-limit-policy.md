@@ -5,7 +5,7 @@ This document defines the endpoint policy buckets and middleware integration use
 ## 1) Requirements & policy definition
 
 Identity keys for limits:
-- IP (`x-forwarded-for` first hop, trimmed)
+- IP (trusted-proxy headers only, normalized)
 - User (`nextauth.token.sub` or `anonymous`)
 - Endpoint type bucket
 
@@ -23,6 +23,56 @@ Every bucket uses two windows:
 - Sustained window (long interval)
 
 Current values are implemented in `src/lib/rate-limit/policy.ts`.
+
+## 2) Trusted proxy / IP source strategy (AWS Lightsail + Nginx)
+
+Production runs behind Nginx on Lightsail, so the application **only trusts IP headers if the request is marked as proxy-trusted**.
+
+`rateLimitIdentity` works as follows:
+1. Require `x-trusted-proxy: 1`.
+2. Preferred source: `x-real-ip`.
+3. Fallbacks: `x-forwarded-for` first valid element, then `forwarded` (`for=` token).
+4. All values are normalized and validated (`node:net.isIP`) before use.
+5. If no trusted/valid source exists, IP becomes `unknown`.
+
+Normalization/guard behavior:
+- Trims whitespace.
+- Accepts IPv4 and IPv6.
+- Strips optional port (`1.2.3.4:1234`, `[2001:db8::1]:443`).
+- Converts IPv4-mapped IPv6 (`::ffff:1.2.3.4`) to IPv4.
+- Rejects malformed values.
+
+This prevents direct spoofing where the client injects `x-forwarded-for` and the app blindly trusts it.
+
+### Nginx config requirements (Lightsail)
+
+In the reverse-proxy `location` that forwards to Next.js, set headers explicitly so user-supplied values are overwritten:
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:3382;
+
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Host $host;
+
+    # Security: define trusted proxy boundary for app-level IP extraction
+    proxy_set_header X-Trusted-Proxy 1;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+}
+```
+
+Typical file locations on Ubuntu Lightsail:
+- `/etc/nginx/sites-available/<site>.conf`
+- symlink: `/etc/nginx/sites-enabled/<site>.conf`
+
+After editing:
+
+```bash
+sudo nginx -t
+sudo systemctl reload nginx
+```
 
 ## 3) Rate-limit architecture
 

@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { isIP } from "node:net";
 
 export type EndpointType =
   | "auth"
@@ -105,8 +106,96 @@ export function rateLimitIdentity(
   ip: string;
   userId: string;
 } {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const ip = resolveClientIp(req);
   const userId = tokenSub ?? "anonymous";
 
   return { ip, userId };
+}
+
+function resolveClientIp(req: NextRequest): string {
+  const trustedProxy = req.headers.get("x-trusted-proxy") === "1";
+
+  if (trustedProxy) {
+    const realIp = normalizeIp(req.headers.get("x-real-ip"));
+    if (realIp) {
+      return realIp;
+    }
+
+    const forwardedFor = pickFirstValidFromCsv(req.headers.get("x-forwarded-for"));
+    if (forwardedFor) {
+      return forwardedFor;
+    }
+
+    const forwarded = pickForwardedForToken(req.headers.get("forwarded"));
+    if (forwarded) {
+      return forwarded;
+    }
+  }
+
+  return "unknown";
+}
+
+function pickFirstValidFromCsv(value: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+
+  for (const part of value.split(",")) {
+    const normalized = normalizeIp(part);
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  return null;
+}
+
+function pickForwardedForToken(value: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+
+  for (const segment of value.split(",")) {
+    for (const token of segment.split(";")) {
+      const trimmed = token.trim();
+      if (!trimmed.toLowerCase().startsWith("for=")) {
+        continue;
+      }
+
+      const candidate = trimmed.slice(4).replace(/^"|"$/g, "");
+      const normalized = normalizeIp(candidate);
+      if (normalized) {
+        return normalized;
+      }
+    }
+  }
+
+  return null;
+}
+
+function normalizeIp(value: string | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+
+  let candidate = value.trim();
+  if (!candidate) {
+    return null;
+  }
+
+  if (candidate.startsWith("[") && candidate.includes("]")) {
+    candidate = candidate.slice(1, candidate.indexOf("]"));
+  } else if (candidate.includes(":") && candidate.includes(".")) {
+    const lastColon = candidate.lastIndexOf(":");
+    const maybePort = candidate.slice(lastColon + 1);
+    if (/^\d+$/.test(maybePort)) {
+      candidate = candidate.slice(0, lastColon);
+    }
+  }
+
+  if (candidate.toLowerCase().startsWith("::ffff:")) {
+    candidate = candidate.slice("::ffff:".length);
+  }
+
+  return isIP(candidate) ? candidate : null;
 }
