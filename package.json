@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "import:events": "node scripts/import-events.mjs",
-    "import:achievements": "node scripts/import-achievements.mjs"
+    "import:achievements": "node scripts/import-achievements.mjs",
+    "attack:rate-limit": "node scripts/rate-limit-attack.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.1",
