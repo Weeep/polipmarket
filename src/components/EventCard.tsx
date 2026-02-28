@@ -27,12 +27,16 @@ function formatVolume(value: number) {
   return Math.round(value).toLocaleString("hu-HU");
 }
 
-function formatSlippageExecutionLine(executionPrice: number, slippageBps: number) {
+function formatSlippageExecutionLine(
+  executionPrice: number,
+  preTradePrice: number,
+  slippageBps: number,
+) {
   const slippageFraction = slippageBps / 10_000;
-  const slippagePriceDelta = executionPrice * slippageFraction;
+  const slippagePriceDelta = preTradePrice * slippageFraction;
   const slippagePercent = slippageBps / 100;
 
-  return `${executionPrice.toFixed(4)} - árfolyamcsúszás +${slippagePriceDelta.toFixed(3)} (${slippagePercent.toFixed(0)}%)`;
+  return `${executionPrice.toFixed(4)} - árfolyamcsúszás +${slippagePriceDelta.toFixed(4)} (${slippagePercent.toFixed(0)}%)`;
 }
 
 export function EventCard({ event }: Props) {
@@ -357,6 +361,7 @@ export function EventCard({ event }: Props) {
                 <span className="font-semibold">
                   {formatSlippageExecutionLine(
                     buyDialog.quote.executionPrice,
+                    buyDialog.quote.preTradePrice,
                     buyDialog.quote.slippageBps,
                   )}
                 </span>

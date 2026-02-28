@@ -29,6 +29,7 @@ export type QuoteOrderResult = {
   netAmount: number;
   executionPrice: number;
   estimatedShares: number;
+  preTradePrice: number;
   slippageBps: number;
 };
 
@@ -100,6 +101,7 @@ export async function quoteOrder(
     netAmount,
     executionPrice: netAmount / estimatedShares,
     estimatedShares,
+    preTradePrice: executionPrice,
     slippageBps,
   };
 }
