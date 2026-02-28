@@ -317,21 +317,3 @@ model Order {
   @@index([marketId])
   @@index([userId])
 }
-
-
-model RateLimitDenyAudit {
-  id                String   @id @default(cuid())
-  endpointType      String
-  path              String
-  method            String
-  ipHash            String
-  userHash          String
-  limit             Int
-  retryAfterSeconds Int
-  region            String
-  createdAt         DateTime @default(now())
-
-  @@index([createdAt])
-  @@index([endpointType, createdAt])
-  @@index([path, createdAt])
-}
