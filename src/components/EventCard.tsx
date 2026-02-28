@@ -75,6 +75,8 @@ export function EventCard({ event }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const { refreshMe } = useMe();
+  const isBettingClosed =
+    new Date(eventData.bettingCloseAt).getTime() <= Date.now();
 
   useEffect(() => {
     setEventData(event);
@@ -294,6 +296,7 @@ export function EventCard({ event }: Props) {
                       disabled={
                         submitting ||
                         buyDialogLoading ||
+                        isBettingClosed ||
                         market.status !== "OPEN" ||
                         outcome?.yesPrice == null ||
                         !outcome
@@ -314,6 +317,7 @@ export function EventCard({ event }: Props) {
                       disabled={
                         submitting ||
                         buyDialogLoading ||
+                        isBettingClosed ||
                         market.status !== "OPEN" ||
                         outcome?.noPrice == null ||
                         !outcome
@@ -353,6 +357,7 @@ export function EventCard({ event }: Props) {
         <div className="marketcard-statusbar">
           <span>
             Fogadás zár: {new Date(eventData.bettingCloseAt).toLocaleString()}
+            {isBettingClosed && <span aria-label="Fogadás zárva"> 🔒</span>}
           </span>
           {eventData.resolveAt && (
             <span>
