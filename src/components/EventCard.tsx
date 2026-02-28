@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
-import { DEFAULT_MAX_SLIPPAGE_BPS } from "@/config/economy";
 import { useMe } from "@/context/MeContext";
 import { QuoteOrderResult } from "@/modules/order/application/quoteOrder";
 import type { EventSummary } from "@/modules/event/domain/Event";
@@ -26,6 +25,27 @@ function getErrorMessage(error: unknown, fallback: string) {
 
 function formatVolume(value: number) {
   return Math.round(value).toLocaleString("hu-HU");
+}
+
+function formatSlippageExecutionLine(
+  executionPrice: number,
+  preTradePrice: number,
+) {
+  const slippagePriceDelta = executionPrice - preTradePrice;
+  const slippagePercent =
+    preTradePrice > 0 ? (slippagePriceDelta / preTradePrice) * 100 : 0;
+
+  return (
+    <>
+      <span className="font-semibold">{executionPrice.toFixed(4)}ଳ </span>
+      {slippagePercent > 10 && (
+        <span className="text-xs text-stone-400">
+          árfolyamcsúszás +{slippagePriceDelta.toFixed(4)}ଳ (
+          {slippagePercent.toFixed(0)}%)
+        </span>
+      )}
+    </>
+  );
 }
 
 export function EventCard({ event }: Props) {
@@ -123,7 +143,7 @@ export function EventCard({ event }: Props) {
           outcomeId: buyDialog.outcomeId,
           position: buyDialog.position,
           amount: buyDialog.quote.amount,
-          maxSlippageBps: DEFAULT_MAX_SLIPPAGE_BPS,
+          maxSlippageBps: null,
         }),
       });
 
@@ -347,9 +367,10 @@ export function EventCard({ event }: Props) {
               </p>
               <p>
                 Várható átlagár:{" "}
-                <span className="font-semibold">
-                  {buyDialog.quote.executionPrice.toFixed(4)}ଳ
-                </span>
+                {formatSlippageExecutionLine(
+                  buyDialog.quote.executionPrice,
+                  buyDialog.quote.preTradePrice,
+                )}
               </p>
               <p>
                 Várható részvény:{" "}
