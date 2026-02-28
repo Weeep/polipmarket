@@ -8,6 +8,7 @@ import { QuoteOrderResult } from "@/modules/order/application/quoteOrder";
 import type { EventSummary } from "@/modules/event/domain/Event";
 import Link from "next/link";
 import { CollapsibleInfoText } from "./CollapsibleInfoText";
+import { toHun } from "@/lib/logger";
 
 type Props = {
   event: EventSummary;
@@ -206,16 +207,6 @@ export function EventCard({ event }: Props) {
     }
   }
 
-  function toHun(position: string): string {
-    if (position === "YES") {
-      return "IGEN";
-    } else if (position === "NO") {
-      return "NEM";
-    } else {
-      return position;
-    }
-  }
-
   const winProfit = buyDialog
     ? Math.max(buyDialog.quote.estimatedShares - buyDialog.quote.amount, 0)
     : 0;
@@ -385,9 +376,7 @@ export function EventCard({ event }: Props) {
             {isBettingClosed && <span aria-label="Fogadás zárva"> 🔒</span>}
           </span>
           {eventData.resolveAt && (
-            <span>
-              Esemény vége: {formatEventDate(eventData.resolveAt)}
-            </span>
+            <span>Esemény vége: {formatEventDate(eventData.resolveAt)}</span>
           )}
         </div>
 

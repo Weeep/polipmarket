@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getSellDisplayMetricsFromBet } from "@/components/sellDisplay";
 import { getRemainingTimeInfo } from "@/lib/remainingTime";
 import { MyEventMarketBetDTO } from "@/modules/event/dto/myEventMarketBetDTO";
+import { toHun } from "@/lib/logger";
 
 type BetCardProps = {
   market: MyEventMarketBetDTO;
@@ -85,8 +86,11 @@ export function BetCard({
           <p className="font-semibold text-xl text-stone-100">
             {bet.outcomeLabel}
           </p>
-          <p className="text-xs uppercase tracking-wide text-stone-400">
-            {bet.position}
+          <p
+            className="rounded-lg bg-slate-800 px-4 py-1 text-stone-100
+           border border-slate-700 mx-8"
+          >
+            {toHun(bet.position)}
           </p>
         </div>
         <div>
