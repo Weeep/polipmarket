@@ -30,11 +30,10 @@ function formatVolume(value: number) {
 function formatSlippageExecutionLine(
   executionPrice: number,
   preTradePrice: number,
-  slippageBps: number,
 ) {
-  const slippageFraction = slippageBps / 10_000;
-  const slippagePriceDelta = preTradePrice * slippageFraction;
-  const slippagePercent = slippageBps / 100;
+  const slippagePriceDelta = executionPrice - preTradePrice;
+  const slippagePercent =
+    preTradePrice > 0 ? (slippagePriceDelta / preTradePrice) * 100 : 0;
 
   return `${executionPrice.toFixed(4)} - árfolyamcsúszás +${slippagePriceDelta.toFixed(4)} (${slippagePercent.toFixed(0)}%)`;
 }
@@ -362,7 +361,6 @@ export function EventCard({ event }: Props) {
                   {formatSlippageExecutionLine(
                     buyDialog.quote.executionPrice,
                     buyDialog.quote.preTradePrice,
-                    buyDialog.quote.slippageBps,
                   )}
                 </span>
               </p>
