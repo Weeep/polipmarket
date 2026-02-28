@@ -20,7 +20,7 @@ function normalizeYesStartPercent(value: number) {
     return 50;
   }
 
-  return Math.min(97, Math.max(3, Math.round(value)));
+  return Math.min(100, Math.max(1, Math.round(value)));
 }
 
 export default function NewEventPage() {
@@ -199,8 +199,8 @@ export default function NewEventPage() {
                         <input
                           className="ml-2 border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
                           type="number"
-                          min="10"
-                          max="90"
+                          min="1"
+                          max="100"
                           value={market.yesStartPercent}
                           onChange={(e) => {
                             const value = Number(e.target.value);
