@@ -128,25 +128,25 @@ export async function middleware(req: NextRequest, event: NextFetchEvent) {
     const decision = checkRateLimit({ ip, userId, endpointType });
     const decisionLatencyMs = Date.now() - startedAt;
 
-    event.waitUntil(
-      sendRateLimitAuditEvent(req, {
-        eventType: "DECISION",
-        endpointType,
-        path: req.nextUrl.pathname,
-        method: req.method,
-        region,
-        ip,
-        userId,
-        allowed: decision.allowed,
-        quotaLimit: decision.limit,
-        remaining: decision.remaining,
-        retryAfterSeconds: decision.retryAfterSeconds,
-        resetAtUnixSeconds: decision.resetAtUnixSeconds,
-        decisionLatencyMs,
-      }),
-    );
-
     if (!decision.allowed) {
+      event.waitUntil(
+        sendRateLimitAuditEvent(req, {
+          eventType: "DECISION",
+          endpointType,
+          path: req.nextUrl.pathname,
+          method: req.method,
+          region,
+          ip,
+          userId,
+          allowed: decision.allowed,
+          quotaLimit: decision.limit,
+          remaining: decision.remaining,
+          retryAfterSeconds: decision.retryAfterSeconds,
+          resetAtUnixSeconds: decision.resetAtUnixSeconds,
+          decisionLatencyMs,
+        }),
+      );
+
       return applyRateLimitHeaders(
         NextResponse.json(
           {

@@ -117,12 +117,12 @@ This implementation remains instance-local (in-memory). For horizontally scaled 
 
 ## 5) Observability and incident response
 
-Rate-limit middleware now emits audit events to `POST /api/internal/rate-limit-audit`.
+Rate-limit middleware now emits audit events to `POST /api/internal/rate-limit-audit` only for denied decisions and backend errors.
 
 - Stored fields include: `endpointType`, `ipHash`, `userHash`, `quotaLimit`, `region`, decision outcome and retry/reset values.
 - Identifiers are hashed server-side before persistence in `RateLimitAuditEvent`.
 - Event types:
-  - `DECISION` for allow/deny outcomes.
+  - `DECISION` for deny outcomes.
   - `BACKEND_ERROR` for limiter backend errors (future Redis migration compatibility).
 
 Structured metrics logging is computed from the audit table (rolling 15-minute window):
