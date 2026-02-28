@@ -32,7 +32,7 @@ Production runs behind Nginx on Lightsail, so the application **only trusts IP h
 1. Require `x-trusted-proxy: 1`.
 2. Preferred source: `x-real-ip`.
 3. Fallbacks: `x-forwarded-for` first valid element, then `forwarded` (`for=` token).
-4. All values are normalized and validated (`node:net.isIP`) before use.
+4. All values are normalized and validated with runtime-safe IPv4/IPv6 checks (Edge-compatible) before use.
 5. If no trusted/valid source exists, IP becomes `unknown`.
 
 Normalization/guard behavior:

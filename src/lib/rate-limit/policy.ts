@@ -1,5 +1,4 @@
 import type { NextRequest } from "next/server";
-import { isIP } from "node:net";
 
 export type EndpointType =
   | "auth"
@@ -197,5 +196,90 @@ function normalizeIp(value: string | null | undefined): string | null {
     candidate = candidate.slice("::ffff:".length);
   }
 
-  return isIP(candidate) ? candidate : null;
+  return isValidIp(candidate) ? candidate : null;
+}
+
+function isValidIp(value: string): boolean {
+  return isValidIPv4(value) || isValidIPv6(value);
+}
+
+function isValidIPv4(value: string): boolean {
+  const parts = value.split(".");
+  if (parts.length !== 4) {
+    return false;
+  }
+
+  for (const part of parts) {
+    if (!/^\d+$/.test(part)) {
+      return false;
+    }
+
+    if (part.length > 1 && part.startsWith("0")) {
+      return false;
+    }
+
+    const octet = Number(part);
+    if (octet < 0 || octet > 255) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function isValidIPv6(value: string): boolean {
+  let candidate = value.toLowerCase();
+  if (!candidate) {
+    return false;
+  }
+
+  if (candidate.includes(".")) {
+    const lastColon = candidate.lastIndexOf(":");
+    if (lastColon === -1) {
+      return false;
+    }
+
+    const ipv4Tail = candidate.slice(lastColon + 1);
+    if (!isValidIPv4(ipv4Tail)) {
+      return false;
+    }
+
+    candidate = `${candidate.slice(0, lastColon)}:0:0`;
+  }
+
+  if (candidate.includes(":::")) {
+    return false;
+  }
+
+  const hasDoubleColon = candidate.includes("::");
+  if (hasDoubleColon && candidate.indexOf("::") !== candidate.lastIndexOf("::")) {
+    return false;
+  }
+
+  if (candidate.startsWith(":") && !candidate.startsWith("::")) {
+    return false;
+  }
+
+  if (candidate.endsWith(":") && !candidate.endsWith("::")) {
+    return false;
+  }
+
+  const [leftRaw, rightRaw] = candidate.split("::");
+  const left = leftRaw ? leftRaw.split(":") : [];
+  const right = rightRaw ? rightRaw.split(":") : [];
+
+  if (![...left, ...right].every(isValidHextet)) {
+    return false;
+  }
+
+  const partCount = left.length + right.length;
+  if (hasDoubleColon) {
+    return partCount < 8;
+  }
+
+  return partCount === 8;
+}
+
+function isValidHextet(value: string): boolean {
+  return /^[0-9a-f]{1,4}$/i.test(value);
 }
