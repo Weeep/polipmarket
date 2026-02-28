@@ -7,6 +7,7 @@ import Image from "next/image";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { apiFetch } from "@/lib/apiFetch";
 
 export function Header() {
   const router = useRouter();
@@ -15,6 +16,10 @@ export function Header() {
   const currentQuery = pathname === "/events" ? (searchParams.get("q") ?? "") : "";
   const { data: session, update } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleteSubmitting, setIsDeleteSubmitting] = useState(false);
+  const [deleteReason, setDeleteReason] = useState("");
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { me } = useMe();
@@ -71,6 +76,23 @@ export function Header() {
 
   async function handleLogout() {
     await signOut({ callbackUrl: "/" });
+  }
+
+  async function handleDeleteAccount() {
+    try {
+      setIsDeleteSubmitting(true);
+      setDeleteError(null);
+      await apiFetch("/api/me/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: deleteReason }),
+      });
+      await signOut({ callbackUrl: "/" });
+    } catch (error) {
+      setDeleteError(error instanceof Error ? error.message : "A törlés sikertelen.");
+    } finally {
+      setIsDeleteSubmitting(false);
+    }
   }
 
   function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
@@ -145,8 +167,20 @@ export function Header() {
 
             {isMenuOpen && (
               <div className="absolute right-0 top-11 z-20 w-52 rounded-xl border border-zinc-700 bg-zinc-900 p-3 shadow-xl">
-                <div className="text-sm font-medium text-stone-100">
-                  {me.name}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-sm font-medium text-stone-100">{me.name}</div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsDeleteDialogOpen(true);
+                      setDeleteError(null);
+                      setIsMenuOpen(false);
+                      setDeleteReason("");
+                    }}
+                    className="text-xs text-zinc-400 hover:text-zinc-300"
+                  >
+                    Törlés
+                  </button>
                 </div>
                 <hr className="my-3 border-zinc-700" />
                 <div className="space-y-1 text-sm">
@@ -182,6 +216,58 @@ export function Header() {
           </div>
         </div>
       </div>
+
+      {isDeleteDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-md rounded-xl border border-stone-700 bg-stone-900 p-5 text-stone-200 shadow-2xl">
+            <h3 className="mb-3 text-lg font-bold text-stone-100">Fiók törlése</h3>
+            <div className="space-y-2 text-sm text-stone-300">
+              <p>
+                A törlés után a profilod anonimizáljuk, a neved és a képed eltűnik,
+                valamint az egyenleged és zárolt összegeid nullázódnak.
+              </p>
+              <p>
+                A művelet végleges. A törlés után ezzel a Google/email fiókkal már
+                nem fogsz tudni újra regisztrálni. Biztosan szeretnéd törölni a
+                fiókodat?
+              </p>
+            </div>
+
+            <label className="mt-3 block text-xs text-stone-400">
+              Opcionális indoklás (audit log):
+              <textarea
+                value={deleteReason}
+                onChange={(event) => setDeleteReason(event.target.value)}
+                maxLength={500}
+                rows={3}
+                className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-sm text-stone-100 placeholder:text-stone-500 focus:border-amber-400 focus:outline-none"
+                placeholder="Miért törlöd a fiókot?"
+              />
+            </label>
+
+            {deleteError && <p className="mt-3 text-xs text-rose-400">{deleteError}</p>}
+
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setIsDeleteDialogOpen(false)}
+                disabled={isDeleteSubmitting}
+                className="rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-stone-300 hover:bg-zinc-800 disabled:opacity-60"
+              >
+                Mégse
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={isDeleteSubmitting}
+                className="rounded-lg bg-rose-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-rose-500 disabled:opacity-60"
+              >
+                {isDeleteSubmitting ? "Törlés folyamatban..." : "Igen, törlöm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="pt-3 border-t border-stone-700">
         <form onSubmit={handleSearchSubmit} className="mx-auto w-full max-w-3xl">
