@@ -83,20 +83,16 @@ export function classifyEndpointType(
     return "admin";
   }
 
+  if (isHeavyRead(pathname, method)) {
+    return "heavy-read";
+  }
+
   if (method !== "GET" && method !== "HEAD" && method !== "OPTIONS") {
     if (pathname.startsWith("/api/orders") || pathname.startsWith("/api/markets")) {
       return "write";
     }
 
-    if (isHeavyRead(pathname, method)) {
-      return "heavy-read";
-    }
-
     return "write";
-  }
-
-  if (isHeavyRead(pathname, method)) {
-    return "heavy-read";
   }
 
   if (HEAVY_READ_PATHS.some((path) => pathname.startsWith(path))) {

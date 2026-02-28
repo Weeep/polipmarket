@@ -129,11 +129,13 @@ async function sendOnce(endpoint) {
   const retryAfter = res.headers.get("retry-after");
   const endpointType = res.headers.get("x-ratelimit-endpoint-type");
 
-  let body = null;
+  const rawBody = await res.text();
+  let body = rawBody;
+
   try {
-    body = await res.json();
+    body = rawBody ? JSON.parse(rawBody) : null;
   } catch {
-    body = await res.text();
+    // maradjon szövegként
   }
 
   return {
