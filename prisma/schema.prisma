@@ -34,6 +34,11 @@ enum OrderPosition {
   NO
 }
 
+enum RateLimitAuditEventType {
+  DECISION
+  BACKEND_ERROR
+}
+
 model Event {
   id          String   @id @default(cuid())
   question    String
@@ -316,4 +321,28 @@ model Order {
 
   @@index([marketId])
   @@index([userId])
+}
+
+model RateLimitAuditEvent {
+  id                    String                  @id @default(cuid())
+  eventType             RateLimitAuditEventType
+  endpointType          String?
+  path                  String
+  method                String
+  region                String?
+  ipHash                String?
+  userHash              String?
+  allowed               Boolean?
+  quotaLimit            Int?
+  remaining             Int?
+  retryAfterSeconds     Int?
+  resetAtUnixSeconds    Int?
+  decisionLatencyMs     Int?
+  errorMessage          String?
+  createdAt             DateTime                @default(now())
+
+  @@index([createdAt])
+  @@index([eventType, createdAt])
+  @@index([endpointType, createdAt])
+  @@index([allowed, createdAt])
 }

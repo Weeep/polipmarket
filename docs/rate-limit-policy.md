@@ -114,3 +114,31 @@ Response headers:
 ## Notes
 
 This implementation remains instance-local (in-memory). For horizontally scaled or serverless deployments, the evaluator backend should be replaced with a distributed store (e.g. Redis) while reusing the same policy/classification layer.
+
+## 5) Observability and incident response
+
+Rate-limit middleware now emits audit events to `POST /api/internal/rate-limit-audit`.
+
+- Stored fields include: `endpointType`, `ipHash`, `userHash`, `quotaLimit`, `region`, decision outcome and retry/reset values.
+- Identifiers are hashed server-side before persistence in `RateLimitAuditEvent`.
+- Event types:
+  - `DECISION` for allow/deny outcomes.
+  - `BACKEND_ERROR` for limiter backend errors (future Redis migration compatibility).
+
+Structured metrics logging is computed from the audit table (rolling 15-minute window):
+- blocking rate
+- top abused endpoint types
+- p95 rate-limit decision latency
+
+Structured alert logs are emitted when:
+- 429/deny rate spikes (latest 5 minutes compared to previous 5 minutes)
+- backend error events are present in the latest 5-minute window
+
+Required environment variables:
+- `RATE_LIMIT_AUDIT_TOKEN`: shared secret between middleware and audit endpoint. If missing, middleware skips audit delivery and logs a structured `config-missing` warning.
+- `RATE_LIMIT_AUDIT_SALT`: required salt used for SHA-256 hashing of IP/user identifiers. Ingest returns `500` if missing (no insecure fallback).
+
+Troubleshooting when rows are not inserted:
+- verify migration was applied (`RateLimitAuditEvent` exists),
+- verify both required env vars are set in the running process,
+- check logs for `rate-limit-audit` events (`config-missing`, `ingest-failed`, `delivery-error`).
