@@ -34,8 +34,8 @@ function normalizeYesStartPercent(value?: number) {
     return 50;
   }
 
-  if (value < 3 || value > 97) {
-    throw new Error("yesStartPercent must be between 3 and 97");
+  if (value < 1 || value > 100) {
+    throw new Error("yesStartPercent must be between 1 and 100");
   }
 
   return value;
