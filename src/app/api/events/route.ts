@@ -7,9 +7,60 @@ import {
 import { getEvents } from "@/modules/event/application/getEvents";
 import { getMarketsByEventId } from "@/modules/market/application/getMarketsByEventId";
 import { getSession } from "@/modules/auth/application/getSession";
+import { EventCategory } from "@/modules/event/domain/Event";
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
+}
+
+const CATEGORY_VALUES: EventCategory[] = ["POLITICS", "SPORT", "WORLD", "OTHER"];
+
+const CATEGORY_SLUG_TO_VALUE: Record<string, EventCategory> = {
+  politics: "POLITICS",
+  sport: "SPORT",
+  world: "WORLD",
+  other: "OTHER",
+};
+
+function parseEventCategory(value: unknown): EventCategory {
+  if (typeof value !== "string") {
+    throw new Error("Category is required");
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    throw new Error("Category is required");
+  }
+
+  const bySlug = CATEGORY_SLUG_TO_VALUE[trimmed.toLowerCase()];
+  if (bySlug) {
+    return bySlug;
+  }
+
+  const upper = trimmed.toUpperCase();
+  if (CATEGORY_VALUES.includes(upper as EventCategory)) {
+    return upper as EventCategory;
+  }
+
+  throw new Error("Invalid category");
+}
+
+function parseEventCategories(searchParams: URLSearchParams): EventCategory[] {
+  const categoryParams = searchParams.getAll("category");
+  const categoriesParams = searchParams.getAll("categories");
+
+  const rawValues = [
+    ...categoryParams,
+    ...categoriesParams.flatMap((value) => value.split(",")),
+  ]
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (rawValues.length === 0) {
+    return [];
+  }
+
+  return Array.from(new Set(rawValues.map((value) => parseEventCategory(value))));
 }
 
 function toCreateEventInput(
@@ -32,6 +83,7 @@ function toCreateEventInput(
   return {
     question: String(body.question ?? ""),
     description: typeof body.description === "string" ? body.description : null,
+    category: parseEventCategory(body.category),
     bettingCloseAt,
     resolveAt,
     createdBy: userId,
@@ -135,10 +187,14 @@ export async function GET(req: Request) {
     const limit = Number(searchParams.get("limit") ?? "0");
     const query = normalizeSearchTerm(searchParams.get("q"));
     const hasValidQuery = query.length >= 2;
+    const categories = parseEventCategories(searchParams);
+    const hasCategoryFilter = categories.length > 0;
     const [events, session] = await Promise.all([getEvents(), getSession()]);
     const userId = typeof session?.user?.id === "string" ? session.user.id : undefined;
 
-    const sourceEvents = activeOnly ? events.filter(isActiveEvent) : events;
+    const sourceEvents = (activeOnly ? events.filter(isActiveEvent) : events).filter((event) =>
+      hasCategoryFilter ? categories.includes(event.category) : true,
+    );
 
     const eventsWithMarkets = await Promise.all(
       sourceEvents.map(async (event) => {
@@ -212,9 +268,14 @@ export async function GET(req: Request) {
 
     return NextResponse.json(limitedEvents);
   } catch (err: unknown) {
+    const message = getErrorMessage(err, "Internal server error");
+    if (message === "Invalid category" || message === "Category is required") {
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
+
     console.error("[GET /api/events]", err);
     return NextResponse.json(
-      { error: getErrorMessage(err, "Internal server error") },
+      { error: message },
       { status: 500 },
     );
   }

@@ -8,22 +8,36 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
+import {
+  EVENT_CATEGORY_OPTIONS,
+  parseCategoryParam,
+} from "@/modules/event/domain/eventCategoryMeta";
+import type { EventCategory } from "@/modules/event/domain/Event";
 
 export function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const currentQuery = pathname === "/events" ? (searchParams.get("q") ?? "") : "";
+  const currentQuery =
+    pathname === "/events" ? (searchParams.get("q") ?? "") : "";
+  const currentCategory =
+    pathname === "/events"
+      ? parseCategoryParam(searchParams.get("category"))
+      : null;
   const { data: session, update } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleteSubmitting, setIsDeleteSubmitting] = useState(false);
   const [deleteReason, setDeleteReason] = useState("");
+  const [searchValue, setSearchValue] = useState(currentQuery);
+  const [isCategoryPanelOpen, setIsCategoryPanelOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { me } = useMe();
-  const previousAmountsRef = useRef<{ balance: number; locked: number } | null>(null);
+  const previousAmountsRef = useRef<{ balance: number; locked: number } | null>(
+    null,
+  );
   const balanceAmountRef = useRef<HTMLDivElement>(null);
   const lockedAmountRef = useRef<HTMLDivElement>(null);
 
@@ -59,6 +73,10 @@ export function Header() {
   }, [me]);
 
   useEffect(() => {
+    setSearchValue(currentQuery);
+  }, [currentQuery]);
+
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsMenuOpen(false);
@@ -89,26 +107,39 @@ export function Header() {
       });
       await signOut({ callbackUrl: "/" });
     } catch (error) {
-      setDeleteError(error instanceof Error ? error.message : "A törlés sikertelen.");
+      setDeleteError(
+        error instanceof Error ? error.message : "A törlés sikertelen.",
+      );
     } finally {
       setIsDeleteSubmitting(false);
     }
   }
 
-  function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const rawValue = formData.get("search");
-    const normalized = typeof rawValue === "string" ? rawValue.trim() : "";
+  function buildEventsUrl(nextQuery: string, category: EventCategory | null) {
+    const params = new URLSearchParams();
 
-    if (normalized.length < 2) {
-      router.push("/events");
-      return;
+    if (nextQuery.length >= 2) {
+      params.set("q", nextQuery);
     }
 
-    const params = new URLSearchParams();
-    params.set("q", normalized);
-    router.push(`/events?${params.toString()}`);
+    if (category) {
+      params.set("category", category);
+    }
+
+    return params.toString() ? `/events?${params.toString()}` : "/events";
+  }
+
+  function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const normalized = searchValue.trim();
+    router.push(buildEventsUrl(normalized, currentCategory));
+    setIsCategoryPanelOpen(false);
+  }
+
+  function handleCategorySelect(category: EventCategory | null) {
+    const normalized = searchValue.trim();
+    router.push(buildEventsUrl(normalized, category));
+    setIsCategoryPanelOpen(false);
   }
 
   if (!me) return null;
@@ -168,7 +199,9 @@ export function Header() {
             {isMenuOpen && (
               <div className="absolute right-0 top-11 z-20 w-52 rounded-xl border border-zinc-700 bg-zinc-900 p-3 shadow-xl">
                 <div className="flex items-center justify-between gap-2">
-                  <div className="text-sm font-medium text-stone-100">{me.name}</div>
+                  <div className="text-sm font-medium text-stone-100">
+                    {me.name}
+                  </div>
                   <button
                     type="button"
                     onClick={() => {
@@ -220,21 +253,23 @@ export function Header() {
       {isDeleteDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
           <div className="w-full max-w-md rounded-xl border border-stone-700 bg-stone-900 p-5 text-stone-200 shadow-2xl">
-            <h3 className="mb-3 text-lg font-bold text-stone-100">Fiók törlése</h3>
+            <h3 className="mb-3 text-lg font-bold text-stone-100">
+              Fiók törlése
+            </h3>
             <div className="space-y-2 text-sm text-stone-300">
               <p>
-                A törlés után a profilod anonimizáljuk, a neved és a képed eltűnik,
-                valamint az egyenleged és zárolt összegeid nullázódnak.
+                A törlés után a profilod anonimizáljuk, a neved és a képed
+                eltűnik, valamint az egyenleged és zárolt összegeid nullázódnak.
               </p>
               <p>
-                A művelet végleges. A törlés után ezzel a Google/email fiókkal már
-                nem fogsz tudni újra regisztrálni. Biztosan szeretnéd törölni a
-                fiókodat?
+                A művelet végleges. A törlés után ezzel a Google/email fiókkal
+                már nem fogsz tudni újra regisztrálni. Biztosan szeretnéd
+                törölni a fiókodat?
               </p>
             </div>
 
             <label className="mt-3 block text-xs text-stone-400">
-              Opcionális indoklás (audit log):
+              Opcionális indoklás:
               <textarea
                 value={deleteReason}
                 onChange={(event) => setDeleteReason(event.target.value)}
@@ -245,7 +280,9 @@ export function Header() {
               />
             </label>
 
-            {deleteError && <p className="mt-3 text-xs text-rose-400">{deleteError}</p>}
+            {deleteError && (
+              <p className="mt-3 text-xs text-rose-400">{deleteError}</p>
+            )}
 
             <div className="mt-5 flex justify-end gap-2">
               <button
@@ -270,18 +307,53 @@ export function Header() {
       )}
 
       <div className="pt-3 border-t border-stone-700">
-        <form onSubmit={handleSearchSubmit} className="mx-auto w-full max-w-3xl">
+        <form
+          onSubmit={handleSearchSubmit}
+          className="mx-auto w-full max-w-3xl"
+        >
           <label className="block w-full">
             <span className="sr-only">Search</span>
             <input
-              key={`${pathname}-${currentQuery}`}
               type="search"
               name="search"
-              defaultValue={currentQuery}
-              placeholder="Keresés események és marketek között..."
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              onFocus={() => setIsCategoryPanelOpen(true)}
+              placeholder="Keresés események között..."
               className="w-full rounded-2xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-stone-100 placeholder:text-stone-400 focus:border-amber-400 focus:outline-none"
             />
           </label>
+
+          {isCategoryPanelOpen && (
+            <div className="flex flex-wrap gap-4 justify-center pt-2">
+              <button
+                type="button"
+                onClick={() => handleCategorySelect(null)}
+                className={`rounded-full border px-3 py-1 text-sm ${
+                  currentCategory === null
+                    ? "border-amber-300 bg-amber-400/20 text-amber-100"
+                    : "border-zinc-600 text-stone-300"
+                }`}
+              >
+                Összes
+              </button>
+
+              {EVENT_CATEGORY_OPTIONS.map((category) => (
+                <button
+                  key={category.value}
+                  type="button"
+                  onClick={() => handleCategorySelect(category.value)}
+                  className={`rounded-full border px-3 py-1 text-sm ${
+                    currentCategory === category.value
+                      ? "border-amber-300 bg-amber-400/20 text-amber-100"
+                      : "border-zinc-600 text-stone-300"
+                  }`}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+          )}
         </form>
       </div>
     </header>

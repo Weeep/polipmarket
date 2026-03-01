@@ -9,6 +9,7 @@ import type { EventSummary } from "@/modules/event/domain/Event";
 import Link from "next/link";
 import { CollapsibleInfoText } from "./CollapsibleInfoText";
 import { toHun } from "@/lib/logger";
+import { getCategoryByValue } from "@/modules/event/domain/eventCategoryMeta";
 
 type Props = {
   event: EventSummary;
@@ -210,11 +211,19 @@ export function EventCard({ event }: Props) {
   const winProfit = buyDialog
     ? Math.max(buyDialog.quote.estimatedShares - buyDialog.quote.amount, 0)
     : 0;
+  const category = getCategoryByValue(eventData.category);
 
   return (
     <>
       <section className="marketcard-base space-y-6">
         <div className="space-y-2">
+          <Link
+            href={`/events?category=${category.slug}`}
+            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${category.badgeClassName}`}
+          >
+            {category.label}
+          </Link>
+
           <Link
             href={`/events/${eventData.id}`}
             className="block marketcard-question hover:underline"
