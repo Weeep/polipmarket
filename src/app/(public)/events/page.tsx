@@ -20,7 +20,9 @@ function EventsPageContent() {
   const searchParams = useSearchParams();
   const [events, setEvents] = useState<EventSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [availableCategories, setAvailableCategories] = useState<EventCategory[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<
+    EventCategory[]
+  >([]);
 
   const query = normalizeSearchTerm(searchParams.get("q"));
   const hasValidQuery = query.length >= 2;
@@ -90,10 +92,15 @@ function EventsPageContent() {
         </Link>
       </div>
 
-      <div className="rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 space-y-3">
+      {/*TODO: Remove later */}
+      <div className="hidden rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 space-y-3">
         <div className="flex flex-wrap gap-2 items-center">
           <Link
-            href={hasValidQuery ? `/events?q=${encodeURIComponent(query)}` : "/events"}
+            href={
+              hasValidQuery
+                ? `/events?q=${encodeURIComponent(query)}`
+                : "/events"
+            }
             className={`rounded-full px-3 py-1 text-sm border transition ${
               selectedCategory === null
                 ? "bg-amber-400/20 border-amber-300 text-amber-100"
@@ -104,7 +111,9 @@ function EventsPageContent() {
           </Link>
 
           {topCategories
-            .filter((option) => visibleCategoryOptions.some((v) => v.value === option.value))
+            .filter((option) =>
+              visibleCategoryOptions.some((v) => v.value === option.value),
+            )
             .map((option) => (
               <Link
                 key={option.value}
@@ -128,7 +137,9 @@ function EventsPageContent() {
             </summary>
             <div className="absolute z-10 mt-2 min-w-44 rounded-lg border border-zinc-600 bg-zinc-950 p-2 shadow-xl">
               {moreCategories
-                .filter((option) => visibleCategoryOptions.some((v) => v.value === option.value))
+                .filter((option) =>
+                  visibleCategoryOptions.some((v) => v.value === option.value),
+                )
                 .map((option) => (
                   <Link
                     key={option.value}
@@ -160,13 +171,17 @@ function EventsPageContent() {
         <p className="text-sm text-stone-300">
           {hasValidQuery && (
             <>
-              Keresés: <span className="font-semibold text-stone-100">{query}</span>
+              Keresés:{" "}
+              <span className="font-semibold text-stone-100">{query}</span>
             </>
           )}
           {hasValidQuery && selectedCategory && <span className="mx-2">•</span>}
           {selectedCategory && (
             <>
-              Kategória: <span className="font-semibold text-stone-100">{getCategoryByValue(selectedCategory).label}</span>
+              Kategória:{" "}
+              <span className="font-semibold text-stone-100">
+                {getCategoryByValue(selectedCategory).label}
+              </span>
             </>
           )}
         </p>
