@@ -1,10 +1,11 @@
-import { Event } from "../domain/Event";
+import { Event, EventCategory } from "../domain/Event";
 import { EventRepository } from "../infrastructure/eventRepository";
 import { DEFAULT_AMM_FEE_BPS } from "@/config/economy";
 
 export type CreateEventInput = {
   question: string;
   description?: string | null;
+  category: EventCategory;
   bettingCloseAt: Date;
   resolveAt?: Date | null;
   feeBps?: number;
@@ -35,6 +36,7 @@ export async function createEvent(
   return repo.create({
     question: input.question.trim(),
     description: input.description ?? null,
+    category: input.category,
     bettingCloseAt: input.bettingCloseAt,
     resolveAt: input.resolveAt ?? null,
     createdBy: input.createdBy,
