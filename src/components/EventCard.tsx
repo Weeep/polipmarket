@@ -308,7 +308,7 @@ export function EventCard({ event }: Props) {
                 <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-start">
                   <div className="flex flex-wrap justify-center gap-3 sm:justify-start">
                     <button
-                      className="marketcard-no-button disabled:opacity-50"
+                      className={`${market.userBetPositions?.yes ? "marketcard-yes-button" : "marketcard-no-button"} disabled:opacity-50`}
                       disabled={
                         submitting ||
                         buyDialogLoading ||
@@ -329,7 +329,7 @@ export function EventCard({ event }: Props) {
                       </span>
                     </button>
                     <button
-                      className="marketcard-no-button disabled:opacity-50"
+                      className={`${market.userBetPositions?.no ? "marketcard-yes-button" : "marketcard-no-button"} disabled:opacity-50`}
                       disabled={
                         submitting ||
                         buyDialogLoading ||

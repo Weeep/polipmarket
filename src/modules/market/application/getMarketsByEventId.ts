@@ -4,8 +4,9 @@ import { ammRepository } from "../infrastructure/ammRepository";
 import { calcExecutionPrice } from "@/modules/order/domain/ammQuote";
 import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
 import { getMarketStats } from "./getMarketStats";
+import { prisma } from "@/lib/prisma";
 
-export async function getMarketsByEventId(eventId: string) {
+export async function getMarketsByEventId(eventId: string, userId?: string) {
   if (!eventId) {
     return [];
   }
@@ -15,6 +16,42 @@ export async function getMarketsByEventId(eventId: string) {
     (market) =>
       market.status !== "PENDING_APPROVAL" && market.status !== "CANCELLED",
   );
+
+  const userBetPositionsByMarketId = new Map<
+    string,
+    { yes: boolean; no: boolean }
+  >();
+
+  if (userId && visibleMarkets.length > 0) {
+    const buyOrders = await prisma.order.findMany({
+      where: {
+        userId,
+        side: "BUY",
+        status: { not: "CANCELLED" },
+        marketId: { in: visibleMarkets.map((market) => market.id) },
+        position: { in: ["YES", "NO"] },
+      },
+      select: {
+        marketId: true,
+        position: true,
+      },
+    });
+
+    for (const order of buyOrders) {
+      const current =
+        userBetPositionsByMarketId.get(order.marketId) ?? { yes: false, no: false };
+
+      if (order.position === "YES") {
+        current.yes = true;
+      }
+
+      if (order.position === "NO") {
+        current.no = true;
+      }
+
+      userBetPositionsByMarketId.set(order.marketId, current);
+    }
+  }
 
   return Promise.all(
     visibleMarkets.map(async (market) => {
@@ -45,6 +82,10 @@ export async function getMarketsByEventId(eventId: string) {
         ...market,
         outcomes: outcomesWithPrices,
         marketStats,
+        userBetPositions: userBetPositionsByMarketId.get(market.id) ?? {
+          yes: false,
+          no: false,
+        },
       };
     }),
   );

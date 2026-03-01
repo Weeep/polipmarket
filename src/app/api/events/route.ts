@@ -6,6 +6,7 @@ import {
 } from "@/modules/event/application/createEventWithMarkets";
 import { getEvents } from "@/modules/event/application/getEvents";
 import { getMarketsByEventId } from "@/modules/market/application/getMarketsByEventId";
+import { getSession } from "@/modules/auth/application/getSession";
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -134,13 +135,14 @@ export async function GET(req: Request) {
     const limit = Number(searchParams.get("limit") ?? "0");
     const query = normalizeSearchTerm(searchParams.get("q"));
     const hasValidQuery = query.length >= 2;
-    const events = await getEvents();
+    const [events, session] = await Promise.all([getEvents(), getSession()]);
+    const userId = typeof session?.user?.id === "string" ? session.user.id : undefined;
 
     const sourceEvents = activeOnly ? events.filter(isActiveEvent) : events;
 
     const eventsWithMarkets = await Promise.all(
       sourceEvents.map(async (event) => {
-        const marketsWithExtras = await getMarketsByEventId(event.id);
+        const marketsWithExtras = await getMarketsByEventId(event.id, userId);
 
         if (marketsWithExtras.length === 0) {
           return null;

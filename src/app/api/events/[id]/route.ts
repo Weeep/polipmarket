@@ -5,6 +5,7 @@ import { ammRepository } from "@/modules/market/infrastructure/ammRepository";
 import { calcExecutionPrice } from "@/modules/order/domain/ammQuote";
 import { getMarketStats } from "@/modules/market/application/getMarketStats";
 import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
+import { getSession } from "@/modules/auth/application/getSession";
 
 type MarketRecord = Awaited<ReturnType<typeof prisma.market.findMany>>[number];
 
@@ -18,6 +19,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const session = await getSession();
+    const userId = typeof session?.user?.id === "string" ? session.user.id : undefined;
 
     const event = await prisma.event.findUnique({
       where: { id },
@@ -34,6 +37,42 @@ export async function GET(
       },
       orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     });
+
+    const userBetPositionsByMarketId = new Map<
+      string,
+      { yes: boolean; no: boolean }
+    >();
+
+    if (userId && markets.length > 0) {
+      const buyOrders = await prisma.order.findMany({
+        where: {
+          userId,
+          side: "BUY",
+          status: { not: "CANCELLED" },
+          marketId: { in: markets.map((market) => market.id) },
+          position: { in: ["YES", "NO"] },
+        },
+        select: {
+          marketId: true,
+          position: true,
+        },
+      });
+
+      for (const order of buyOrders) {
+        const current =
+          userBetPositionsByMarketId.get(order.marketId) ?? { yes: false, no: false };
+
+        if (order.position === "YES") {
+          current.yes = true;
+        }
+
+        if (order.position === "NO") {
+          current.no = true;
+        }
+
+        userBetPositionsByMarketId.set(order.marketId, current);
+      }
+    }
 
     const marketsWithExtras = await Promise.all(
       markets.map(async (market: MarketRecord) => {
@@ -64,6 +103,10 @@ export async function GET(
           ...market,
           outcomes: outcomesWithPrices,
           marketStats,
+          userBetPositions: userBetPositionsByMarketId.get(market.id) ?? {
+            yes: false,
+            no: false,
+          },
         };
       }),
     );
