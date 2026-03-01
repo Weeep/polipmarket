@@ -215,6 +215,7 @@ async function main() {
             question,
             description:
               typeof event?.description === "string" ? event.description : null,
+            category: "POLITICS",
             bettingCloseAt,
             resolveAt,
             feeBps: defaultAmmFeeBps,

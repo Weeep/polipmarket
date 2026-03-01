@@ -7,9 +7,26 @@ import {
 import { getEvents } from "@/modules/event/application/getEvents";
 import { getMarketsByEventId } from "@/modules/market/application/getMarketsByEventId";
 import { getSession } from "@/modules/auth/application/getSession";
+import { EventCategory } from "@/modules/event/domain/Event";
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
+}
+
+
+const EVENT_CATEGORIES: EventCategory[] = ["POLITICS", "SPORT", "WORLD", "OTHER"];
+
+function parseEventCategory(value: unknown): EventCategory {
+  if (typeof value !== "string") {
+    return "POLITICS";
+  }
+
+  const normalized = value.trim().toUpperCase();
+  if (EVENT_CATEGORIES.includes(normalized as EventCategory)) {
+    return normalized as EventCategory;
+  }
+
+  throw new Error("Invalid category");
 }
 
 function toCreateEventInput(
@@ -32,6 +49,7 @@ function toCreateEventInput(
   return {
     question: String(body.question ?? ""),
     description: typeof body.description === "string" ? body.description : null,
+    category: parseEventCategory(body.category),
     bettingCloseAt,
     resolveAt,
     createdBy: userId,
@@ -135,10 +153,14 @@ export async function GET(req: Request) {
     const limit = Number(searchParams.get("limit") ?? "0");
     const query = normalizeSearchTerm(searchParams.get("q"));
     const hasValidQuery = query.length >= 2;
+    const category = parseEventCategory(searchParams.get("category"));
+    const hasCategoryFilter = searchParams.has("category");
     const [events, session] = await Promise.all([getEvents(), getSession()]);
     const userId = typeof session?.user?.id === "string" ? session.user.id : undefined;
 
-    const sourceEvents = activeOnly ? events.filter(isActiveEvent) : events;
+    const sourceEvents = (activeOnly ? events.filter(isActiveEvent) : events).filter((event) =>
+      hasCategoryFilter ? event.category === category : true,
+    );
 
     const eventsWithMarkets = await Promise.all(
       sourceEvents.map(async (event) => {
@@ -212,9 +234,14 @@ export async function GET(req: Request) {
 
     return NextResponse.json(limitedEvents);
   } catch (err: unknown) {
+    const message = getErrorMessage(err, "Internal server error");
+    if (message === "Invalid category") {
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
+
     console.error("[GET /api/events]", err);
     return NextResponse.json(
-      { error: getErrorMessage(err, "Internal server error") },
+      { error: message },
       { status: 500 },
     );
   }

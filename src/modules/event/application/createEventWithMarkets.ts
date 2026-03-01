@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_AMM_FEE_BPS, DEFAULT_OUTCOME_POOL } from "@/config/economy";
-import { Event } from "../domain/Event";
+import { Event, EventCategory } from "../domain/Event";
 import { eventRepository } from "../infrastructure/eventRepository";
 import { marketRepository } from "@/modules/market/infrastructure/marketRepository";
 import { MarketStatus } from "@/modules/market/domain/Market";
@@ -14,6 +14,7 @@ export type CreateEventMarketInput = {
 export type CreateEventWithMarketsInput = {
   question: string;
   description?: string | null;
+  category: EventCategory;
   bettingCloseAt: Date;
   resolveAt?: Date | null;
   createdBy: string;
@@ -103,6 +104,7 @@ export async function createEventWithMarkets(
       {
         question: input.question.trim(),
         description: input.description ?? null,
+        category: input.category,
         bettingCloseAt: input.bettingCloseAt,
         resolveAt: input.resolveAt ?? null,
         createdBy: input.createdBy,

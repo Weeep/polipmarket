@@ -39,10 +39,18 @@ enum RateLimitAuditEventType {
   BACKEND_ERROR
 }
 
+enum EventCategory {
+  POLITICS
+  SPORT
+  WORLD
+  OTHER
+}
+
 model Event {
   id          String   @id @default(cuid())
   question    String
   description String?
+  category    EventCategory
   bettingCloseAt DateTime
   resolveAt   DateTime?
   feeBps      Int      @default(100)
@@ -54,6 +62,7 @@ model Event {
   markets Market[]
 
   @@index([createdBy])
+  @@index([category])
 }
 
 model User {
