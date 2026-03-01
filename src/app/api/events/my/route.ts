@@ -4,6 +4,6 @@ import { getMyBetLots } from "@/modules/event/application/getMyBetLots";
 
 export async function GET() {
   const user = await ensureUser();
-  const eventMarkets = await getMyBetLots(user.id, 5);
+  const eventMarkets = await getMyBetLots(user.id, 100);
   return NextResponse.json(eventMarkets);
 }
