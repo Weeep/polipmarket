@@ -8,18 +8,27 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
+import {
+  EVENT_CATEGORY_OPTIONS,
+  parseCategoryParam,
+} from "@/modules/event/domain/eventCategoryMeta";
+import type { EventCategory } from "@/modules/event/domain/Event";
 
 export function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentQuery = pathname === "/events" ? (searchParams.get("q") ?? "") : "";
+  const currentCategory =
+    pathname === "/events" ? parseCategoryParam(searchParams.get("category")) : null;
   const { data: session, update } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleteSubmitting, setIsDeleteSubmitting] = useState(false);
   const [deleteReason, setDeleteReason] = useState("");
+  const [searchValue, setSearchValue] = useState(currentQuery);
+  const [isCategoryPanelOpen, setIsCategoryPanelOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { me } = useMe();
@@ -59,6 +68,10 @@ export function Header() {
   }, [me]);
 
   useEffect(() => {
+    setSearchValue(currentQuery);
+  }, [currentQuery]);
+
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsMenuOpen(false);
@@ -95,20 +108,31 @@ export function Header() {
     }
   }
 
-  function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const rawValue = formData.get("search");
-    const normalized = typeof rawValue === "string" ? rawValue.trim() : "";
+  function buildEventsUrl(nextQuery: string, category: EventCategory | null) {
+    const params = new URLSearchParams();
 
-    if (normalized.length < 2) {
-      router.push("/events");
-      return;
+    if (nextQuery.length >= 2) {
+      params.set("q", nextQuery);
     }
 
-    const params = new URLSearchParams();
-    params.set("q", normalized);
-    router.push(`/events?${params.toString()}`);
+    if (category) {
+      params.set("category", category);
+    }
+
+    return params.toString() ? `/events?${params.toString()}` : "/events";
+  }
+
+  function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const normalized = searchValue.trim();
+    router.push(buildEventsUrl(normalized, currentCategory));
+    setIsCategoryPanelOpen(false);
+  }
+
+  function handleCategorySelect(category: EventCategory | null) {
+    const normalized = searchValue.trim();
+    router.push(buildEventsUrl(normalized, category));
+    setIsCategoryPanelOpen(false);
   }
 
   if (!me) return null;
@@ -274,14 +298,49 @@ export function Header() {
           <label className="block w-full">
             <span className="sr-only">Search</span>
             <input
-              key={`${pathname}-${currentQuery}`}
               type="search"
               name="search"
-              defaultValue={currentQuery}
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              onFocus={() => pathname === "/events" && setIsCategoryPanelOpen(true)}
               placeholder="Keresés események és marketek között..."
               className="w-full rounded-2xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm text-stone-100 placeholder:text-stone-400 focus:border-amber-400 focus:outline-none"
             />
           </label>
+
+          {pathname === "/events" && isCategoryPanelOpen && (
+            <div className="mt-2 rounded-xl border border-zinc-700 bg-zinc-950/95 p-3">
+              <div className="mb-2 text-xs text-stone-400">Kategóriák</div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleCategorySelect(null)}
+                  className={`rounded-full border px-3 py-1 text-sm ${
+                    currentCategory === null
+                      ? "border-amber-300 bg-amber-400/20 text-amber-100"
+                      : "border-zinc-600 text-stone-300"
+                  }`}
+                >
+                  Összes
+                </button>
+
+                {EVENT_CATEGORY_OPTIONS.map((category) => (
+                  <button
+                    key={category.value}
+                    type="button"
+                    onClick={() => handleCategorySelect(category.value)}
+                    className={`rounded-full border px-3 py-1 text-sm ${
+                      currentCategory === category.value
+                        ? "border-amber-300 bg-amber-400/20 text-amber-100"
+                        : "border-zinc-600 text-stone-300"
+                    }`}
+                  >
+                    {category.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </header>

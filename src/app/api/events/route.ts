@@ -13,28 +13,33 @@ function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
 
-const CATEGORY_ALIASES: Record<string, EventCategory> = {
+const CATEGORY_VALUES: EventCategory[] = ["POLITICS", "SPORT", "WORLD", "OTHER"];
+
+const CATEGORY_SLUG_TO_VALUE: Record<string, EventCategory> = {
   politics: "POLITICS",
-  politika: "POLITICS",
   sport: "SPORT",
   world: "WORLD",
-  vilag: "WORLD",
-  világ: "WORLD",
   other: "OTHER",
-  egyeb: "OTHER",
-  egyéb: "OTHER",
 };
-
 
 function parseEventCategory(value: unknown): EventCategory {
   if (typeof value !== "string") {
     throw new Error("Category is required");
   }
 
-  const normalized = value.trim().toLocaleLowerCase();
-  const parsed = CATEGORY_ALIASES[normalized];
-  if (parsed) {
-    return parsed;
+  const trimmed = value.trim();
+  if (!trimmed) {
+    throw new Error("Category is required");
+  }
+
+  const bySlug = CATEGORY_SLUG_TO_VALUE[trimmed.toLowerCase()];
+  if (bySlug) {
+    return bySlug;
+  }
+
+  const upper = trimmed.toUpperCase();
+  if (CATEGORY_VALUES.includes(upper as EventCategory)) {
+    return upper as EventCategory;
   }
 
   throw new Error("Invalid category");

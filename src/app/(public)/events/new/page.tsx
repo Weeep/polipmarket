@@ -1,9 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
 import { DEFAULT_AMM_FEE_BPS } from "@/config/economy";
+import { EventCategory } from "@/modules/event/domain/Event";
+import {
+  EVENT_CATEGORY_OPTIONS,
+  getCategoryByValue,
+  parseCategoryParam,
+} from "@/modules/event/domain/eventCategoryMeta";
 
 type DraftMarket = {
   id: string;
@@ -36,11 +42,33 @@ export default function NewEventPage() {
 
   const [question, setQuestion] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState<EventCategory | "">("");
+  const [activeCategories, setActiveCategories] = useState<EventCategory[]>(
+    EVENT_CATEGORY_OPTIONS.map((option) => option.value),
+  );
   const [bettingCloseAt, setBettingCloseAt] = useState("");
   const [resolveAt, setResolveAt] = useState("");
   const [markets, setMarkets] = useState<DraftMarket[]>([createMarket()]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    apiFetch("/api/categories")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data: Array<{ value?: string; isActive?: boolean }>) => {
+        const next = data
+          .filter((item) => item.isActive !== false)
+          .map((item) => parseCategoryParam(item.value ?? null))
+          .filter((value): value is EventCategory => value !== null);
+
+        if (next.length > 0) {
+          setActiveCategories(next);
+        }
+      })
+      .catch(() => {
+        setActiveCategories(EVENT_CATEGORY_OPTIONS.map((option) => option.value));
+      });
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -59,12 +87,17 @@ export default function NewEventPage() {
         throw new Error("At least one market is required");
       }
 
+      if (!category) {
+        throw new Error("Category is required");
+      }
+
       const res = await apiFetch("/api/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question,
           description,
+          category,
           bettingCloseAt,
           resolveAt: resolveAt || null,
           markets: payloadMarkets,
@@ -109,6 +142,29 @@ export default function NewEventPage() {
           onSubmit={onSubmit}
           style={{ display: "flex", gap: 12, flexDirection: "column" }}
         >
+          <label>
+            Kategória<span className="text-red-600">*</span>
+            <select
+              className="w-full border marketcard-description rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              value={category}
+              onChange={(e) => setCategory((e.target.value || "") as EventCategory | "")}
+              required
+            >
+              <option value="">Válassz kategóriát…</option>
+              {activeCategories.map((value) => {
+                const option = getCategoryByValue(value);
+                return (
+                  <option key={value} value={value}>
+                    {option.label}
+                  </option>
+                );
+              })}
+            </select>
+            <span className="mt-1 block text-xs text-stone-300">
+              A kategória segíti a felfedezést és a moderációt.
+            </span>
+          </label>
+
           <label>
             Kérdés<span className="text-red-600">*</span>
             <input
