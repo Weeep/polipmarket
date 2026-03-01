@@ -49,4 +49,8 @@ export interface Market {
 export type MarketSummary = Market & {
   outcomes?: OutcomeWithPrices[];
   marketStats?: MarketStats | null;
+  userBetPositions?: {
+    yes: boolean;
+    no: boolean;
+  };
 };

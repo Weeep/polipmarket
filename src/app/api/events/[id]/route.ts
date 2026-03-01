@@ -1,12 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { outcomeRepository } from "@/modules/market/infrastructure/outcomeRepository";
-import { ammRepository } from "@/modules/market/infrastructure/ammRepository";
-import { calcExecutionPrice } from "@/modules/order/domain/ammQuote";
-import { getMarketStats } from "@/modules/market/application/getMarketStats";
-import { DEFAULT_OUTCOME_POOL } from "@/config/economy";
-
-type MarketRecord = Awaited<ReturnType<typeof prisma.market.findMany>>[number];
+import { getSession } from "@/modules/auth/application/getSession";
+import { getMarketsByEventId } from "@/modules/market/application/getMarketsByEventId";
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -18,6 +13,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const session = await getSession();
+    const userId = typeof session?.user?.id === "string" ? session.user.id : undefined;
 
     const event = await prisma.event.findUnique({
       where: { id },
@@ -27,46 +24,7 @@ export async function GET(
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    const markets = await prisma.market.findMany({
-      where: {
-        eventId: event.id,
-        status: { notIn: ["PENDING_APPROVAL", "CANCELLED"] },
-      },
-      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-    });
-
-    const marketsWithExtras = await Promise.all(
-      markets.map(async (market: MarketRecord) => {
-        const [outcomes, marketStats] = await Promise.all([
-          outcomeRepository.findByMarketId(market.id),
-          getMarketStats(market.id),
-        ]);
-
-        const outcomesWithPrices = await Promise.all(
-          outcomes.map(async (outcome) => {
-            const liquidity = await ammRepository.findLiquidityByOutcomeId(
-              outcome.id,
-            );
-            const pool = {
-              yesPool: liquidity?.yesPool ?? DEFAULT_OUTCOME_POOL,
-              noPool: liquidity?.noPool ?? DEFAULT_OUTCOME_POOL,
-            };
-
-            return {
-              ...outcome,
-              yesPrice: calcExecutionPrice(pool, "YES"),
-              noPrice: calcExecutionPrice(pool, "NO"),
-            };
-          }),
-        );
-
-        return {
-          ...market,
-          outcomes: outcomesWithPrices,
-          marketStats,
-        };
-      }),
-    );
+    const marketsWithExtras = await getMarketsByEventId(event.id, userId);
 
     const eventStats = marketsWithExtras.reduce<{
       totalBets: number;

@@ -52,22 +52,33 @@ export const positionLotRepository = {
   }, tx?: TxLike): Promise<void> {
     const client = tx ?? prisma;
 
-    const lots = await client.$queryRaw<OpenLotRow[]>`
-      SELECT "id", "remainingShares"
-      FROM "PositionLot"
-      WHERE "userId" = ${input.userId}
-        AND "marketId" = ${input.marketId}
-        AND "outcomeId" = ${input.outcomeId}
-        AND "position" = ${input.position}
-        AND "remainingShares" > 0
-      ORDER BY
-        CASE
-          WHEN ${input.preferredBuyLotId ?? null} IS NOT NULL AND "id" = ${input.preferredBuyLotId ?? null} THEN 0
-          ELSE 1
-        END ASC,
-        "createdAt" ASC,
-        "id" ASC
-    `;
+    const lots = input.preferredBuyLotId
+      ? await client.$queryRaw<OpenLotRow[]>`
+          SELECT "id", "remainingShares"
+          FROM "PositionLot"
+          WHERE "userId" = ${input.userId}
+            AND "marketId" = ${input.marketId}
+            AND "outcomeId" = ${input.outcomeId}
+            AND "position" = ${input.position}
+            AND "remainingShares" > 0
+          ORDER BY
+            CASE
+              WHEN "id" = ${input.preferredBuyLotId} THEN 0
+              ELSE 1
+            END ASC,
+            "createdAt" ASC,
+            "id" ASC
+        `
+      : await client.$queryRaw<OpenLotRow[]>`
+          SELECT "id", "remainingShares"
+          FROM "PositionLot"
+          WHERE "userId" = ${input.userId}
+            AND "marketId" = ${input.marketId}
+            AND "outcomeId" = ${input.outcomeId}
+            AND "position" = ${input.position}
+            AND "remainingShares" > 0
+          ORDER BY "createdAt" ASC, "id" ASC
+        `;
 
     let remainingShares = input.sharesToClose;
 
