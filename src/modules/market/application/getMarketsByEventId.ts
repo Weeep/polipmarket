@@ -23,12 +23,11 @@ export async function getMarketsByEventId(eventId: string, userId?: string) {
   >();
 
   if (userId && visibleMarkets.length > 0) {
-    const buyOrders = await prisma.order.findMany({
+    const openPositions = await prisma.position.findMany({
       where: {
         userId,
-        side: "BUY",
-        status: { not: "CANCELLED" },
         marketId: { in: visibleMarkets.map((market) => market.id) },
+        shares: { gt: 0 },
         position: { in: ["YES", "NO"] },
       },
       select: {
@@ -37,19 +36,22 @@ export async function getMarketsByEventId(eventId: string, userId?: string) {
       },
     });
 
-    for (const order of buyOrders) {
+    for (const openPosition of openPositions) {
       const current =
-        userBetPositionsByMarketId.get(order.marketId) ?? { yes: false, no: false };
+        userBetPositionsByMarketId.get(openPosition.marketId) ?? {
+          yes: false,
+          no: false,
+        };
 
-      if (order.position === "YES") {
+      if (openPosition.position === "YES") {
         current.yes = true;
       }
 
-      if (order.position === "NO") {
+      if (openPosition.position === "NO") {
         current.no = true;
       }
 
-      userBetPositionsByMarketId.set(order.marketId, current);
+      userBetPositionsByMarketId.set(openPosition.marketId, current);
     }
   }
 
