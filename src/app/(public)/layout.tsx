@@ -10,11 +10,12 @@ import { Suspense } from "react";
 export const metadata: Metadata = {
   metadataBase: new URL("https://polipmarket.hu"),
   title: "Polipmarket",
-  description: "Fogadj a jövőre játékpénzzel a közösségi előrejelző piacon.",
+  description:
+    "Fogadj a jövőre virtuális pénzzel a közösségi előrejelző piacon.",
   openGraph: {
     title: "Polipmarket",
     description:
-      "Fogadj a jövőre játékpénzzel a közösségi előrejelző piacon.",
+      "Fogadj a jövőre virtuális pénzzel a közösségi előrejelző piacon.",
     url: "https://polipmarket.hu",
     type: "website",
     images: [
