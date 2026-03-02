@@ -142,8 +142,6 @@ export function Header() {
     setIsCategoryPanelOpen(false);
   }
 
-  if (!me) return null;
-
   return (
     <header className="bg-zinc-800 px-4 py-4 text-white sm:px-6">
       <div className="flex items-center gap-3 sm:gap-4 mb-1">
@@ -163,94 +161,107 @@ export function Header() {
         </div>
 
         <div className="ml-auto flex items-center gap-3 sm:gap-4">
-          <div className="text-right text-xs text-stone-200 sm:text-sm">
-            <div ref={balanceAmountRef} className="wallet-amount">
-              💰 {me.balance.toLocaleString()}ଳ
-            </div>
-            <div ref={lockedAmountRef} className="wallet-amount">
-              🔒 {me.locked.toLocaleString()}ଳ
-            </div>
-          </div>
-
-          <div className="relative" ref={menuRef}>
-            <button
-              type="button"
-              onClick={() => setIsMenuOpen((open) => !open)}
-              className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
-              aria-expanded={isMenuOpen}
-              aria-label="Open profile menu"
-            >
-              {me.image ? (
-                <div className="relative h-8 w-8">
-                  <Image
-                    src={me.image}
-                    alt="profile image"
-                    fill
-                    className="rounded-full border-2 border-stone-200 object-cover"
-                  />
+          {me ? (
+            <>
+              <div className="text-right text-xs text-stone-200 sm:text-sm">
+                <div ref={balanceAmountRef} className="wallet-amount">
+                  💰 {me.balance.toLocaleString()}ଳ
                 </div>
-              ) : (
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-200 text-sm text-zinc-800">
-                  {me.name?.[0] ?? "U"}
-                </div>
-              )}
-            </button>
-
-            {isMenuOpen && (
-              <div className="absolute right-0 top-11 z-20 w-52 rounded-xl border border-zinc-700 bg-zinc-900 p-3 shadow-xl">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="text-sm font-medium text-stone-100">
-                    {me.name}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsDeleteDialogOpen(true);
-                      setDeleteError(null);
-                      setIsMenuOpen(false);
-                      setDeleteReason("");
-                    }}
-                    className="text-xs text-zinc-400 hover:text-zinc-300"
-                  >
-                    Törlés
-                  </button>
-                </div>
-                <hr className="my-3 border-zinc-700" />
-                <div className="space-y-1 text-sm">
-                  {isImpersonating ? (
-                    <button
-                      type="button"
-                      onClick={stopImpersonation}
-                      className="w-full rounded-lg px-2 py-1.5 text-left text-stone-200 hover:bg-zinc-800"
-                    >
-                      Stop impersonation
-                    </button>
-                  ) : (
-                    isAdmin && (
-                      <Link
-                        href="/king"
-                        onClick={() => setIsMenuOpen(false)}
-                        className="block rounded-lg px-2 py-1.5 text-stone-200 hover:bg-zinc-800"
-                      >
-                        Admin
-                      </Link>
-                    )
-                  )}
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="w-full rounded-lg px-2 py-1.5 text-left text-stone-200 hover:bg-zinc-800"
-                  >
-                    Logout
-                  </button>
+                <div ref={lockedAmountRef} className="wallet-amount">
+                  🔒 {me.locked.toLocaleString()}ଳ
                 </div>
               </div>
-            )}
-          </div>
+
+              <div className="relative" ref={menuRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsMenuOpen((open) => !open)}
+                  className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                  aria-expanded={isMenuOpen}
+                  aria-label="Open profile menu"
+                >
+                  {me.image ? (
+                    <div className="relative h-8 w-8">
+                      <Image
+                        src={me.image}
+                        alt="profile image"
+                        fill
+                        className="rounded-full border-2 border-stone-200 object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-200 text-sm text-zinc-800">
+                      {me.name?.[0] ?? "U"}
+                    </div>
+                  )}
+                </button>
+
+                {isMenuOpen && (
+                  <div className="absolute right-0 top-11 z-20 w-52 rounded-xl border border-zinc-700 bg-zinc-900 p-3 shadow-xl">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-sm font-medium text-stone-100">
+                        {me.name}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsDeleteDialogOpen(true);
+                          setDeleteError(null);
+                          setIsMenuOpen(false);
+                          setDeleteReason("");
+                        }}
+                        className="text-xs text-zinc-400 hover:text-zinc-300"
+                      >
+                        Törlés
+                      </button>
+                    </div>
+                    <hr className="my-3 border-zinc-700" />
+                    <div className="space-y-1 text-sm">
+                      {isImpersonating ? (
+                        <button
+                          type="button"
+                          onClick={stopImpersonation}
+                          className="w-full rounded-lg px-2 py-1.5 text-left text-stone-200 hover:bg-zinc-800"
+                        >
+                          Stop impersonation
+                        </button>
+                      ) : (
+                        isAdmin && (
+                          <Link
+                            href="/king"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="block rounded-lg px-2 py-1.5 text-stone-200 hover:bg-zinc-800"
+                          >
+                            Admin
+                          </Link>
+                        )
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="w-full rounded-lg px-2 py-1.5 text-left text-stone-200 hover:bg-zinc-800"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link href="/about" className="rounded-lg border border-zinc-500 px-3 py-2 text-xs font-semibold text-stone-100 hover:bg-zinc-700 sm:text-sm">
+                Mi ez?
+              </Link>
+              <Link href="/about" className="button-gold px-3 py-2 text-xs sm:text-sm">
+                Bejelentkezés
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 
-      {isDeleteDialogOpen && (
+      {me && isDeleteDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
           <div className="w-full max-w-md rounded-xl border border-stone-700 bg-stone-900 p-5 text-stone-200 shadow-2xl">
             <h3 className="mb-3 text-lg font-bold text-stone-100">

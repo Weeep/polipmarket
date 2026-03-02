@@ -5,6 +5,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
 import { EventCard } from "@/components/EventCard";
+import { useMe } from "@/context/MeContext";
 import { EventCategory, EventSummary } from "@/modules/event/domain/Event";
 import {
   EVENT_CATEGORY_OPTIONS,
@@ -23,6 +24,7 @@ function EventsPageContent() {
   const [availableCategories, setAvailableCategories] = useState<
     EventCategory[]
   >([]);
+  const { me, isMeResolved } = useMe();
 
   const query = normalizeSearchTerm(searchParams.get("q"));
   const hasValidQuery = query.length >= 2;
@@ -87,9 +89,24 @@ function EventsPageContent() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-stone-100">Események</h1>
 
-        <Link href="/events/new" className="button-gold">
-          Új
-        </Link>
+        {me ? (
+          <Link href="/events/new" className="button-gold">
+            Új
+          </Link>
+        ) : (
+          <button
+            type="button"
+            disabled
+            title={
+              isMeResolved
+                ? "Új esemény létrehozásához be kell jelentkezned."
+                : "Felhasználói állapot betöltése..."
+            }
+            className="button-gold cursor-not-allowed opacity-50"
+          >
+            Új
+          </button>
+        )}
       </div>
 
       {/*TODO: Remove later */}

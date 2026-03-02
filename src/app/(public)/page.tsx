@@ -15,8 +15,9 @@ export default function HomePage() {
 
   useEffect(() => {
     apiFetch(`/api/bets/my?limit=${BETS_LIMIT}`)
-      .then((r) => (r.ok ? r.json() : []))
+      .then((r) => r.json())
       .then(setMyBets)
+      .catch(() => setMyBets([]))
       .finally(() => setLoading(false));
   }, []);
 
