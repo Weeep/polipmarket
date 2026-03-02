@@ -6,6 +6,7 @@ import type { UserInfoDTO } from "@/modules/user/dto/UserInfoDTO";
 
 type MeContextValue = {
   me: UserInfoDTO | null;
+  isMeResolved: boolean;
   refreshMe: () => Promise<void>;
 };
 
@@ -13,13 +14,16 @@ const MeContext = createContext<MeContextValue | null>(null);
 
 export function MeProvider({ children }: { children: React.ReactNode }) {
   const [me, setMe] = useState<UserInfoDTO | null>(null);
+  const [isMeResolved, setIsMeResolved] = useState(false);
 
   async function refreshMe() {
-    const res = await apiFetch("/api/me");
-    if (res.ok) {
+    try {
+      const res = await apiFetch("/api/me");
       setMe(await res.json());
-    } else {
+    } catch {
       setMe(null);
+    } finally {
+      setIsMeResolved(true);
     }
   }
 
@@ -32,7 +36,7 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <MeContext.Provider value={{ me, refreshMe }}>
+    <MeContext.Provider value={{ me, isMeResolved, refreshMe }}>
       {children}
     </MeContext.Provider>
   );
