@@ -19,6 +19,7 @@ export default function MyOrdersPage() {
     INITIAL_CLOSED_BETS_LIMIT,
   );
   const [hasMoreClosed, setHasMoreClosed] = useState(true);
+  const [serverClosedOffset, setServerClosedOffset] = useState(0);
 
   useEffect(() => {
     Promise.all([
@@ -33,13 +34,14 @@ export default function MyOrdersPage() {
         setOpenBets(open);
         setClosedBets(closed);
         setHasMoreClosed(closed.length === INITIAL_CLOSED_BETS_LIMIT);
+        setServerClosedOffset(closed.length);
       })
       .finally(() => setLoading(false));
   }, []);
 
   async function loadMoreClosedBets() {
     const res = await apiFetch(
-      `/api/bets/my?status=closed&limit=${CLOSED_BETS_PAGE_SIZE}&offset=${closedBets.length}`,
+      `/api/bets/my?status=closed&limit=${CLOSED_BETS_PAGE_SIZE}&offset=${serverClosedOffset}`,
     );
 
     if (!res.ok) {
@@ -50,6 +52,7 @@ export default function MyOrdersPage() {
     setClosedBets((prev) => [...prev, ...next]);
     setVisibleClosedBetCount((prev) => prev + CLOSED_BETS_PAGE_SIZE);
     setHasMoreClosed(next.length === CLOSED_BETS_PAGE_SIZE);
+    setServerClosedOffset((prev) => prev + next.length);
   }
 
   function updateOpenBet(lotId: string, updatedBet: MyBetDTO | null) {
