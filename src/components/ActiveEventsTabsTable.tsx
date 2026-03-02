@@ -47,11 +47,19 @@ export function ActiveEventsTabsTable() {
   }, [query]);
 
   function handleSortChange(sort: ActiveEventsSort) {
+    if (sort === activeSort) {
+      return;
+    }
+
     setLoading(true);
     setActiveSort(sort);
   }
 
   function handleCategoryChange(category: EventCategory | null) {
+    if (category === activeCategory) {
+      return;
+    }
+
     setLoading(true);
     setActiveCategory(category);
   }
