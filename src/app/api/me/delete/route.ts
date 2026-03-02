@@ -14,7 +14,9 @@ export const POST = withAuth(async (user, req) => {
   const reason = parseReason(body.reason);
   const deletedEmail = `deleted+${user.id}@anon.polipmarket.local`;
 
-  await prisma.$transaction(async (tx) => {
+  type TransactionClient = Pick<typeof prisma, "userDeletionAudit" | "user" | "wallet">;
+
+  await prisma.$transaction(async (tx: TransactionClient) => {
     await tx.userDeletionAudit.create({
       data: {
         userId: user.id,
