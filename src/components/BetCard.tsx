@@ -68,7 +68,8 @@ export function BetCard({
         {bet.eventId && bet.eventQuestion ? (
           <Link
             href={`/events/${bet.eventId}`}
-            className="block text-l leading-tight font-semibold text-stone-400 hover:text-stone-200 hover:underline border-b border-stone-800 pb-2"
+            className="leading-5 line-clamp-2 min-h-[3rem] block text-l font-semibold ntext-stone-400 hover:text-stone-200 hover:underline border-b border-stone-800 pb-2"
+            title={bet.eventQuestion}
           >
             {bet.eventQuestion}
           </Link>
@@ -79,7 +80,7 @@ export function BetCard({
         )}
       </div>
 
-      <div className="text-center">
+      <div className="text-center min-h-[4rem]">
         <p className="text-stone-500">Válasz</p>
         <p className="font-semibold text-stone-100">{bet.outcomeLabel}</p>
       </div>
