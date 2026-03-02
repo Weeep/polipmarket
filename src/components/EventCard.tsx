@@ -88,7 +88,7 @@ export function EventCard({ event }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [nowTimestamp, setNowTimestamp] = useState(() => Date.now());
-  const { me, refreshMe } = useMe();
+  const { me, isMeResolved, refreshMe } = useMe();
   const bettingCloseTimestamp = new Date(eventData.bettingCloseAt).getTime();
   const isBettingClosed = bettingCloseTimestamp <= nowTimestamp;
 
@@ -458,7 +458,15 @@ export function EventCard({ event }: Props) {
               >
                 MÉGSEM
               </button>
-              {me ? (
+              {!isMeResolved ? (
+                <button
+                  type="button"
+                  disabled
+                  className="button-gold cursor-wait opacity-70"
+                >
+                  Betöltés...
+                </button>
+              ) : me ? (
                 <button
                   type="button"
                   onClick={placeOrder}

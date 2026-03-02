@@ -1,6 +1,5 @@
 "use client";
 
-import { apiFetch } from "@/lib/apiFetch";
 import { createContext, useContext, useEffect, useState } from "react";
 import type { UserInfoDTO } from "@/modules/user/dto/UserInfoDTO";
 
@@ -18,10 +17,18 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
 
   async function refreshMe() {
     try {
-      const res = await apiFetch("/api/me");
-      setMe(await res.json());
+      const res = await fetch("/api/me");
+
+      if (res.ok) {
+        setMe(await res.json());
+        return;
+      }
+
+      if (res.status === 401 || res.status === 403) {
+        setMe(null);
+      }
     } catch {
-      setMe(null);
+      // Keep previous user state on transient network/server errors.
     } finally {
       setIsMeResolved(true);
     }
