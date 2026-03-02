@@ -78,68 +78,53 @@ export async function getMyBetLots(
     ) sellAgg ON sellAgg."buyLotId" = pl."id"
     WHERE pl."userId" = ${userId}
     ORDER BY bo."createdAt" DESC
+    LIMIT ${limit}
   `;
 
-  const map = new Map<string, MyEventMarketBetDTO>();
-
-  for (const row of rows) {
-    if (!map.has(row.marketId)) {
-      map.set(row.marketId, {
-        marketId: row.marketId,
-        question: row.marketQuestion,
-        eventId: row.eventId,
-        eventQuestion: row.eventQuestion,
-        closesAt: new Date(row.marketClosesAt).toISOString(),
-        resolvesAt: row.marketResolvesAt
-          ? new Date(row.marketResolvesAt).toISOString()
-          : null,
-        status: row.marketStatus,
-        resolvedOutcomeId: row.marketResolvedOutcomeId,
-        resolvedPosition: row.marketResolvedPosition,
-        latestBetAt: new Date(row.buyCreatedAt).toISOString(),
-        bets: [],
-      });
-    }
-
-    const market = map.get(row.marketId)!;
+  return rows.map((row) => {
     const isCancelled = row.buyStatus === "CANCELLED";
     const isOpen = !isCancelled && row.remainingShares > 0.000001;
     const status = isCancelled ? "CANCELLED" : isOpen ? "OPEN" : "FILLED";
 
-    market.bets.push({
-      lotId: row.lotId,
-      orderId: row.buyOrderId,
-      outcomeId: row.outcomeId,
-      outcomeLabel: row.outcomeLabel,
-      position: row.position,
-      amount: row.entryGrossAmount,
-      price: row.entryPrice,
-      shares: isOpen ? row.remainingShares : row.openedShares,
-      status,
-      createdAt: new Date(row.buyCreatedAt).toISOString(),
-      soldAmount: row.soldNetAmount ?? undefined,
-      soldPrice:
-        row.soldShares != null &&
-        row.soldShares > 0 &&
-        row.soldGrossAmount != null
-          ? row.soldGrossAmount / row.soldShares
-          : undefined,
-      soldShares: row.soldShares ?? undefined,
-      soldGrossAmount: row.soldGrossAmount ?? undefined,
-      soldFee: row.soldFee ?? undefined,
-      soldNetAmount: row.soldNetAmount ?? undefined,
-      soldAt: row.soldAt ? new Date(row.soldAt).toISOString() : undefined,
-    });
-
-    if (new Date(row.buyCreatedAt) > new Date(market.latestBetAt)) {
-      market.latestBetAt = new Date(row.buyCreatedAt).toISOString();
-    }
-  }
-
-  return Array.from(map.values())
-    .sort(
-      (a, b) =>
-        new Date(b.latestBetAt).getTime() - new Date(a.latestBetAt).getTime(),
-    )
-    .slice(0, limit);
+    return {
+      marketId: row.marketId,
+      question: row.marketQuestion,
+      eventId: row.eventId,
+      eventQuestion: row.eventQuestion,
+      closesAt: new Date(row.marketClosesAt).toISOString(),
+      resolvesAt: row.marketResolvesAt
+        ? new Date(row.marketResolvesAt).toISOString()
+        : null,
+      status: row.marketStatus,
+      resolvedOutcomeId: row.marketResolvedOutcomeId,
+      resolvedPosition: row.marketResolvedPosition,
+      latestBetAt: new Date(row.buyCreatedAt).toISOString(),
+      bets: [
+        {
+          lotId: row.lotId,
+          orderId: row.buyOrderId,
+          outcomeId: row.outcomeId,
+          outcomeLabel: row.outcomeLabel,
+          position: row.position,
+          amount: row.entryGrossAmount,
+          price: row.entryPrice,
+          shares: isOpen ? row.remainingShares : row.openedShares,
+          status,
+          createdAt: new Date(row.buyCreatedAt).toISOString(),
+          soldAmount: row.soldNetAmount ?? undefined,
+          soldPrice:
+            row.soldShares != null &&
+            row.soldShares > 0 &&
+            row.soldGrossAmount != null
+              ? row.soldGrossAmount / row.soldShares
+              : undefined,
+          soldShares: row.soldShares ?? undefined,
+          soldGrossAmount: row.soldGrossAmount ?? undefined,
+          soldFee: row.soldFee ?? undefined,
+          soldNetAmount: row.soldNetAmount ?? undefined,
+          soldAt: row.soldAt ? new Date(row.soldAt).toISOString() : undefined,
+        },
+      ],
+    };
+  });
 }
