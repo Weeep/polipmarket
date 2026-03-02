@@ -90,7 +90,9 @@ export async function getMyBetLots(
         eventId: row.eventId,
         eventQuestion: row.eventQuestion,
         closesAt: new Date(row.marketClosesAt).toISOString(),
-        resolvesAt: row.marketResolvesAt ? new Date(row.marketResolvesAt).toISOString() : null,
+        resolvesAt: row.marketResolvesAt
+          ? new Date(row.marketResolvesAt).toISOString()
+          : null,
         status: row.marketStatus,
         resolvedOutcomeId: row.marketResolvedOutcomeId,
         resolvedPosition: row.marketResolvedPosition,
@@ -117,7 +119,9 @@ export async function getMyBetLots(
       createdAt: new Date(row.buyCreatedAt).toISOString(),
       soldAmount: row.soldNetAmount ?? undefined,
       soldPrice:
-        row.soldShares != null && row.soldShares > 0 && row.soldGrossAmount != null
+        row.soldShares != null &&
+        row.soldShares > 0 &&
+        row.soldGrossAmount != null
           ? row.soldGrossAmount / row.soldShares
           : undefined,
       soldShares: row.soldShares ?? undefined,
@@ -133,6 +137,9 @@ export async function getMyBetLots(
   }
 
   return Array.from(map.values())
-    .sort((a, b) => new Date(b.latestBetAt).getTime() - new Date(a.latestBetAt).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.latestBetAt).getTime() - new Date(a.latestBetAt).getTime(),
+    )
     .slice(0, limit);
 }

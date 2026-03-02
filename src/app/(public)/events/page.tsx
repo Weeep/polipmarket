@@ -88,7 +88,7 @@ function EventsPageContent() {
         <h1 className="text-2xl font-bold text-stone-100">Események</h1>
 
         <Link href="/events/new" className="button-gold">
-          New event
+          Új
         </Link>
       </div>
 

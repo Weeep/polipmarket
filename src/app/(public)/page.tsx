@@ -1,10 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { OpenBetsGrid } from "@/components/OpenBetsGrid";
 import { ActiveEventsTabsTable } from "@/components/ActiveEventsTabsTable";
 import { MyEventMarketBetDTO } from "@/modules/event/dto/myEventMarketBetDTO";
 import { apiFetch } from "@/lib/apiFetch";
+
+const EVENTS_LIMIT = 6;
 
 function filterMarketsByBetStatus(
   markets: MyEventMarketBetDTO[],
@@ -65,7 +68,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiFetch("/api/events/my")
+    apiFetch(`/api/events/my?limit=${EVENTS_LIMIT}`)
       .then((r) => (r.ok ? r.json() : []))
       .then(setMyMarkets)
       .finally(() => setLoading(false));
@@ -100,13 +103,21 @@ export default function HomePage() {
         <ActiveEventsTabsTable />
 
         <div className="marketcard-base space-y-4 scroll-mt-24">
-          <h2 className="text-lg font-bold text-stone-100">Fogadásaim</h2>
+          <h2 className="text-lg font-bold text-stone-100">
+            Fogadásaim (utolsó {EVENTS_LIMIT})
+          </h2>
 
           <OpenBetsGrid
             markets={openMarkets}
             onUpdateMarket={updateMarket}
             emptyMessage="Nincs nyitott fogadásod"
           />
+
+          <div>
+            <Link href="/myorders" className="text-amber-300 hover:underline">
+              Összes fogadás
+            </Link>
+          </div>
         </div>
       </div>
     </main>
