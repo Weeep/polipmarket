@@ -4,56 +4,39 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/lib/apiFetch";
 import { getRemainingTimeInfo } from "@/lib/remainingTime";
+import { EVENT_CATEGORY_OPTIONS } from "@/modules/event/domain/eventCategoryMeta";
 import type { EventSummary } from "@/modules/event/domain/Event";
+import type { EventCategory } from "@/modules/event/domain/Event";
 
-type ActiveEventsTab =
-  | "NEW_EVENT"
-  | "TOP_VOLUME"
-  | "BETTING_CLOSE"
-  | "EVENT_CLOSE";
-
-const TAB_CONFIG: Record<
-  ActiveEventsTab,
-  {
-    label: string;
-    sort:
-      | "created_desc"
-      | "volume_desc"
-      | "betting_close_asc"
-      | "event_close_asc";
-  }
-> = {
-  NEW_EVENT: {
-    label: "Új esemény",
-    sort: "created_desc",
-  },
-  TOP_VOLUME: {
-    label: "Legtöbb tét",
-    sort: "volume_desc",
-  },
-  BETTING_CLOSE: {
-    label: "Záruló fogadás",
-    sort: "betting_close_asc",
-  },
-  EVENT_CLOSE: {
-    label: "Záruló esemény",
-    sort: "event_close_asc",
-  },
-};
+type ActiveEventsSort =
+  | "created_desc"
+  | "volume_desc"
+  | "betting_close_asc"
+  | "event_close_asc";
 
 function formatVolume(value?: number) {
   return Math.round(value ?? 0).toLocaleString("hu-HU");
 }
 
 export function ActiveEventsTabsTable() {
-  const [activeTab, setActiveTab] = useState<ActiveEventsTab>("NEW_EVENT");
+  const [activeSort, setActiveSort] = useState<ActiveEventsSort>("created_desc");
+  const [activeCategory, setActiveCategory] = useState<EventCategory | null>(null);
   const [events, setEvents] = useState<EventSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   const query = useMemo(() => {
-    const sort = TAB_CONFIG[activeTab].sort;
-    return `/api/events?activeOnly=true&sort=${sort}&limit=20`;
-  }, [activeTab]);
+    const params = new URLSearchParams({
+      activeOnly: "true",
+      sort: activeSort,
+      limit: "20",
+    });
+
+    if (activeCategory) {
+      params.set("category", activeCategory);
+    }
+
+    return `/api/events?${params.toString()}`;
+  }, [activeCategory, activeSort]);
 
   useEffect(() => {
     apiFetch(query)
@@ -63,6 +46,16 @@ export function ActiveEventsTabsTable() {
       .finally(() => setLoading(false));
   }, [query]);
 
+  function handleSortChange(sort: ActiveEventsSort) {
+    setLoading(true);
+    setActiveSort(sort);
+  }
+
+  function handleCategoryChange(category: EventCategory | null) {
+    setLoading(true);
+    setActiveCategory(category);
+  }
+
   return (
     <section className="marketcard-base space-y-4">
       <p className="text-sm text-stone-400">
@@ -71,19 +64,31 @@ export function ActiveEventsTabsTable() {
       </p>
       <h2 className="text-lg font-bold text-stone-100">Fogadható események</h2>
 
-      <div className="flex flex-wrap gap-2 justify-center">
-        {(Object.keys(TAB_CONFIG) as ActiveEventsTab[]).map((tab) => (
+      <div className="flex flex-wrap gap-4 justify-center">
+        <button
+          type="button"
+          onClick={() => handleCategoryChange(null)}
+          className={`rounded-full border px-3 py-1 text-sm ${
+            activeCategory === null
+              ? "border-amber-300 bg-amber-400/20 text-amber-100"
+              : "border-zinc-600 text-stone-300"
+          }`}
+        >
+          Összes
+        </button>
+
+        {EVENT_CATEGORY_OPTIONS.map((category) => (
           <button
-            key={tab}
+            key={category.value}
             type="button"
-            onClick={() => {
-              setLoading(true);
-              setActiveTab(tab);
-            }}
-            data-active={activeTab === tab}
-            className="rounded-md border border-stone-700 px-3 py-1 text-sm text-stone-200 data-[active=true]:border-amber-400 data-[active=true]:text-amber-300"
+            onClick={() => handleCategoryChange(category.value)}
+            className={`rounded-full border px-3 py-1 text-sm ${
+              activeCategory === category.value
+                ? "border-amber-300 bg-amber-400/20 text-amber-100"
+                : "border-zinc-600 text-stone-300"
+            }`}
           >
-            {TAB_CONFIG[tab].label}
+            {category.label}
           </button>
         ))}
       </div>
@@ -92,10 +97,49 @@ export function ActiveEventsTabsTable() {
         <table className="min-w-full table-fixed text-sm text-stone-200">
           <thead className="text-left text-stone-400">
             <tr className="border-b border-stone-700">
-              <th className="py-2 pr-4">Esemény</th>
-              <th className="py-2 pr-4">Összes tét</th>
-              <th className="py-2 pr-4">Fogadás zárás</th>
-              <th className="py-2">Esemény zárás</th>
+              <th className="py-2 pr-4">
+                <button
+                  type="button"
+                  className={`inline-flex items-center gap-2 ${activeSort === "created_desc" ? "text-amber-300" : "hover:text-stone-200"}`}
+                  onClick={() => handleSortChange("created_desc")}
+                >
+                  Esemény
+                  <span
+                    className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-stone-500 text-[10px]"
+                    title="Az esemény létrejöttének ideje szerint történik a rendezés (nem ABC sorrendben)."
+                    aria-label="Az esemény létrejöttének ideje szerint történik a rendezés"
+                  >
+                    i
+                  </span>
+                </button>
+              </th>
+              <th className="py-2 pr-4">
+                <button
+                  type="button"
+                  className={activeSort === "volume_desc" ? "text-amber-300" : "hover:text-stone-200"}
+                  onClick={() => handleSortChange("volume_desc")}
+                >
+                  Összes tét
+                </button>
+              </th>
+              <th className="py-2 pr-4">
+                <button
+                  type="button"
+                  className={activeSort === "betting_close_asc" ? "text-amber-300" : "hover:text-stone-200"}
+                  onClick={() => handleSortChange("betting_close_asc")}
+                >
+                  Fogadás zárás
+                </button>
+              </th>
+              <th className="py-2">
+                <button
+                  type="button"
+                  className={activeSort === "event_close_asc" ? "text-amber-300" : "hover:text-stone-200"}
+                  onClick={() => handleSortChange("event_close_asc")}
+                >
+                  Esemény zárás
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody>
