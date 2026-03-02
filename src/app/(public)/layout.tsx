@@ -44,6 +44,16 @@ export default function RootLayout({
             </Suspense>
             <AchievementPopupQueue />
             <div className="pb-20 md:pb-0">{children}</div>
+            <footer className="border-t border-zinc-800 bg-zinc-950 px-4 py-4 text-center text-xs text-zinc-400 md:text-sm">
+              © {new Date().getFullYear()} Minden jog fenntartva · Contact:
+              {" "}
+              <a
+                href="mailto:polipmarket@gmail.com"
+                className="text-zinc-300 hover:text-white underline-offset-2 hover:underline"
+              >
+                polipmarket@gmail.com
+              </a>
+            </footer>
             <MobileBottomNav />
           </MeProvider>
         </Providers>
