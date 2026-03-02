@@ -1,0 +1,28 @@
+export type MyBetDTO = {
+  lotId: string;
+  orderId: string;
+  marketId: string;
+  question: string;
+  eventId: string;
+  eventQuestion: string;
+  closesAt: string;
+  resolvesAt?: string | null;
+  marketStatus: string;
+  resolvedOutcomeId?: string | null;
+  resolvedPosition?: "YES" | "NO" | null;
+  outcomeId: string;
+  outcomeLabel: string;
+  position: "YES" | "NO";
+  amount: number;
+  price: number;
+  shares: number;
+  status: "OPEN" | "FILLED" | "CANCELLED";
+  createdAt: string;
+  soldAmount?: number;
+  soldPrice?: number;
+  soldShares?: number;
+  soldGrossAmount?: number;
+  soldFee?: number;
+  soldNetAmount?: number;
+  soldAt?: string;
+};
