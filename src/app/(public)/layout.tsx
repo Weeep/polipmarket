@@ -8,8 +8,24 @@ import { AchievementPopupQueue } from "@/components/AchievementPopupQueue";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://polipmarket.hu"),
   title: "Polipmarket",
-  description: "A play-money marketplace for predicting real-world events.",
+  description: "Fogadj a jövőre játékpénzzel a közösségi előrejelző piacon.",
+  openGraph: {
+    title: "Polipmarket",
+    description:
+      "Fogadj a jövőre játékpénzzel a közösségi előrejelző piacon.",
+    url: "https://polipmarket.hu",
+    type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Polipmarket OG előnézeti kép",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
