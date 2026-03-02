@@ -11,7 +11,12 @@ type BetCardProps = {
   onSell: () => void;
 };
 
-export function BetCard({ bet, canSell, sellDialogLoading, onSell }: BetCardProps) {
+export function BetCard({
+  bet,
+  canSell,
+  sellDialogLoading,
+  onSell,
+}: BetCardProps) {
   const shares = bet.shares;
   const isCancelled = bet.status === "CANCELLED";
   const isFilled = bet.status === "FILLED";
@@ -25,7 +30,11 @@ export function BetCard({ bet, canSell, sellDialogLoading, onSell }: BetCardProp
     bet.resolvedOutcomeId === bet.outcomeId &&
     resolvedPosition === bet.position;
   const settlePrice = isResolved ? (isWinning ? 1 : 0) : bet.price;
-  const payout = isResolved ? (isWinning ? shares * settlePrice : 0) : bet.amount;
+  const payout = isResolved
+    ? isWinning
+      ? shares * settlePrice
+      : 0
+    : bet.amount;
   const resolvedEventProfit = payout - bet.amount;
   const resolvedEventProfitLabel =
     resolvedEventProfit > 0
@@ -64,13 +73,20 @@ export function BetCard({ bet, canSell, sellDialogLoading, onSell }: BetCardProp
             {bet.eventQuestion}
           </Link>
         ) : (
-          <p className="block text-sm font-medium text-stone-400">{bet.question}</p>
+          <p className="block text-sm font-medium text-stone-400">
+            {bet.question}
+          </p>
         )}
+      </div>
+
+      <div className="text-center">
+        <p className="text-stone-500">Válasz</p>
+        <p className="font-semibold text-stone-100">{bet.outcomeLabel}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm text-center items-center">
         <div>
-          <p className="font-semibold text-xl text-stone-100">{bet.outcomeLabel}</p>
+          <p className="text-stone-500">Pozíció</p>
           <p
             className="rounded-lg bg-slate-800 px-4 py-1 text-stone-100
            border border-slate-700 mx-8"
@@ -94,8 +110,8 @@ export function BetCard({ bet, canSell, sellDialogLoading, onSell }: BetCardProp
 
       {isFilled && !isResolved && (
         <p className="text-s text-stone-400 text-center">
-          Eladva {soldMetrics.shares.toFixed(2)} · Átlagár: {" "}
-          {soldMetrics.executionPrice.toFixed(4)}ଳ · Bevétel: {" "}
+          Eladva {soldMetrics.shares.toFixed(2)} · Átlagár:{" "}
+          {soldMetrics.executionPrice.toFixed(4)}ଳ · Bevétel:{" "}
           {soldMetrics.netAmount.toFixed(2)}ଳ · Profit:{" "}
           <span
             className={
@@ -113,7 +129,7 @@ export function BetCard({ bet, canSell, sellDialogLoading, onSell }: BetCardProp
 
       {isResolved && (
         <p className="text-s text-stone-400 text-center">
-          Lezárva. {isWinning ? "NYERTES!" : "VESZTES."} · Bevétel: {" "}
+          Lezárva. {isWinning ? "NYERTES!" : "VESZTES."} · Bevétel:{" "}
           {payout.toFixed(2)}ଳ · Profit:{" "}
           <span
             className={
@@ -130,7 +146,9 @@ export function BetCard({ bet, canSell, sellDialogLoading, onSell }: BetCardProp
       )}
 
       {isCancelled && (
-        <p className="text-xs text-stone-400">Törölve. Tét {payout}ଳ visszautalva.</p>
+        <p className="text-xs text-stone-400">
+          Törölve. Tét {payout}ଳ visszautalva.
+        </p>
       )}
 
       <div className="flex items-center justify-between border-t border-stone-800 pt-2 px-4">
