@@ -13,7 +13,7 @@ export default function AboutPage() {
         <p className="text-m font-semibold uppercase tracking-[0.2em] text-amber-300">
           <b>Üdv a Polipmarketen! </b>
           <span className="text-sm">
-            a polymarket virtuális pénzes magyar verzióján
+            a polymarket játékpénzes magyar verzióján
           </span>
         </p>
         <h1 className="text-3xl font-bold leading-tight text-stone-100 md:text-5xl">

@@ -8,13 +8,14 @@ export default function OgPreviewPage() {
               Polipmarket
             </span>
             <h1 className="text-5xl font-bold leading-tight">
-              Fogadj a jövőre,
-              <br />
-              virtuális pénzzel.
+              Fogadj a jövőre!
             </h1>
             <p className="text-2xl text-slate-300 leading-relaxed">
               Magyar predikciós piactér, ahol aktuális gazdasági és politikai
               kérdésekre szavazhatsz, és követheted a közösség várakozásait.
+            </p>
+            <p className="text-lg text-slate-400 leading-relaxed italic">
+              A piac játékpénzzel működik, nincs valós pénzmozgás.
             </p>
           </div>
           <div className="text-slate-400 text-lg">
