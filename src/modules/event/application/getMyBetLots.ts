@@ -77,11 +77,11 @@ export async function getMyBetLots(
       GROUP BY lc."buyLotId"
     ) sellAgg ON sellAgg."buyLotId" = pl."id"
     WHERE pl."userId" = ${userId}
-    ORDER BY bo."createdAt" DESC
+    ORDER BY bo."createdAt" DESC, pl."id" DESC
     LIMIT ${limit}
   `;
 
-  return rows.map((row) => {
+  const latestLots = rows.map<MyEventMarketBetDTO>((row) => {
     const isCancelled = row.buyStatus === "CANCELLED";
     const isOpen = !isCancelled && row.remainingShares > 0.000001;
     const status = isCancelled ? "CANCELLED" : isOpen ? "OPEN" : "FILLED";
@@ -127,4 +127,23 @@ export async function getMyBetLots(
       ],
     };
   });
+
+  const marketsById = new Map<string, MyEventMarketBetDTO>();
+
+  for (const lot of latestLots) {
+    const existing = marketsById.get(lot.marketId);
+
+    if (!existing) {
+      marketsById.set(lot.marketId, lot);
+      continue;
+    }
+
+    existing.bets.push(...lot.bets);
+
+    if (new Date(lot.latestBetAt) > new Date(existing.latestBetAt)) {
+      existing.latestBetAt = lot.latestBetAt;
+    }
+  }
+
+  return Array.from(marketsById.values());
 }
