@@ -3,9 +3,18 @@ import { getSellDisplayMetricsFromBet } from "@/components/sellDisplay";
 import { getRemainingTimeInfo } from "@/lib/remainingTime";
 import { toHun } from "@/lib/logger";
 import { MyBetDTO } from "@/modules/event/dto/myBetDTO";
+import { MyEventMarketBetDTO } from "@/modules/event/dto/myEventMarketBetDTO";
+
+type MarketSummary = Pick<
+  MyEventMarketBetDTO,
+  "eventId" | "eventQuestion" | "question" | "closesAt" | "status" | "resolvedOutcomeId" | "resolvedPosition"
+>;
+
+type EventMarketBet = MyEventMarketBetDTO["bets"][number];
 
 type BetCardProps = {
-  bet: MyBetDTO;
+  bet: MyBetDTO | EventMarketBet;
+  market?: MarketSummary;
   canSell: boolean;
   sellDialogLoading: boolean;
   onSell: () => void;
@@ -13,6 +22,7 @@ type BetCardProps = {
 
 export function BetCard({
   bet,
+  market,
   canSell,
   sellDialogLoading,
   onSell,
@@ -20,14 +30,17 @@ export function BetCard({
   const shares = bet.shares;
   const isCancelled = bet.status === "CANCELLED";
   const isFilled = bet.status === "FILLED";
-  const isResolved = bet.marketStatus === "RESOLVED";
+  const marketStatus = market?.status ?? ("marketStatus" in bet ? bet.marketStatus : undefined);
+  const isResolved = marketStatus === "RESOLVED";
   const isActive = bet.status === "OPEN";
-  const closeTime = getRemainingTimeInfo(bet.closesAt);
+  const closesAt = market?.closesAt ?? ("closesAt" in bet ? bet.closesAt : null);
+  const closeTime = getRemainingTimeInfo(closesAt ?? new Date().toISOString());
 
-  const resolvedPosition = bet.resolvedPosition ?? null;
+  const resolvedPosition = market?.resolvedPosition ?? ("resolvedPosition" in bet ? bet.resolvedPosition : null);
+  const resolvedOutcomeId = market?.resolvedOutcomeId ?? ("resolvedOutcomeId" in bet ? bet.resolvedOutcomeId : null);
   const isWinning =
     isResolved &&
-    bet.resolvedOutcomeId === bet.outcomeId &&
+    resolvedOutcomeId === bet.outcomeId &&
     resolvedPosition === bet.position;
   const settlePrice = isResolved ? (isWinning ? 1 : 0) : bet.price;
   const payout = isResolved
@@ -65,17 +78,18 @@ export function BetCard({
   return (
     <div className="w-[310px] rounded-lg border border-stone-800 bg-stone-950/60 px-4 py-3 text-sm text-stone-300 space-y-3">
       <div className="space-y-2">
-        {bet.eventId && bet.eventQuestion ? (
+        {(market?.eventId ?? ("eventId" in bet ? bet.eventId : undefined)) &&
+        (market?.eventQuestion ?? ("eventQuestion" in bet ? bet.eventQuestion : undefined)) ? (
           <Link
-            href={`/events/${bet.eventId}`}
+            href={`/events/${market?.eventId ?? ("eventId" in bet ? bet.eventId : "")}`}
             className="leading-5 line-clamp-2 min-h-[3rem] block text-l font-semibold ntext-stone-400 hover:text-stone-200 hover:underline border-b border-stone-800 pb-2"
-            title={bet.eventQuestion}
+            title={market?.eventQuestion ?? ("eventQuestion" in bet ? bet.eventQuestion : "")}
           >
-            {bet.eventQuestion}
+            {market?.eventQuestion ?? ("eventQuestion" in bet ? bet.eventQuestion : "")}
           </Link>
         ) : (
           <p className="block text-sm font-medium text-stone-400">
-            {bet.question}
+            {market?.question ?? ("question" in bet ? bet.question : "-")}
           </p>
         )}
       </div>
