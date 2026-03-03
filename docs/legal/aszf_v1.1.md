@@ -2,9 +2,9 @@
 
 **Szolgáltatás neve:** Polipmarket  
 **Domain:** polipmarket.hu  
-**Hatálybalépés:** 2026. február 23.  
-**Utolsó frissítés:** 2026. február 23.  
-**Verzió:** 1.0
+**Hatálybalépés:** 2026. március 3.  
+**Utolsó frissítés:** 2026. március 3.  
+**Verzió:** 1.1
 
 ## 1. Szolgáltató adatai
 
@@ -85,6 +85,8 @@ A szolgáltató jogosult a szolgáltatás funkcióit módosítani, bővíteni, k
 ## 13. ÁSZF módosítása
 
 A szolgáltató jogosult jelen ÁSZF-et egyoldalúan módosítani. A módosításról a felhasználókat előzetesen, észszerű határidővel tájékoztatja. A módosított ÁSZF a közzétételkor vagy a megjelölt hatálybalépési időpontban lép hatályba.
+
+A jogi dokumentumok verziózottak. Az aktuálisan hatályos, kötelezően elfogadandó ÁSZF-verzió a rendszerben publikált PDF dokumentum, amely a weboldalon is elérhető.
 
 ## 14. Alkalmazandó jog és jogvita
 
