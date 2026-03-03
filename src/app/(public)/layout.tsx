@@ -7,6 +7,7 @@ import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { AchievementPopupQueue } from "@/components/AchievementPopupQueue";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { getSession } from "@/modules/auth/application/getSession";
 import { getLegalAcceptanceStatus } from "@/modules/legal/application/getLegalAcceptanceStatus";
 
@@ -35,6 +36,14 @@ async function enforceLegalGate() {
 
   if (!session?.user?.id) {
     return;
+  }
+
+  const cookieStore = await cookies();
+  const shouldAutoAcceptFromLogin =
+    cookieStore.get("pm_auto_legal_accept")?.value === "1";
+
+  if (shouldAutoAcceptFromLogin) {
+    redirect("/api/legal/auto-accept-login?next=/");
   }
 
   const status = await getLegalAcceptanceStatus(session.user.id);
