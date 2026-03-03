@@ -9,5 +9,12 @@ export function StopImpersonationButton() {
     await update({ impersonatedUserId: null });
   }
 
-  return <button onClick={stop}>Stop impersonation</button>;
+  return (
+    <button
+      onClick={stop}
+      className="cursor-pointer rounded-md border border-stone-600 bg-stone-800 px-3 py-2 text-sm font-medium text-stone-100 transition hover:bg-stone-700"
+    >
+      Stop impersonation
+    </button>
+  );
 }
