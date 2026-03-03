@@ -7,6 +7,17 @@ import {
 import { readPublicAssetPdf } from "@/modules/legal/application/publicLegalAssets";
 import type { LegalDocumentType } from "@/modules/legal/domain/LegalDocument";
 
+function redirectToKing(searchParams: URLSearchParams): NextResponse {
+  const location = `/king?${searchParams.toString()}`;
+
+  return new NextResponse(null, {
+    status: 303,
+    headers: {
+      Location: location,
+    },
+  });
+}
+
 function parseDocumentType(value: FormDataEntryValue | null): LegalDocumentType {
   if (value !== "TERMS_OF_SERVICE" && value !== "PRIVACY_NOTICE") {
     throw new Error("Érvénytelen dokumentumtípus.");
@@ -66,17 +77,18 @@ export async function POST(req: Request) {
     const input = await parseUploadInput(req);
     await publishLegalDocumentVersion(input);
 
-    return NextResponse.redirect(new URL("/king?legalUpload=success", req.url), 303);
+    return redirectToKing(new URLSearchParams({ legalUpload: "success" }));
   } catch (error) {
     const message =
       error instanceof Error
         ? error.message
         : "A jogi dokumentum publikálása sikertelen.";
 
-    const url = new URL("/king", req.url);
-    url.searchParams.set("legalUpload", "error");
-    url.searchParams.set("message", message);
-
-    return NextResponse.redirect(url, 303);
+    return redirectToKing(
+      new URLSearchParams({
+        legalUpload: "error",
+        message,
+      }),
+    );
   }
 }
