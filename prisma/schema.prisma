@@ -111,6 +111,8 @@ model LegalDocumentVersion {
   acceptances UserLegalAcceptance[]
 
   @@unique([documentType, version])
+  // NOTE: A partial unique index for current rows is created via SQL migration:
+  // LegalDocumentVersion_single_current_per_type_key WHERE isCurrent = true
   @@index([documentType, isCurrent])
 }
 

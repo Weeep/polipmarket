@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     const input = await parseUploadInput(req);
     await publishLegalDocumentVersion(input);
 
-    return NextResponse.redirect(new URL("/king?legalUpload=success", req.url));
+    return NextResponse.redirect(new URL("/king?legalUpload=success", req.url), 303);
   } catch (error) {
     const message =
       error instanceof Error
@@ -76,6 +76,6 @@ export async function POST(req: Request) {
     url.searchParams.set("legalUpload", "error");
     url.searchParams.set("message", message);
 
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(url, 303);
   }
 }
