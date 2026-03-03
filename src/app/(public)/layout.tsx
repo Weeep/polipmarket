@@ -10,7 +10,6 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getSession } from "@/modules/auth/application/getSession";
 import { getLegalAcceptanceStatus } from "@/modules/legal/application/getLegalAcceptanceStatus";
-import { acceptCurrentLegalDocuments } from "@/modules/legal/application/acceptCurrentLegalDocuments";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://polipmarket.hu"),
@@ -44,7 +43,7 @@ async function enforceLegalGate() {
     cookieStore.get("pm_auto_legal_accept")?.value === "1";
 
   if (shouldAutoAcceptFromLogin) {
-    await acceptCurrentLegalDocuments(session.user.id);
+    redirect("/api/legal/auto-accept-login?next=/");
   }
 
   const status = await getLegalAcceptanceStatus(session.user.id);
