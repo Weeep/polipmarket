@@ -101,7 +101,7 @@ export const authOptions: AuthOptions = {
     },
 
     async redirect({ url, baseUrl }) {
-      const appUrl = process.env.NEXTAUTH_URL ?? baseUrl;
+      const appUrl = baseUrl || process.env.NEXTAUTH_URL || "";
 
       if (url.startsWith("/")) {
         return `${appUrl}${url}`;

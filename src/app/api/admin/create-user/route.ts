@@ -12,5 +12,10 @@ export async function POST(req: Request) {
 
   await createFakeUser({ email, name });
 
-  return NextResponse.redirect(new URL("/king", req.url));
+  return new NextResponse(null, {
+    status: 303,
+    headers: {
+      Location: "/king",
+    },
+  });
 }

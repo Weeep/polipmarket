@@ -29,7 +29,12 @@ export const GET = withAuth(async (user, req) => {
     await acceptCurrentLegalDocuments(user.id, req.headers.get("user-agent"));
   }
 
-  const response = NextResponse.redirect(new URL(nextPath, url.origin));
+  const response = new NextResponse(null, {
+    status: 303,
+    headers: {
+      Location: nextPath,
+    },
+  });
   response.cookies.set({
     name: AUTO_ACCEPT_COOKIE_NAME,
     value: "",
