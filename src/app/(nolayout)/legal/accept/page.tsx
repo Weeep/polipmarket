@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/modules/auth/application/getSession";
 import { getLegalAcceptanceStatus } from "@/modules/legal/application/getLegalAcceptanceStatus";
-import LegalAcceptClient from "./LegalAcceptClient";
+import LegalAcceptClient from "@/components/LegalAcceptClient";
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("hu-HU", {
@@ -26,9 +26,12 @@ export default async function LegalAcceptPage() {
   if (!terms || !privacy) {
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-4 px-6 py-10 text-stone-100">
-        <h1 className="text-2xl font-bold">Jogi dokumentumok jelenleg nem elérhetők</h1>
+        <h1 className="text-2xl font-bold">
+          Jogi dokumentumok jelenleg nem elérhetők
+        </h1>
         <p className="text-sm text-stone-300">
-          Az admin még nem publikálta mindkét kötelező dokumentum aktuális verzióját.
+          Az admin még nem publikálta mindkét kötelező dokumentum aktuális
+          verzióját.
         </p>
       </main>
     );

@@ -1,12 +1,12 @@
 // src/app/(nolayout)/admin/page.tsx
 import { ImpersonateButton } from "@/components/ImpersonateButton";
+import { LegalDocumentsAdminForm } from "@/components/LegalDocumentsAdminForm";
+import { MarketAdminPanel } from "@/components/MarketAdminPanel";
 import { StopImpersonationButton } from "@/components/StopImpersonationButton";
 import { ensureAdmin } from "@/modules/auth/application/ensureAdmin";
 import { listPublicAssetPdfFileNames } from "@/modules/legal/application/publicLegalAssets";
 import { listUsers } from "@/modules/user/application/listUsers";
 import Link from "next/link";
-import { LegalDocumentsAdminForm } from "./LegalDocumentsAdminForm";
-import { MarketAdminPanel } from "./MarketAdminPanel";
 
 export default async function AdminPage() {
   await ensureAdmin();

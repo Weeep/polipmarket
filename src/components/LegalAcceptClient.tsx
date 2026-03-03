@@ -16,7 +16,10 @@ type LegalAcceptClientProps = {
   privacy: LegalDocumentCard;
 };
 
-export default function LegalAcceptClient({ terms, privacy }: LegalAcceptClientProps) {
+export default function LegalAcceptClient({
+  terms,
+  privacy,
+}: LegalAcceptClientProps) {
   const router = useRouter();
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptPrivacy, setAcceptPrivacy] = useState(false);
@@ -65,12 +68,14 @@ export default function LegalAcceptClient({ terms, privacy }: LegalAcceptClientP
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-6 py-10 text-stone-100">
-      <h1 className="text-2xl font-bold">Jogi dokumentumok elfogadása</h1>
-      <p className="text-sm text-stone-300">
-        A folytatáshoz mindkét aktuális dokumentum elfogadása kötelező.
-      </p>
+      <h1 className="text-2xl font-bold">
+        A folytatáshoz a következő dokumentumokat el kell fogadni.
+      </h1>
 
-      <form onSubmit={onSubmit} className="space-y-4 rounded-xl border border-zinc-800 p-5">
+      <form
+        onSubmit={onSubmit}
+        className="space-y-4 rounded-xl border border-zinc-800 p-5"
+      >
         <label className="flex items-start gap-3 text-sm">
           <input
             type="checkbox"
@@ -79,7 +84,8 @@ export default function LegalAcceptClient({ terms, privacy }: LegalAcceptClientP
             className="mt-1 h-4 w-4"
           />
           <span>
-            Elfogadom a(z) <b>{terms.version}</b> verziójú ÁSZF-et (hatálybalépés: {terms.effectiveFrom}).{" "}
+            Elfogadom a(z) <b>{terms.version}</b> verziójú ÁSZF-et
+            (hatálybalépés: {terms.effectiveFrom}). <br />
             <a
               href={`/assets/${terms.sourceFileName}`}
               target="_blank"
@@ -99,8 +105,8 @@ export default function LegalAcceptClient({ terms, privacy }: LegalAcceptClientP
             className="mt-1 h-4 w-4"
           />
           <span>
-            Elfogadom a(z) <b>{privacy.version}</b> verziójú adatkezelési tájékoztatót
-            (hatálybalépés: {privacy.effectiveFrom}).{" "}
+            Elfogadom a(z) <b>{privacy.version}</b> verziójú adatkezelési
+            tájékoztatót (hatálybalépés: {privacy.effectiveFrom}). <br />
             <a
               href={`/assets/${privacy.sourceFileName}`}
               target="_blank"
