@@ -6,6 +6,9 @@ import { MeProvider } from "@/context/MeContext";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { AchievementPopupQueue } from "@/components/AchievementPopupQueue";
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
+import { getSession } from "@/modules/auth/application/getSession";
+import { getLegalAcceptanceStatus } from "@/modules/legal/application/getLegalAcceptanceStatus";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://polipmarket.hu"),
@@ -27,11 +30,27 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+async function enforceLegalGate() {
+  const session = await getSession();
+
+  if (!session?.user?.id) {
+    return;
+  }
+
+  const status = await getLegalAcceptanceStatus(session.user.id);
+
+  if (status.requiresAcceptance) {
+    redirect("/legal/accept");
+  }
+}
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  await enforceLegalGate();
+
   return (
     <html lang="hu">
       <body className="bg-zinc-950 text-slate-900 min-h-screen">
