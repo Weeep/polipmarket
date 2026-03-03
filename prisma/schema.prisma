@@ -46,19 +46,24 @@ enum EventCategory {
   OTHER
 }
 
-model Event {
-  id          String   @id @default(cuid())
-  question    String
-  description String?
-  category    EventCategory
-  bettingCloseAt DateTime
-  resolveAt   DateTime?
-  feeBps      Int      @default(100)
-  createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+enum LegalDocumentType {
+  TERMS_OF_SERVICE
+  PRIVACY_NOTICE
+}
 
-  creator User    @relation(fields: [createdBy], references: [id])
+model Event {
+  id             String        @id @default(cuid())
+  question       String
+  description    String?
+  category       EventCategory
+  bettingCloseAt DateTime
+  resolveAt      DateTime?
+  feeBps         Int           @default(100)
+  createdBy      String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  creator User     @relation(fields: [createdBy], references: [id])
   markets Market[]
 
   @@index([createdBy])
@@ -66,28 +71,65 @@ model Event {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  image     String?
-  role      UserRole @default(USER)
-  deletedAt DateTime?
-  sessionVersion Int  @default(0)
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String?
+  image          String?
+  role           UserRole  @default(USER)
+  deletedAt      DateTime?
+  sessionVersion Int       @default(0)
 
-  wallet    Wallet?
-  events    Event[]
-  markets   Market[]
-  orders    Order[]
-  positions Position[]
-  positionLots PositionLot[]
-  achievements UserAchievement[]
+  wallet              Wallet?
+  events              Event[]
+  markets             Market[]
+  orders              Order[]
+  positions           Position[]
+  positionLots        PositionLot[]
+  achievements        UserAchievement[]
   walletLedgerEntries WalletLedger[]
-  deletionAudits UserDeletionAudit[]
+  deletionAudits      UserDeletionAudit[]
+  legalAcceptances    UserLegalAcceptance[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([deletedAt])
+}
+
+model LegalDocumentVersion {
+  id             String            @id @default(cuid())
+  documentType   LegalDocumentType
+  version        String
+  sourceFileName String
+  contentHash    String
+  effectiveFrom  DateTime
+  publishedAt    DateTime          @default(now())
+  isCurrent      Boolean           @default(false)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  acceptances UserLegalAcceptance[]
+
+  @@unique([documentType, version])
+  @@index([documentType, isCurrent])
+}
+
+model UserLegalAcceptance {
+  id                String   @id @default(cuid())
+  userId            String
+  documentVersionId String
+  acceptedAt        DateTime @default(now())
+  ipHash            String?
+  userAgent         String?
+  source            String?
+  createdAt         DateTime @default(now())
+
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documentVersion LegalDocumentVersion @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, documentVersionId])
+  @@index([userId, acceptedAt])
+  @@index([documentVersionId, acceptedAt])
 }
 
 model UserDeletionAudit {
@@ -121,13 +163,13 @@ model AchievementDefinition {
 }
 
 model UserAchievement {
-  id            String   @id @default(cuid())
-  userId        String
-  achievementId String
-  unlockedAt    DateTime @default(now())
+  id             String    @id @default(cuid())
+  userId         String
+  achievementId  String
+  unlockedAt     DateTime  @default(now())
   acknowledgedAt DateTime?
-  rewardGranted Int
-  createdAt     DateTime @default(now())
+  rewardGranted  Int
+  createdAt      DateTime  @default(now())
 
   user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   achievement AchievementDefinition @relation(fields: [achievementId], references: [id], onDelete: Cascade)
@@ -152,41 +194,41 @@ model WalletLedger {
 }
 
 model Wallet {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  balance   Int      @default(1000)
-  locked    Int      @default(0)
+  id      String @id @default(cuid())
+  userId  String @unique
+  balance Int    @default(1000)
+  locked  Int    @default(0)
 
-  user      User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Market {
-  id          String     @id @default(cuid())
-  eventId     String
-  question    String
-  description String?
-  status      String
-  type        MarketType @default(BINARY)
-  bettingCloseAt DateTime
-  resolveAt      DateTime?
+  id                String         @id @default(cuid())
+  eventId           String
+  question          String
+  description       String?
+  status            String
+  type              MarketType     @default(BINARY)
+  bettingCloseAt    DateTime
+  resolveAt         DateTime?
   resolvedOutcomeId String?
   resolvedPosition  OrderPosition?
 
   createdBy String
   createdAt DateTime @default(now())
 
-  orders     Order[]
-  positions  Position[]
+  orders       Order[]
+  positions    Position[]
   positionLots PositionLot[]
-  liquidity  MarketLiquidity?
-  outcomes   Outcome[]
-  ammConfig  MarketAmmConfig?
+  liquidity    MarketLiquidity?
+  outcomes     Outcome[]
+  ammConfig    MarketAmmConfig?
 
   event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  creator User   @relation(fields: [createdBy], references: [id])
+  creator User  @relation(fields: [createdBy], references: [id])
 
   @@index([status])
   @@index([bettingCloseAt])
@@ -216,9 +258,9 @@ model Outcome {
   status    OutcomeStatus @default(ACTIVE)
   createdAt DateTime      @default(now())
 
-  market    Market            @relation(fields: [marketId], references: [id], onDelete: Cascade)
-  liquidity OutcomeLiquidity?
-  positions Position[]
+  market       Market            @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  liquidity    OutcomeLiquidity?
+  positions    Position[]
   positionLots PositionLot[]
 
   @@unique([marketId, slug])
@@ -245,27 +287,26 @@ model Position {
   @@index([marketId])
 }
 
-
 model PositionLot {
-  id              String        @id @default(cuid())
-  userId          String
-  marketId        String
-  outcomeId       String
-  position        OrderPosition
-  buyOrderId      String        @unique
-  openedShares    Float
-  remainingShares Float
-  entryPrice      Float
+  id               String        @id @default(cuid())
+  userId           String
+  marketId         String
+  outcomeId        String
+  position         OrderPosition
+  buyOrderId       String        @unique
+  openedShares     Float
+  remainingShares  Float
+  entryPrice       Float
   entryGrossAmount Float
-  entryFee        Float
-  entryNetAmount  Float
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  entryFee         Float
+  entryNetAmount   Float
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  market  Market  @relation(fields: [marketId], references: [id], onDelete: Cascade)
-  outcome Outcome @relation(fields: [outcomeId], references: [id], onDelete: Cascade)
-  buyOrder Order  @relation("BuyOrderLots", fields: [buyOrderId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  market    Market     @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  outcome   Outcome    @relation(fields: [outcomeId], references: [id], onDelete: Cascade)
+  buyOrder  Order      @relation("BuyOrderLots", fields: [buyOrderId], references: [id], onDelete: Cascade)
   lotCloses LotClose[]
 
   @@index([userId, marketId, outcomeId, position])
@@ -273,16 +314,16 @@ model PositionLot {
 }
 
 model LotClose {
-  id          String   @id @default(cuid())
-  sellOrderId String
-  buyLotId    String
+  id           String   @id @default(cuid())
+  sellOrderId  String
+  buyLotId     String
   closedShares Float
-  grossAmount Float
-  feeAmount   Float
-  netAmount   Float
-  createdAt   DateTime @default(now())
+  grossAmount  Float
+  feeAmount    Float
+  netAmount    Float
+  createdAt    DateTime @default(now())
 
-  sellOrder Order      @relation("SellOrderCloses", fields: [sellOrderId], references: [id], onDelete: Cascade)
+  sellOrder Order       @relation("SellOrderCloses", fields: [sellOrderId], references: [id], onDelete: Cascade)
   buyLot    PositionLot @relation(fields: [buyLotId], references: [id], onDelete: Cascade)
 
   @@index([sellOrderId])
@@ -298,7 +339,7 @@ model MarketAmmConfig {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  market    Market   @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
 }
 
 model OutcomeLiquidity {
@@ -308,11 +349,11 @@ model OutcomeLiquidity {
   noPool    Float    @default(0)
   updatedAt DateTime @updatedAt
 
-  outcome   Outcome  @relation(fields: [outcomeId], references: [id], onDelete: Cascade)
+  outcome Outcome @relation(fields: [outcomeId], references: [id], onDelete: Cascade)
 }
 
 model Order {
-  id        String   @id
+  id        String         @id
   userId    String
   marketId  String
   outcomeId String
@@ -321,34 +362,34 @@ model Order {
   price     Float
   amount    Float
   status    String
-  createdAt DateTime @default(now())
+  createdAt DateTime       @default(now())
 
-  user   User   @relation(fields: [userId], references: [id])
-  market Market @relation(fields: [marketId], references: [id])
-  buyLots PositionLot[] @relation("BuyOrderLots")
-  lotCloses LotClose[] @relation("SellOrderCloses")
+  user      User          @relation(fields: [userId], references: [id])
+  market    Market        @relation(fields: [marketId], references: [id])
+  buyLots   PositionLot[] @relation("BuyOrderLots")
+  lotCloses LotClose[]    @relation("SellOrderCloses")
 
   @@index([marketId])
   @@index([userId])
 }
 
 model RateLimitAuditEvent {
-  id                    String                  @id @default(cuid())
-  eventType             RateLimitAuditEventType
-  endpointType          String?
-  path                  String
-  method                String
-  region                String?
-  ipHash                String?
-  userHash              String?
-  allowed               Boolean?
-  quotaLimit            Int?
-  remaining             Int?
-  retryAfterSeconds     Int?
-  resetAtUnixSeconds    Int?
-  decisionLatencyMs     Int?
-  errorMessage          String?
-  createdAt             DateTime                @default(now())
+  id                 String                  @id @default(cuid())
+  eventType          RateLimitAuditEventType
+  endpointType       String?
+  path               String
+  method             String
+  region             String?
+  ipHash             String?
+  userHash           String?
+  allowed            Boolean?
+  quotaLimit         Int?
+  remaining          Int?
+  retryAfterSeconds  Int?
+  resetAtUnixSeconds Int?
+  decisionLatencyMs  Int?
+  errorMessage       String?
+  createdAt          DateTime                @default(now())
 
   @@index([createdAt])
   @@index([eventType, createdAt])

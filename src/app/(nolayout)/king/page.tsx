@@ -5,6 +5,7 @@ import { ensureAdmin } from "@/modules/auth/application/ensureAdmin";
 import { listUsers } from "@/modules/user/application/listUsers";
 import Link from "next/link";
 import { MarketAdminPanel } from "./MarketAdminPanel";
+import { LegalDocumentsAdminForm } from "./LegalDocumentsAdminForm";
 
 export default async function AdminPage() {
   await ensureAdmin();
@@ -52,6 +53,8 @@ export default async function AdminPage() {
       </table>
 
       <StopImpersonationButton />
+
+      <LegalDocumentsAdminForm />
 
       <MarketAdminPanel />
 
