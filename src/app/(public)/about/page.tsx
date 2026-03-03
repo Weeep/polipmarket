@@ -7,6 +7,15 @@ import { useState } from "react";
 export default function AboutPage() {
   const [acceptedLegal, setAcceptedLegal] = useState(false);
 
+  const handleGoogleSignIn = () => {
+    if (acceptedLegal) {
+      document.cookie =
+        "pm_auto_legal_accept=1; Path=/; Max-Age=600; SameSite=Lax";
+    }
+
+    void signIn("google", { callbackUrl: "/" });
+  };
+
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-10 md:min-h-[calc(100vh-9rem)] md:flex-row md:items-center md:gap-16">
       <section className="w-full space-y-6 md:w-2/3">
@@ -50,7 +59,7 @@ export default function AboutPage() {
           </p>
           <button
             disabled={!acceptedLegal}
-            onClick={() => signIn("google", { callbackUrl: "/" })}
+            onClick={handleGoogleSignIn}
             className="button-gold w-full disabled:cursor-not-allowed disabled:opacity-50"
           >
             Sign in with Google

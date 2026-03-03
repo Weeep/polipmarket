@@ -7,8 +7,10 @@ import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { AchievementPopupQueue } from "@/components/AchievementPopupQueue";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { getSession } from "@/modules/auth/application/getSession";
 import { getLegalAcceptanceStatus } from "@/modules/legal/application/getLegalAcceptanceStatus";
+import { acceptCurrentLegalDocuments } from "@/modules/legal/application/acceptCurrentLegalDocuments";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://polipmarket.hu"),
@@ -35,6 +37,14 @@ async function enforceLegalGate() {
 
   if (!session?.user?.id) {
     return;
+  }
+
+  const cookieStore = await cookies();
+  const shouldAutoAcceptFromLogin =
+    cookieStore.get("pm_auto_legal_accept")?.value === "1";
+
+  if (shouldAutoAcceptFromLogin) {
+    await acceptCurrentLegalDocuments(session.user.id);
   }
 
   const status = await getLegalAcceptanceStatus(session.user.id);
