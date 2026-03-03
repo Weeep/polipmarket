@@ -2,6 +2,10 @@
 
 import { useSearchParams } from "next/navigation";
 
+type LegalDocumentsAdminFormProps = {
+  availableDocuments: string[];
+};
+
 function statusText(status: string | null, message: string | null) {
   if (status === "success") {
     return { kind: "success", text: "Jogi dokumentum verzió sikeresen publikálva." };
@@ -17,7 +21,7 @@ function statusText(status: string | null, message: string | null) {
   return null;
 }
 
-export function LegalDocumentsAdminForm() {
+export function LegalDocumentsAdminForm({ availableDocuments }: LegalDocumentsAdminFormProps) {
   const searchParams = useSearchParams();
   const status = searchParams.get("legalUpload");
   const message = searchParams.get("message");
@@ -27,13 +31,14 @@ export function LegalDocumentsAdminForm() {
     <form
       action="/api/admin/legal-documents/upload"
       method="post"
-      encType="multipart/form-data"
       style={{ marginTop: 24, marginBottom: 24 }}
     >
-      <h2>Jogi dokumentum verzió feltöltése</h2>
+      <h2>Jogi dokumentum verzió publikálása</h2>
       <p style={{ marginBottom: 12 }}>
-        Az új verzió publikálása után az adott dokumentumtípusnál ez lesz az aktuális
-        ({"isCurrent"}=true), a korábbi verziók automatikusan lekapcsolódnak.
+        Feltöltés helyett a <code>public/assets</code> mappában lévő PDF-ek közül
+        választasz. Az új verzió publikálása után az adott dokumentumtípusnál ez lesz
+        az aktuális ({"isCurrent"}=true), a korábbi verziók automatikusan
+        lekapcsolódnak.
       </p>
 
       <div style={{ display: "grid", gap: 8, maxWidth: 560 }}>
@@ -61,11 +66,27 @@ export function LegalDocumentsAdminForm() {
         </label>
 
         <label>
-          Dokumentum (PDF)
-          <input type="file" name="document" accept="application/pdf" required />
+          Dokumentum a public/assets könyvtárból
+          <select
+            name="assetFileName"
+            required
+            defaultValue={availableDocuments[0] ?? ""}
+            disabled={availableDocuments.length === 0}
+          >
+            {availableDocuments.length === 0 ? (
+              <option value="">Nincs elérhető PDF a public/assets alatt</option>
+            ) : null}
+            {availableDocuments.map((fileName) => (
+              <option key={fileName} value={fileName}>
+                {fileName}
+              </option>
+            ))}
+          </select>
         </label>
 
-        <button type="submit">Új verzió publikálása</button>
+        <button type="submit" disabled={availableDocuments.length === 0}>
+          Új verzió publikálása
+        </button>
       </div>
 
       {state ? (

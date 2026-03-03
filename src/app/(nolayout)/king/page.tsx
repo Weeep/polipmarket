@@ -2,14 +2,18 @@
 import { ImpersonateButton } from "@/components/ImpersonateButton";
 import { StopImpersonationButton } from "@/components/StopImpersonationButton";
 import { ensureAdmin } from "@/modules/auth/application/ensureAdmin";
+import { listPublicAssetPdfFileNames } from "@/modules/legal/application/publicLegalAssets";
 import { listUsers } from "@/modules/user/application/listUsers";
 import Link from "next/link";
-import { MarketAdminPanel } from "./MarketAdminPanel";
 import { LegalDocumentsAdminForm } from "./LegalDocumentsAdminForm";
+import { MarketAdminPanel } from "./MarketAdminPanel";
 
 export default async function AdminPage() {
   await ensureAdmin();
-  const users = await listUsers();
+  const [users, availableDocuments] = await Promise.all([
+    listUsers(),
+    listPublicAssetPdfFileNames(),
+  ]);
 
   return (
     <div style={{ padding: 24 }}>
@@ -54,7 +58,7 @@ export default async function AdminPage() {
 
       <StopImpersonationButton />
 
-      <LegalDocumentsAdminForm />
+      <LegalDocumentsAdminForm availableDocuments={availableDocuments} />
 
       <MarketAdminPanel />
 

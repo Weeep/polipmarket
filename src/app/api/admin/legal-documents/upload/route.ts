@@ -4,6 +4,7 @@ import {
   publishLegalDocumentVersion,
   type PublishLegalDocumentVersionInput,
 } from "@/modules/legal/application/publishLegalDocumentVersion";
+import { readPublicAssetPdf } from "@/modules/legal/application/publicLegalAssets";
 import type { LegalDocumentType } from "@/modules/legal/domain/LegalDocument";
 
 function parseDocumentType(value: FormDataEntryValue | null): LegalDocumentType {
@@ -28,32 +29,32 @@ function parseEffectiveFrom(value: FormDataEntryValue | null): Date {
   return parsed;
 }
 
+function parseAssetFileName(value: FormDataEntryValue | null): string {
+  if (typeof value !== "string" || !value.trim()) {
+    throw new Error("A dokumentum kiválasztása kötelező.");
+  }
+
+  return value;
+}
+
 async function parseUploadInput(req: Request): Promise<PublishLegalDocumentVersionInput> {
   const form = await req.formData();
   const documentType = parseDocumentType(form.get("documentType"));
   const version = form.get("version");
   const effectiveFrom = parseEffectiveFrom(form.get("effectiveFrom"));
-  const file = form.get("document");
+  const assetFileName = parseAssetFileName(form.get("assetFileName"));
 
   if (typeof version !== "string") {
     throw new Error("A verzió megadása kötelező.");
   }
 
-  if (!(file instanceof File)) {
-    throw new Error("A dokumentum feltöltése kötelező.");
-  }
-
-  if (file.size === 0) {
-    throw new Error("A feltöltött fájl üres.");
-  }
-
-  const fileBytes = new Uint8Array(await file.arrayBuffer());
+  const fileBytes = await readPublicAssetPdf(assetFileName);
 
   return {
     documentType,
     version,
     effectiveFrom,
-    sourceFileName: file.name,
+    sourceFileName: assetFileName,
     fileBytes,
   };
 }
