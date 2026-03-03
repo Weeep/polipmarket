@@ -16,54 +16,90 @@ export default async function AdminPage() {
   ]);
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>Admin</h1>
+    <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-6 px-4 py-6 sm:px-6">
+      <h1 className="text-3xl font-semibold text-stone-100">Admin</h1>
 
       <form
         action="/api/admin/create-user"
         method="post"
-        style={{ marginBottom: 24 }}
+        className="rounded-xl border border-stone-700/70 bg-stone-900/70 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.28)]"
       >
-        <h2>Create fake user</h2>
-        <input name="email" placeholder="email" required />
-        <input name="name" placeholder="name" />
-        <button type="submit">Create</button>
+        <h2 className="mb-3 text-xl font-semibold text-stone-100">Create fake user</h2>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            name="email"
+            placeholder="email"
+            required
+            className="rounded-md border border-stone-600 bg-stone-800 px-3 py-2 text-sm text-stone-100"
+          />
+          <input
+            name="name"
+            placeholder="name"
+            className="rounded-md border border-stone-600 bg-stone-800 px-3 py-2 text-sm text-stone-100"
+          />
+          <button
+            type="submit"
+            className="cursor-pointer rounded-md border border-yellow-500/60 bg-yellow-500/90 px-3 py-2 text-sm font-semibold text-stone-900 transition hover:bg-yellow-400"
+          >
+            Create
+          </button>
+        </div>
       </form>
 
-      <h2>Users</h2>
-      <table border={1} cellPadding={8}>
-        <thead>
-          <tr>
-            <th>id</th>
-            <th>email</th>
-            <th>name</th>
-            <th>role</th>
-            <th />
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((u) => (
-            <tr key={u.id}>
-              <td>{u.id}</td>
-              <td>{u.email}</td>
-              <td>{u.name}</td>
-              <td>{u.role}</td>
-              <td>
-                <ImpersonateButton userId={u.id} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <section className="rounded-xl border border-stone-700/70 bg-stone-900/70 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
+        <h2 className="mb-3 text-xl font-semibold text-stone-100">Users</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr>
+                <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">
+                  id
+                </th>
+                <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">
+                  email
+                </th>
+                <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">
+                  name
+                </th>
+                <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">
+                  role
+                </th>
+                <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200" />
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((u) => (
+                <tr key={u.id}>
+                  <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{u.id}</td>
+                  <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{u.email}</td>
+                  <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{u.name}</td>
+                  <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{u.role}</td>
+                  <td className="border-b border-stone-700/70 px-3 py-2">
+                    <ImpersonateButton userId={u.id} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-      <StopImpersonationButton />
+        <div className="mt-3">
+          <StopImpersonationButton />
+        </div>
+      </section>
 
-      <LegalDocumentsAdminForm availableDocuments={availableDocuments} />
+      <section className="rounded-xl border border-stone-700/70 bg-stone-900/70 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
+        <LegalDocumentsAdminForm availableDocuments={availableDocuments} />
+      </section>
 
-      <MarketAdminPanel />
+      <section className="overflow-hidden rounded-xl border border-stone-700/70 bg-stone-900/70 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
+        <MarketAdminPanel />
+      </section>
 
-      <p style={{ marginTop: 24 }}>
-        <Link href="/">Back</Link>
+      <p className="text-sm text-stone-300">
+        <Link href="/" className="text-yellow-400 hover:text-yellow-300">
+          Back
+        </Link>
       </p>
     </div>
   );

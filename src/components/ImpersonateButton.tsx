@@ -21,5 +21,12 @@ export function ImpersonateButton({ userId }: { userId: string }) {
     router.refresh();
   }
 
-  return <button onClick={impersonate}>Impersonate</button>;
+  return (
+    <button
+      onClick={impersonate}
+      className="cursor-pointer rounded-md border border-yellow-500/60 bg-yellow-500/90 px-3 py-1.5 text-xs font-semibold text-stone-900 transition hover:bg-yellow-400"
+    >
+      Impersonate
+    </button>
+  );
 }

@@ -226,26 +226,27 @@ export function MarketAdminPanel() {
   const renderMarketTable = (title: string, rows: MarketSummary[]) => {
     if (rows.length === 0) {
       return (
-        <div style={{ marginTop: 20 }}>
-          <h3>{title}</h3>
-          <p>Nincs market ebben a csoportban.</p>
+        <div className="mt-5">
+          <h3 className="mb-2 text-lg font-semibold text-stone-200">{title}</h3>
+          <p className="text-sm text-stone-300">Nincs market ebben a csoportban.</p>
         </div>
       );
     }
 
     return (
-      <div style={{ marginTop: 20 }}>
-        <h3>{title}</h3>
-        <table border={1} cellPadding={8} style={{ width: "100%" }}>
+      <div className="mt-5">
+        <h3 className="mb-2 text-lg font-semibold text-stone-200">{title}</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[900px] border-collapse text-sm">
           <thead>
             <tr>
-              <th>Event</th>
-              <th>Question</th>
-              <th>Status</th>
-              <th>Betting close</th>
-              <th>Resolved outcome</th>
-              <th>Winning position</th>
-              <th>Actions</th>
+              <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Event</th>
+              <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Question</th>
+              <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Status</th>
+              <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Betting close</th>
+              <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Resolved outcome</th>
+              <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Winning position</th>
+              <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -259,13 +260,14 @@ export function MarketAdminPanel() {
 
               return (
                 <tr key={market.id}>
-                  <td>{market.event?.question ?? "-"}</td>
-                  <td>{market.question}</td>
-                  <td>{statusLabel(market.status)}</td>
-                  <td>{new Date(market.bettingCloseAt).toLocaleString()}</td>
-                  <td>{renderResolvedOutcome(market)}</td>
-                  <td>
+                  <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{market.event?.question ?? "-"}</td>
+                  <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{market.question}</td>
+                  <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{statusLabel(market.status)}</td>
+                  <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{new Date(market.bettingCloseAt).toLocaleString()}</td>
+                  <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{renderResolvedOutcome(market)}</td>
+                  <td className="border-b border-stone-700/70 px-3 py-2">
                     <select
+                      className="rounded-md border border-stone-600 bg-stone-800 px-2 py-1 text-sm text-stone-100 disabled:opacity-60"
                       value={selectedPositionByMarket[market.id] ?? "YES"}
                       onChange={(event) => {
                         const value =
@@ -281,12 +283,13 @@ export function MarketAdminPanel() {
                       <option value="NO">NO</option>
                     </select>
                   </td>
-                  <td>
-                    <div style={{ display: "flex", gap: 8 }}>
+                  <td className="border-b border-stone-700/70 px-3 py-2">
+                    <div className="flex flex-wrap gap-2">
                       <button
                         type="button"
                         onClick={() => handleApprove(market.id)}
                         disabled={!canApprove || busy}
+                        className="cursor-pointer rounded-md border border-yellow-500/60 bg-yellow-500/90 px-2 py-1 text-xs font-semibold text-stone-900 transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:border-stone-700 disabled:bg-stone-700 disabled:text-stone-400"
                       >
                         {busy && canApprove ? "Approving…" : "Approve"}
                       </button>
@@ -294,6 +297,7 @@ export function MarketAdminPanel() {
                         type="button"
                         onClick={() => handleClose(market.id)}
                         disabled={!canClose || busy}
+                        className="cursor-pointer rounded-md border border-stone-600 bg-stone-800 px-2 py-1 text-xs font-semibold text-stone-100 transition hover:bg-stone-700 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {busy && canClose ? "Closing…" : "Close"}
                       </button>
@@ -301,6 +305,7 @@ export function MarketAdminPanel() {
                         type="button"
                         onClick={() => handleRejectOrCancel(market.id)}
                         disabled={!(canReject || canCancel) || busy}
+                        className="cursor-pointer rounded-md border border-red-500/60 bg-red-500/80 px-2 py-1 text-xs font-semibold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:border-stone-700 disabled:bg-stone-700 disabled:text-stone-400"
                       >
                         {busy && (canReject || canCancel)
                           ? canReject
@@ -314,6 +319,7 @@ export function MarketAdminPanel() {
                         type="button"
                         onClick={() => handleResolve(market.id)}
                         disabled={!canResolve || busy}
+                        className="cursor-pointer rounded-md border border-emerald-500/60 bg-emerald-500/80 px-2 py-1 text-xs font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:border-stone-700 disabled:bg-stone-700 disabled:text-stone-400"
                       >
                         {busy && canResolve ? "Resolving…" : "Resolve"}
                       </button>
@@ -323,19 +329,20 @@ export function MarketAdminPanel() {
               );
             })}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     );
   };
 
   return (
-    <section style={{ marginTop: 32 }}>
-      <h2>Markets</h2>
-      {loading && <p>Loading markets…</p>}
-      {error && <p style={{ color: "crimson" }}>{error}</p>}
-      {actionError && <p style={{ color: "crimson" }}>{actionError}</p>}
+    <section className="space-y-2">
+      <h2 className="text-xl font-semibold text-stone-100">Markets</h2>
+      {loading && <p className="text-sm text-stone-300">Loading markets…</p>}
+      {error && <p className="text-sm text-red-500">{error}</p>}
+      {actionError && <p className="text-sm text-red-500">{actionError}</p>}
       {!loading && !error && markets.length === 0 && (
-        <p>No markets available.</p>
+        <p className="text-sm text-stone-300">No markets available.</p>
       )}
 
       {!loading && markets.length > 0 && (

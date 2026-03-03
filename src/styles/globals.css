@@ -128,4 +128,5 @@ body {
   .wallet-amount--changed {
     animation: walletShake 280ms ease-in-out;
   }
+
 }
