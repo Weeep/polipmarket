@@ -128,4 +128,75 @@ body {
   .wallet-amount--changed {
     animation: walletShake 280ms ease-in-out;
   }
+
+  .admin-page {
+    @apply mx-auto flex max-w-[1400px] flex-col gap-6 px-4 py-6 sm:px-6;
+  }
+
+  .admin-page h1 {
+    @apply text-3xl font-semibold text-stone-100;
+  }
+
+  .admin-page h2 {
+    @apply mb-3 text-xl font-semibold text-stone-100;
+  }
+
+  .admin-page h3 {
+    @apply mb-2 text-lg font-semibold text-stone-200;
+  }
+
+  .admin-card {
+    @apply rounded-xl border border-stone-700/70 bg-stone-900/70 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.28)] backdrop-blur;
+  }
+
+  .admin-card--wide {
+    @apply overflow-hidden;
+  }
+
+  .admin-page form {
+    @apply space-y-3;
+  }
+
+  .admin-form-row {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .admin-page input,
+  .admin-page select,
+  .admin-page button {
+    @apply rounded-md border border-stone-600 bg-stone-800 px-3 py-2 text-sm text-stone-100;
+  }
+
+  .admin-page button {
+    @apply cursor-pointer border-yellow-500/60 bg-yellow-500/90 font-semibold text-stone-900 transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:border-stone-700 disabled:bg-stone-700 disabled:text-stone-400;
+  }
+
+  .admin-page table {
+    @apply w-full border-collapse overflow-hidden rounded-lg text-sm;
+  }
+
+  .admin-page th,
+  .admin-page td {
+    @apply border-b border-stone-700/70 px-3 py-2 text-left align-top;
+  }
+
+  .admin-page th {
+    @apply bg-stone-800/90 font-semibold text-stone-200;
+  }
+
+  .admin-page td {
+    @apply text-stone-300;
+  }
+
+  .admin-page code {
+    @apply rounded bg-stone-800 px-1 py-0.5 text-xs text-stone-200;
+  }
+
+  .admin-back-link {
+    @apply text-sm text-stone-300;
+  }
+
+  .admin-back-link a {
+    @apply text-yellow-400 hover:text-yellow-300;
+  }
 }

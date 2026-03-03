@@ -16,53 +16,61 @@ export default async function AdminPage() {
   ]);
 
   return (
-    <div style={{ padding: 24 }}>
+    <div className="admin-page">
       <h1>Admin</h1>
 
       <form
         action="/api/admin/create-user"
         method="post"
-        style={{ marginBottom: 24 }}
+        className="admin-card"
       >
         <h2>Create fake user</h2>
-        <input name="email" placeholder="email" required />
-        <input name="name" placeholder="name" />
-        <button type="submit">Create</button>
+        <div className="admin-form-row">
+          <input name="email" placeholder="email" required />
+          <input name="name" placeholder="name" />
+          <button type="submit">Create</button>
+        </div>
       </form>
 
-      <h2>Users</h2>
-      <table border={1} cellPadding={8}>
-        <thead>
-          <tr>
-            <th>id</th>
-            <th>email</th>
-            <th>name</th>
-            <th>role</th>
-            <th />
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((u) => (
-            <tr key={u.id}>
-              <td>{u.id}</td>
-              <td>{u.email}</td>
-              <td>{u.name}</td>
-              <td>{u.role}</td>
-              <td>
-                <ImpersonateButton userId={u.id} />
-              </td>
+      <section className="admin-card">
+        <h2>Users</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>id</th>
+              <th>email</th>
+              <th>name</th>
+              <th>role</th>
+              <th />
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.id}>
+                <td>{u.id}</td>
+                <td>{u.email}</td>
+                <td>{u.name}</td>
+                <td>{u.role}</td>
+                <td>
+                  <ImpersonateButton userId={u.id} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-      <StopImpersonationButton />
+        <StopImpersonationButton />
+      </section>
 
-      <LegalDocumentsAdminForm availableDocuments={availableDocuments} />
+      <section className="admin-card">
+        <LegalDocumentsAdminForm availableDocuments={availableDocuments} />
+      </section>
 
-      <MarketAdminPanel />
+      <section className="admin-card admin-card--wide">
+        <MarketAdminPanel />
+      </section>
 
-      <p style={{ marginTop: 24 }}>
+      <p className="admin-back-link">
         <Link href="/">Back</Link>
       </p>
     </div>
