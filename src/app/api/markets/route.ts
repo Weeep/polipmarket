@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/withAuth";
+import { prisma } from "@/lib/prisma";
 import { ensureAdmin } from "@/modules/auth/application/ensureAdmin";
 import {
   createMarket,
@@ -186,7 +187,19 @@ export async function GET(req: Request) {
       }),
     );
 
-    return NextResponse.json(marketsWithExtras);
+    const creatorIds = Array.from(new Set(marketsWithExtras.map((market) => market.createdBy)));
+    const creators = await prisma.user.findMany({
+      where: { id: { in: creatorIds } },
+      select: { id: true, name: true },
+    });
+    const creatorNameById = new Map(creators.map((creator) => [creator.id, creator.name]));
+
+    return NextResponse.json(
+      marketsWithExtras.map((market) => ({
+        ...market,
+        createdByName: creatorNameById.get(market.createdBy) ?? null,
+      })),
+    );
   } catch (error: unknown) {
     console.error("[GET /api/markets]", error);
 
