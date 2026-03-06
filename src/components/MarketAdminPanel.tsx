@@ -16,11 +16,14 @@ type MarketOutcome = {
   id: string;
   label: string;
   position: number;
+  yesPrice?: number;
+  noPrice?: number;
 };
 
 type MarketEvent = {
   id: string;
   question: string;
+  resolveAt?: string | null;
 };
 
 type MarketSummary = {
@@ -32,6 +35,8 @@ type MarketSummary = {
   resolvedOutcomeId?: string | null;
   resolvedPosition?: "YES" | "NO" | null;
   outcomes?: MarketOutcome[];
+  createdBy: string;
+  createdByName?: string | null;
 };
 
 type MarketSummaryApi = MarketSummary & { marketId?: string };
@@ -59,7 +64,7 @@ export function MarketAdminPanel() {
     setLoading(true);
     setError(null);
 
-    apiFetch("/api/markets?include=outcomes&includePending=true")
+    apiFetch("/api/markets?include=prices&includePending=true")
       .then((res) => res.json())
       .then((data: MarketSummaryApi[]) => {
         if (cancelled) return;
@@ -101,7 +106,7 @@ export function MarketAdminPanel() {
     });
   }, [markets]);
 
-  const expiredOpenMarkets = useMemo(() => {
+  const openMarketsToClose = useMemo(() => {
     const now = Date.now();
     return markets.filter(
       (market) =>
@@ -109,10 +114,38 @@ export function MarketAdminPanel() {
     );
   }, [markets]);
 
-  const nonExpiredOrNonOpenMarkets = useMemo(() => {
-    const expiredIds = new Set(expiredOpenMarkets.map((market) => market.id));
-    return markets.filter((market) => !expiredIds.has(market.id));
-  }, [expiredOpenMarkets, markets]);
+  const marketsToApprove = useMemo(
+    () => markets.filter((market) => market.status === "PENDING_APPROVAL"),
+    [markets],
+  );
+
+  const marketsToResolve = useMemo(() => {
+    const now = Date.now();
+    return markets.filter((market) => {
+      if (market.status !== "CLOSED") {
+        return false;
+      }
+
+      const eventResolveTime = market.event?.resolveAt
+        ? new Date(market.event.resolveAt).getTime()
+        : Number.POSITIVE_INFINITY;
+
+      return eventResolveTime <= now;
+    });
+  }, [markets]);
+
+  const activeBettableMarkets = useMemo(() => {
+    const now = Date.now();
+    return markets.filter(
+      (market) =>
+        market.status === "OPEN" && new Date(market.bettingCloseAt).getTime() > now,
+    );
+  }, [markets]);
+
+  const resolvedMarkets = useMemo(
+    () => markets.filter((market) => market.status === "RESOLVED"),
+    [markets],
+  );
 
   const updateMarket = (updated: MarketSummary) => {
     setMarkets((prev) =>
@@ -223,6 +256,31 @@ export function MarketAdminPanel() {
     return `${outcome.label} (${market.resolvedPosition ?? "YES"})`;
   };
 
+  const renderPercent = (value?: number) => {
+    if (typeof value !== "number") {
+      return "-";
+    }
+
+    return `${(value * 100).toFixed(1)}%`;
+  };
+
+  const getReferenceOutcome = (market: MarketSummary) => {
+    if (!market.outcomes?.length) {
+      return null;
+    }
+
+    return [...market.outcomes].sort((a, b) => a.position - b.position)[0] ?? null;
+  };
+
+  const formatEventEndAt = (market: MarketSummary) => {
+    const value = market.event?.resolveAt;
+    if (!value) {
+      return "-";
+    }
+
+    return new Date(value).toLocaleString();
+  };
+
   const renderMarketTable = (title: string, rows: MarketSummary[]) => {
     if (rows.length === 0) {
       return (
@@ -237,13 +295,17 @@ export function MarketAdminPanel() {
       <div className="mt-5">
         <h3 className="mb-2 text-lg font-semibold text-stone-200">{title}</h3>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] border-collapse text-sm">
+          <table className="w-full min-w-[1450px] border-collapse text-sm">
           <thead>
             <tr>
               <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Event</th>
               <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Question</th>
               <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Status</th>
+              <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Igen %</th>
+              <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Nem %</th>
               <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Betting close</th>
+              <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Esemény vége</th>
+              <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Creator</th>
               <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Resolved outcome</th>
               <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Winning position</th>
               <th className="border-b border-stone-700/70 bg-stone-800/90 px-3 py-2 text-left font-semibold text-stone-200">Actions</th>
@@ -257,13 +319,18 @@ export function MarketAdminPanel() {
               const canCancel = market.status === "OPEN" || market.status === "CLOSED";
               const canResolve = market.status === "CLOSED";
               const busy = busyMarketId === market.id;
+              const referenceOutcome = getReferenceOutcome(market);
 
               return (
                 <tr key={market.id}>
                   <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{market.event?.question ?? "-"}</td>
                   <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{market.question}</td>
                   <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{statusLabel(market.status)}</td>
+                  <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{renderPercent(referenceOutcome?.yesPrice)}</td>
+                  <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{renderPercent(referenceOutcome?.noPrice)}</td>
                   <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{new Date(market.bettingCloseAt).toLocaleString()}</td>
+                  <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{formatEventEndAt(market)}</td>
+                  <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{market.createdByName ?? "-"}</td>
                   <td className="border-b border-stone-700/70 px-3 py-2 text-stone-300">{renderResolvedOutcome(market)}</td>
                   <td className="border-b border-stone-700/70 px-3 py-2">
                     <select
@@ -347,8 +414,20 @@ export function MarketAdminPanel() {
 
       {!loading && markets.length > 0 && (
         <>
-          {renderMarketTable("Lezárandó (lejárt) marketek", expiredOpenMarkets)}
-          {renderMarketTable("További marketek", nonExpiredOrNonOpenMarkets)}
+          {renderMarketTable(
+            "Lezárandó (esemény véget ért) marketek - Markets to resolve",
+            marketsToResolve,
+          )}
+          {renderMarketTable(
+            "Új, approveolandó marketek - Markets to approve",
+            marketsToApprove,
+          )}
+          {renderMarketTable(
+            "Lezárandó (fogadás véget ért) marketek - Markets to close",
+            openMarketsToClose,
+          )}
+          {renderMarketTable("Aktív (még fogadható) marketek", activeBettableMarkets)}
+          {renderMarketTable("Lezárt (resolved) marketek", resolvedMarkets)}
         </>
       )}
     </section>

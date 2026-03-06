@@ -19,6 +19,10 @@ export default async function AdminPage() {
     <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-6 px-4 py-6 sm:px-6">
       <h1 className="text-3xl font-semibold text-stone-100">Admin</h1>
 
+      <section className="overflow-hidden rounded-xl border border-stone-700/70 bg-stone-900/70 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
+        <MarketAdminPanel />
+      </section>
+
       <form
         action="/api/admin/create-user"
         method="post"
@@ -90,10 +94,6 @@ export default async function AdminPage() {
 
       <section className="rounded-xl border border-stone-700/70 bg-stone-900/70 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
         <LegalDocumentsAdminForm availableDocuments={availableDocuments} />
-      </section>
-
-      <section className="overflow-hidden rounded-xl border border-stone-700/70 bg-stone-900/70 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
-        <MarketAdminPanel />
       </section>
 
       <p className="text-sm text-stone-300">
