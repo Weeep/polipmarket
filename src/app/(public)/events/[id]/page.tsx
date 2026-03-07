@@ -1,51 +1,79 @@
-"use client";
+import type { Metadata } from "next";
+import { EventDetailClient } from "./EventDetailClient";
+import { getEventShareData } from "@/modules/event/application/getEventShareData";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import { EventCard } from "@/components/EventCard";
-import { apiFetch } from "@/lib/apiFetch";
-import { EventSummary } from "@/modules/event/domain/Event";
+const BASE_URL = "https://polipmarket.hu";
 
-function getErrorMessage(error: unknown, fallback: string) {
-  return error instanceof Error ? error.message : fallback;
+function truncateQuestion(question: string): string {
+  if (question.length <= 80) {
+    return question;
+  }
+
+  return `${question.slice(0, 77)}...`;
 }
 
-export default function EventDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const [event, setEvent] = useState<EventSummary | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const shareData = await getEventShareData(id);
+  const fallbackTitle = "Esemény | Polipmarket";
 
-  useEffect(() => {
-    apiFetch(`/api/events/${id}`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Event not found");
-        }
-        return res.json() as Promise<EventSummary>;
-      })
-      .then((data) => setEvent(data))
-      .catch((err: unknown) => {
-        setError(getErrorMessage(err, "Failed to load event"));
-      })
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  if (loading) {
-    return <div className="max-w-5xl mx-auto px-6 py-8 text-white">Loading…</div>;
+  if (!shareData) {
+    return {
+      title: fallbackTitle,
+      description: "Esemény részletek a Polipmarketen.",
+      openGraph: {
+        type: "website",
+        url: `${BASE_URL}/events/${id}`,
+        title: fallbackTitle,
+        description: "Esemény részletek a Polipmarketen.",
+        images: [`${BASE_URL}/api/events/${id}/og-image`],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: fallbackTitle,
+        description: "Esemény részletek a Polipmarketen.",
+        images: [`${BASE_URL}/api/events/${id}/og-image`],
+      },
+    };
   }
 
-  if (error || !event) {
-    return (
-      <div className="max-w-5xl mx-auto px-6 py-8 text-white">
-        {error ?? "Event not found"}
-      </div>
-    );
-  }
+  const title = `${truncateQuestion(shareData.question)} | Polipmarket`;
 
-  return (
-    <div className="max-w-5xl mx-auto px-6 py-8">
-      <EventCard event={event} />
-    </div>
-  );
+  return {
+    title,
+    description: shareData.description,
+    openGraph: {
+      type: "website",
+      url: `${BASE_URL}/events/${id}`,
+      title,
+      description: shareData.description,
+      images: [
+        {
+          url: `${BASE_URL}/api/events/${id}/og-image`,
+          width: 1200,
+          height: 630,
+          alt: `Polipmarket esemény: ${shareData.question}`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: shareData.description,
+      images: [`${BASE_URL}/api/events/${id}/og-image`],
+    },
+  };
+}
+
+export default async function EventDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  return <EventDetailClient id={id} />;
 }
