@@ -21,9 +21,7 @@ export async function GET(
   const title = shareData ? truncateQuestion(shareData.question) : "Esemény nem található";
   const category = shareData?.categoryLabel ?? "Polipmarket";
   const closeAt = shareData?.bettingCloseLabel ?? "Nincs elérhető eseményadat";
-  const subtitle =
-    shareData?.description ??
-    "Fogadj a jövőre közösségi előrejelző piacon. Magyar nyelvű predikciós piactér.";
+  const marketPreviews = shareData?.marketPreviews ?? [];
 
   return new ImageResponse(
     (
@@ -32,52 +30,132 @@ export async function GET(
           height: "100%",
           width: "100%",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          background: "linear-gradient(135deg, #09090b 0%, #18181b 50%, #09090b 100%)",
-          color: "#f8fafc",
-          padding: "52px 64px",
+          background: "#0f0f10",
+          padding: "24px",
+          color: "#f5f5f4",
           fontFamily: "Inter, Segoe UI, Arial, sans-serif",
         }}
       >
         <div
           style={{
             display: "flex",
-            alignSelf: "flex-start",
-            border: "1px solid rgba(251, 191, 36, 0.8)",
-            borderRadius: "999px",
-            fontSize: 28,
-            padding: "10px 20px",
-            color: "#fcd34d",
+            flexDirection: "column",
+            width: "100%",
+            borderRadius: "24px",
+            border: "1px solid rgba(251, 191, 36, 0.45)",
+            padding: "32px",
+            background: "linear-gradient(180deg, #171717 0%, #121212 100%)",
+            gap: "18px",
           }}
         >
-          Polipmarket
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-          <div style={{ display: "flex", fontSize: 28, color: "#cbd5e1" }}>{category}</div>
           <div
             style={{
               display: "flex",
-              fontSize: 66,
+              alignSelf: "flex-start",
+              borderRadius: "999px",
+              border: "1px solid rgba(251, 191, 36, 0.75)",
+              color: "#fde68a",
+              fontSize: 24,
+              fontWeight: 700,
+              padding: "6px 14px",
+            }}
+          >
+            {category}
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              fontSize: 52,
               lineHeight: 1.08,
               fontWeight: 700,
-              letterSpacing: -1.2,
-              maxWidth: "100%",
+              letterSpacing: -0.8,
+              color: "#f5f5f4",
             }}
           >
             {title}
           </div>
-          <div style={{ display: "flex", fontSize: 32, color: "#e2e8f0", maxWidth: "100%" }}>
-            {subtitle}
-          </div>
-        </div>
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", fontSize: 26, color: "#94a3b8" }}>
-            Fogadás zárása: {closeAt}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+              marginTop: "2px",
+            }}
+          >
+            {(marketPreviews.length > 0
+              ? marketPreviews
+              : [
+                  {
+                    id: "fallback",
+                    question: "Nincs aktív piac előnézet ehhez az eseményhez",
+                    yesPriceLabel: "—",
+                    noPriceLabel: "—",
+                  },
+                ]
+            ).map((market) => (
+              <div
+                key={market.id}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  borderRadius: "14px",
+                  border: "1px solid rgba(245, 158, 11, 0.45)",
+                  padding: "12px 14px",
+                  background: "rgba(24, 24, 27, 0.8)",
+                }}
+              >
+                <div style={{ display: "flex", fontSize: 26, fontWeight: 600, maxWidth: "62%" }}>
+                  {market.question}
+                </div>
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      borderRadius: "10px",
+                      border: "1px solid rgba(96, 165, 250, 0.5)",
+                      background: "rgba(30, 58, 138, 0.25)",
+                      padding: "10px 14px",
+                      fontSize: 24,
+                      fontWeight: 700,
+                      color: "#dbeafe",
+                    }}
+                  >
+                    IGEN ({market.yesPriceLabel})
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      borderRadius: "10px",
+                      border: "1px solid rgba(96, 165, 250, 0.5)",
+                      background: "rgba(30, 58, 138, 0.25)",
+                      padding: "10px 14px",
+                      fontSize: 24,
+                      fontWeight: 700,
+                      color: "#dbeafe",
+                    }}
+                  >
+                    NEM ({market.noPriceLabel})
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-          <div style={{ display: "flex", fontSize: 24, color: "#94a3b8" }}>polipmarket.hu</div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              fontSize: 24,
+              color: "#d6d3d1",
+              marginTop: "auto",
+            }}
+          >
+            <div style={{ display: "flex" }}>Fogadás zár: {closeAt}</div>
+            <div style={{ display: "flex", color: "#a8a29e" }}>polipmarket.hu</div>
+          </div>
         </div>
       </div>
     ),
