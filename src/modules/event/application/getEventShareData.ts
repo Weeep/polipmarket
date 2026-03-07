@@ -19,6 +19,18 @@ export type EventShareData = {
 const DEFAULT_DESCRIPTION =
   "Fogadj a jövőre közösségi előrejelző piacon a Polipmarketen.";
 
+type PreviewMarket = {
+  id: string;
+  question: string;
+  outcomes: Array<{
+    id: string;
+    liquidity: {
+      yesPool: number;
+      noPool: number;
+    } | null;
+  }>;
+};
+
 function formatHuDate(date: Date | null | undefined): string {
   if (!date) {
     return "Nincs megadva";
@@ -67,9 +79,16 @@ export async function getEventShareData(id: string): Promise<EventShareData | nu
   }
 
   try {
-    const [{ getEventById }, { getMarketsByEventId }] = await Promise.all([
+    const [
+      { getEventById },
+      { prisma },
+      { calcExecutionPrice },
+      { DEFAULT_OUTCOME_POOL },
+    ] = await Promise.all([
       import("./getEvents"),
-      import("@/modules/market/application/getMarketsByEventId"),
+      import("@/lib/prisma"),
+      import("@/modules/order/domain/ammQuote"),
+      import("@/config/economy"),
     ]);
 
     const event = await getEventById(id);
@@ -78,15 +97,47 @@ export async function getEventShareData(id: string): Promise<EventShareData | nu
     }
 
     const category = getCategoryByValue(event.category);
-    const markets = await getMarketsByEventId(event.id);
-    const marketPreviews = markets.slice(0, 3).map((market) => {
-      const outcome = market.outcomes?.[0];
+
+    const previewMarkets = (await prisma.market.findMany({
+      where: {
+        eventId: event.id,
+        NOT: {
+          status: { in: ["PENDING_APPROVAL", "CANCELLED"] },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+      take: 3,
+      select: {
+        id: true,
+        question: true,
+        outcomes: {
+          orderBy: { position: "asc" },
+          take: 1,
+          select: {
+            id: true,
+            liquidity: {
+              select: {
+                yesPool: true,
+                noPool: true,
+              },
+            },
+          },
+        },
+      },
+    })) as PreviewMarket[];
+
+    const marketPreviews = previewMarkets.map((market) => {
+      const outcome = market.outcomes[0];
+      const pool = {
+        yesPool: outcome?.liquidity?.yesPool ?? DEFAULT_OUTCOME_POOL,
+        noPool: outcome?.liquidity?.noPool ?? DEFAULT_OUTCOME_POOL,
+      };
 
       return {
         id: market.id,
         question: toMarketQuestionLabel(market.question),
-        yesPriceLabel: formatPriceLabel(outcome?.yesPrice),
-        noPriceLabel: formatPriceLabel(outcome?.noPrice),
+        yesPriceLabel: formatPriceLabel(calcExecutionPrice(pool, "YES")),
+        noPriceLabel: formatPriceLabel(calcExecutionPrice(pool, "NO")),
       };
     });
 
