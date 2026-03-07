@@ -1,11 +1,40 @@
+"use client";
+
+import { useState } from "react";
+
 const outcomes = [
   { label: "IGEN", value: "0.81" },
   { label: "NEM", value: "0.19" },
 ];
 
 export default function FacebookCoverPage() {
+  const [isOctopusForeground, setIsOctopusForeground] = useState(false);
+
   return (
-    <main className="min-h-screen bg-[#090704] p-8 flex items-center justify-center overflow-auto">
+    <main className="min-h-screen bg-[#090704] p-8 flex flex-col items-center justify-center gap-4 overflow-auto">
+      <label className="inline-flex items-center gap-3 rounded-full border border-amber-400/60 bg-black/40 px-4 py-2 text-amber-200 shadow-[0_0_18px_rgba(251,191,36,0.15)]">
+        <span className="text-sm font-semibold tracking-wide">
+          Polip előtér mód
+        </span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={isOctopusForeground}
+          onClick={() => setIsOctopusForeground((prev) => !prev)}
+          className={`relative h-7 w-14 rounded-full border transition-colors ${
+            isOctopusForeground
+              ? "border-amber-300/80 bg-amber-500/40"
+              : "border-amber-700/60 bg-zinc-900/80"
+          }`}
+        >
+          <span
+            className={`absolute top-0.5 h-[22px] w-[22px] rounded-full bg-amber-200 shadow-[0_0_12px_rgba(251,191,36,0.6)] transition-transform ${
+              isOctopusForeground ? "translate-x-7" : "translate-x-0.5"
+            }`}
+          />
+        </button>
+      </label>
+
       <div className="relative w-[1640px] h-[624px] overflow-hidden border border-amber-500/40 bg-[#0a0704] text-amber-100 shadow-[0_0_120px_rgba(251,191,36,0.2)]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,rgba(255,184,77,0.28),transparent_55%),radial-gradient(circle_at_15%_75%,rgba(255,125,24,0.15),transparent_45%),radial-gradient(circle_at_80%_15%,rgba(255,145,42,0.16),transparent_48%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(130deg,rgba(255,188,95,0.1)_0%,transparent_30%,rgba(255,142,34,0.15)_70%,transparent_100%)]" />
@@ -17,9 +46,17 @@ export default function FacebookCoverPage() {
         <div className="absolute inset-x-[120px] top-[138px] h-px bg-gradient-to-r from-transparent via-amber-300/70 to-transparent shadow-[0_0_18px_rgba(251,191,36,0.8)]" />
         <div className="absolute inset-x-[120px] bottom-[106px] h-px bg-gradient-to-r from-transparent via-amber-300/70 to-transparent shadow-[0_0_18px_rgba(251,191,36,0.8)]" />
 
-        <div className="absolute -left-16 top-[206px] text-[310px] font-bold leading-none text-amber-500/10 select-none">
-          🐙
-        </div>
+        {!isOctopusForeground && (
+          <div className="absolute -left-16 top-[206px] text-[310px] font-bold leading-none text-amber-500/10 select-none">
+            🐙
+          </div>
+        )}
+
+        {isOctopusForeground && (
+          <div className="pointer-events-none absolute -left-14 top-[184px] z-20 text-[335px] font-bold leading-none text-amber-400 select-none drop-shadow-[0_0_18px_rgba(251,191,36,0.45)]">
+            🐙
+          </div>
+        )}
 
         <div className="absolute inset-0 [background-image:radial-gradient(rgba(255,190,93,0.65)_1px,transparent_1px)] [background-size:18px_18px] opacity-35" />
 
