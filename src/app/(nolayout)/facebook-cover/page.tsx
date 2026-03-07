@@ -1,12 +1,12 @@
 const outcomes = [
   { label: "IGEN", value: "0.81" },
-  { label: "NEM", value: "0.10" },
+  { label: "NEM", value: "0.19" },
 ];
 
 export default function FacebookCoverPage() {
   return (
     <main className="min-h-screen bg-[#090704] p-8 flex items-center justify-center overflow-auto">
-      <div className="relative w-[1640px] h-[624px] overflow-hidden rounded-[28px] border border-amber-500/40 bg-[#0a0704] text-amber-100 shadow-[0_0_120px_rgba(251,191,36,0.2)]">
+      <div className="relative w-[1640px] h-[624px] overflow-hidden border border-amber-500/40 bg-[#0a0704] text-amber-100 shadow-[0_0_120px_rgba(251,191,36,0.2)]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,rgba(255,184,77,0.28),transparent_55%),radial-gradient(circle_at_15%_75%,rgba(255,125,24,0.15),transparent_45%),radial-gradient(circle_at_80%_15%,rgba(255,145,42,0.16),transparent_48%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(130deg,rgba(255,188,95,0.1)_0%,transparent_30%,rgba(255,142,34,0.15)_70%,transparent_100%)]" />
 
@@ -23,16 +23,16 @@ export default function FacebookCoverPage() {
 
         <div className="absolute inset-0 [background-image:radial-gradient(rgba(255,190,93,0.65)_1px,transparent_1px)] [background-size:18px_18px] opacity-35" />
 
-        <div className="relative z-10 flex h-full flex-col items-center justify-center gap-10 px-20 text-center">
+        <div className="relative z-10 flex h-full flex-col items-center justify-center px-20 text-center">
           <h1 className="text-[100px] font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-300 to-amber-500 drop-shadow-[0_0_22px_rgba(255,183,77,0.45)]">
             POLIPMARKET
           </h1>
 
-          <p className="text-[44px] font-semibold text-amber-200 drop-shadow-[0_0_14px_rgba(251,191,36,0.5)]">
+          <p className="mt-1 whitespace-nowrap text-[40px] font-semibold text-amber-200 drop-shadow-[0_0_14px_rgba(251,191,36,0.5)]">
             Magyar fogadási piac játékpénzzel
           </p>
 
-          <div className="inline-flex items-center gap-8 rounded-[30px] border border-amber-400/70 bg-black/35 px-8 py-5 shadow-[0_0_30px_rgba(251,191,36,0.28)] backdrop-blur-[1px]">
+          <div className="mt-7 inline-flex items-center gap-8 rounded-[30px] border border-amber-400/70 bg-black/35 px-8 py-5 shadow-[0_0_30px_rgba(251,191,36,0.28)] backdrop-blur-[1px]">
             {outcomes.map((option) => (
               <div
                 key={option.label}
@@ -48,7 +48,7 @@ export default function FacebookCoverPage() {
             ))}
           </div>
 
-          <p className="text-[48px] font-semibold text-amber-200/90">
+          <p className="mt-7 text-[48px] font-semibold text-amber-200/90">
             Fogadás • Piac • Stratégia
           </p>
         </div>
