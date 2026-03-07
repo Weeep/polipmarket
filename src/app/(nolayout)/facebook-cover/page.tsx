@@ -1,13 +1,60 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 const outcomes = [
   { label: "IGEN", value: "0.81" },
   { label: "NEM", value: "0.19" },
 ];
 
+const solidBackgrounds = ["#120a04", "#1a0f06", "#261507", "#2f1908"];
+
 type Mode = "cover" | "post";
+
+function drawWrappedText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+) {
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let current = "";
+
+  for (const word of words) {
+    const test = current ? `${current} ${word}` : word;
+    if (ctx.measureText(test).width > maxWidth && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = test;
+    }
+  }
+  if (current) lines.push(current);
+
+  const startY = y - ((lines.length - 1) * lineHeight) / 2;
+  lines.forEach((line, index) => {
+    ctx.fillText(line, x, startY + index * lineHeight);
+  });
+}
+
+function downloadCanvas(canvas: HTMLCanvasElement, fileName: string) {
+  canvas.toBlob((blob) => {
+    if (!blob) {
+      window.alert("Az export nem sikerült ebben a böngészőben.");
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, "image/png");
+}
 
 export default function FacebookCoverPage() {
   const [mode, setMode] = useState<Mode>("cover");
@@ -16,65 +63,184 @@ export default function FacebookCoverPage() {
     "Szerinted mi fog történni a magyar politikában?",
   );
   const [isExporting, setIsExporting] = useState(false);
+  const [useGradientBackground, setUseGradientBackground] = useState(true);
+  const [solidBackground, setSolidBackground] = useState(solidBackgrounds[1]);
 
-  const coverRef = useRef<HTMLDivElement>(null);
-  const postRef = useRef<HTMLDivElement>(null);
+  const previewBackgroundStyle = useMemo(
+    () =>
+      useGradientBackground
+        ? undefined
+        : { backgroundColor: solidBackground, backgroundImage: "none" },
+    [solidBackground, useGradientBackground],
+  );
 
-  const exportCurrentAsPng = async () => {
-    const target = mode === "cover" ? coverRef.current : postRef.current;
-
-    if (!target) {
-      return;
-    }
-
+  const exportCurrentAsPng = () => {
     setIsExporting(true);
 
     try {
-      const width = target.clientWidth;
-      const height = target.clientHeight;
-      const clonedNode = target.cloneNode(true) as HTMLElement;
+      if (mode === "cover") {
+        const width = 1640;
+        const height = 624;
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Canvas context hiba");
 
-      clonedNode.style.margin = "0";
+        if (useGradientBackground) {
+          const bg = ctx.createLinearGradient(0, 0, width, height);
+          bg.addColorStop(0, "#0d0804");
+          bg.addColorStop(0.55, "#2e1b0a");
+          bg.addColorStop(1, "#100a05");
+          ctx.fillStyle = bg;
+          ctx.fillRect(0, 0, width, height);
 
-      const wrapper = document.createElement("div");
-      wrapper.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
-      wrapper.style.width = `${width}px`;
-      wrapper.style.height = `${height}px`;
-      wrapper.appendChild(clonedNode);
+          const glow = ctx.createRadialGradient(
+            width * 0.5,
+            height * 0.22,
+            20,
+            width * 0.5,
+            height * 0.22,
+            400,
+          );
+          glow.addColorStop(0, "rgba(255,184,77,0.25)");
+          glow.addColorStop(1, "rgba(255,184,77,0)");
+          ctx.fillStyle = glow;
+          ctx.fillRect(0, 0, width, height);
+        } else {
+          ctx.fillStyle = solidBackground;
+          ctx.fillRect(0, 0, width, height);
+        }
 
-      const serialized = new XMLSerializer().serializeToString(wrapper);
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="100%" height="100%">${serialized}</foreignObject></svg>`;
-      const svgBlob = new Blob([svg], {
-        type: "image/svg+xml;charset=utf-8",
-      });
-      const url = URL.createObjectURL(svgBlob);
+        ctx.strokeStyle = "rgba(245,180,80,0.2)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(120, 200, 180, 0, Math.PI * 2);
+        ctx.stroke();
 
-      const image = await new Promise<HTMLImageElement>((resolve, reject) => {
-        const img = new Image();
+        if (!isOctopusForeground) {
+          ctx.font = "300px Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif";
+          ctx.fillStyle = "rgba(245,170,90,0.14)";
+          ctx.fillText("🐙", 20, 500);
+        }
 
-        img.onload = () => resolve(img);
-        img.onerror = () => reject(new Error("Nem sikerült a kép renderelése."));
-        img.src = url;
-      });
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#f4c46f";
+        ctx.font = "900 120px Inter, Arial, sans-serif";
+        ctx.fillText("POLIPMARKET", width / 2, 185);
 
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
+        ctx.fillStyle = "#f4d493";
+        ctx.font = "600 56px Inter, Arial, sans-serif";
+        ctx.fillText("Magyar fogadási piac játékpénzzel", width / 2, 255);
 
-      const context = canvas.getContext("2d");
+        const boxX = width / 2 - 360;
+        const boxY = 300;
+        const boxW = 720;
+        const boxH = 130;
+        ctx.fillStyle = "rgba(0,0,0,0.35)";
+        ctx.strokeStyle = "rgba(245,180,80,0.6)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 24);
+        ctx.fill();
+        ctx.stroke();
 
-      if (!context) {
-        throw new Error("A böngésző nem támogatja a canvas exportot.");
+        outcomes.forEach((option, index) => {
+          const cardW = 320;
+          const cardH = 92;
+          const gap = 24;
+          const x = boxX + 24 + index * (cardW + gap);
+          const y = boxY + 19;
+
+          ctx.fillStyle = "#1c140d";
+          ctx.strokeStyle = "rgba(245,180,80,0.55)";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.roundRect(x, y, cardW, cardH, 18);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.textAlign = "left";
+          ctx.fillStyle = "#f4c46f";
+          ctx.font = "800 60px Inter, Arial, sans-serif";
+          ctx.fillText(option.label, x + 36, y + 66);
+          ctx.font = "500 58px Inter, Arial, sans-serif";
+          ctx.fillStyle = "#f2d9a7";
+          ctx.fillText(option.value, x + 190, y + 66);
+        });
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "rgba(245,220,170,0.95)";
+        ctx.font = "600 56px Inter, Arial, sans-serif";
+        ctx.fillText("Fogadás • Piac • Stratégia", width / 2, 530);
+
+        if (isOctopusForeground) {
+          ctx.font = "330px Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif";
+          ctx.fillStyle = "#eab86d";
+          ctx.fillText("🐙", 35, 500);
+        }
+
+        downloadCanvas(canvas, "polipmarket-cover.png");
+      } else {
+        const width = 1080;
+        const height = 1080;
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Canvas context hiba");
+
+        if (useGradientBackground) {
+          const bg = ctx.createLinearGradient(0, 0, width, height);
+          bg.addColorStop(0, "#0d0804");
+          bg.addColorStop(0.58, "#2d1c0d");
+          bg.addColorStop(1, "#100a05");
+          ctx.fillStyle = bg;
+          ctx.fillRect(0, 0, width, height);
+
+          const glow = ctx.createRadialGradient(
+            width * 0.5,
+            height * 0.2,
+            20,
+            width * 0.5,
+            height * 0.2,
+            360,
+          );
+          glow.addColorStop(0, "rgba(255,184,77,0.22)");
+          glow.addColorStop(1, "rgba(255,184,77,0)");
+          ctx.fillStyle = glow;
+          ctx.fillRect(0, 0, width, height);
+        } else {
+          ctx.fillStyle = solidBackground;
+          ctx.fillRect(0, 0, width, height);
+        }
+
+        ctx.font = "320px Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif";
+        ctx.fillStyle = "rgba(245,170,90,0.16)";
+        ctx.fillText("🐙", 20, 640);
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#f7e7c3";
+        ctx.font = "800 70px Inter, Arial, sans-serif";
+        drawWrappedText(ctx, postText, width / 2, 560, 860, 92);
+
+        const bottomGradient = ctx.createLinearGradient(0, 820, 0, height);
+        bottomGradient.addColorStop(0, "rgba(10,7,4,0)");
+        bottomGradient.addColorStop(0.35, "rgba(10,7,4,0.9)");
+        bottomGradient.addColorStop(1, "rgba(10,7,4,1)");
+        ctx.fillStyle = bottomGradient;
+        ctx.fillRect(0, 780, width, 300);
+
+        ctx.fillStyle = "rgba(244,210,145,0.82)";
+        ctx.font = "900 66px Inter, Arial, sans-serif";
+        ctx.fillText("POLIPMARKET", width / 2, 942);
+
+        ctx.fillStyle = "rgba(244,210,145,0.65)";
+        ctx.font = "600 42px Inter, Arial, sans-serif";
+        ctx.fillText("Fogadás • Piac • Stratégia", width / 2, 992);
+
+        downloadCanvas(canvas, "polipmarket-post.png");
       }
-
-      context.drawImage(image, 0, 0, width, height);
-      URL.revokeObjectURL(url);
-
-      const dataUrl = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = `polipmarket-${mode}.png`;
-      link.click();
     } catch (error) {
       console.error(error);
       window.alert("Az export nem sikerült ebben a böngészőben.");
@@ -108,6 +274,37 @@ export default function FacebookCoverPage() {
         >
           Poszt
         </button>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-amber-400/40 bg-black/35 px-4 py-3">
+        <label className="inline-flex items-center gap-2 text-amber-200 text-sm font-semibold">
+          <input
+            type="checkbox"
+            checked={useGradientBackground}
+            onChange={(event) => setUseGradientBackground(event.target.checked)}
+            className="h-4 w-4 accent-amber-400"
+          />
+          Gradient háttér
+        </label>
+
+        {!useGradientBackground && (
+          <div className="inline-flex items-center gap-2">
+            {solidBackgrounds.map((color) => (
+              <button
+                key={color}
+                type="button"
+                onClick={() => setSolidBackground(color)}
+                className={`h-7 w-7 rounded-full border ${
+                  solidBackground === color
+                    ? "border-amber-200"
+                    : "border-amber-700/60"
+                }`}
+                style={{ backgroundColor: color }}
+                title={`Háttérszín: ${color}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <button
@@ -144,11 +341,10 @@ export default function FacebookCoverPage() {
             </button>
           </label>
 
-          <div
-            ref={coverRef}
-            className="relative w-[1640px] h-[624px] overflow-hidden border border-amber-500/40 bg-[#0a0704] text-amber-100"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,rgba(255,184,77,0.24),transparent_56%),linear-gradient(140deg,#0d0804_0%,#2e1b0a_55%,#100a05_100%)]" />
+          <div className="relative w-[1640px] h-[624px] overflow-hidden border border-amber-500/40 bg-[#0a0704] text-amber-100" style={previewBackgroundStyle}>
+            {useGradientBackground && (
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,rgba(255,184,77,0.24),transparent_56%),linear-gradient(140deg,#0d0804_0%,#2e1b0a_55%,#100a05_100%)]" />
+            )}
 
             <div className="absolute -left-10 top-20 h-[420px] w-[420px] rounded-full border border-amber-600/15" />
             <div className="absolute right-[-120px] bottom-[-100px] h-[340px] w-[640px] rounded-[50%] border border-amber-500/15" />
@@ -210,11 +406,10 @@ export default function FacebookCoverPage() {
             />
           </label>
 
-          <div
-            ref={postRef}
-            className="relative w-[1080px] h-[1080px] overflow-hidden border border-amber-500/40 bg-[#0a0704] text-amber-100"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,184,77,0.22),transparent_50%),linear-gradient(145deg,#0d0804_0%,#2d1c0d_58%,#100a05_100%)]" />
+          <div className="relative w-[1080px] h-[1080px] overflow-hidden border border-amber-500/40 bg-[#0a0704] text-amber-100" style={previewBackgroundStyle}>
+            {useGradientBackground && (
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,184,77,0.22),transparent_50%),linear-gradient(145deg,#0d0804_0%,#2d1c0d_58%,#100a05_100%)]" />
+            )}
 
             <div className="absolute -left-14 top-[286px] text-[330px] font-bold leading-none text-amber-500/16 select-none">
               🐙
