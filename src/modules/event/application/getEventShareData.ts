@@ -22,6 +22,7 @@ function formatHuDate(date: Date | null | undefined): string {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Europe/Budapest",
   }).format(date);
 }
 
