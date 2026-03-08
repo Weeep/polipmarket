@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 const outcomes = [
   { label: "IGEN", value: "0.81" },
@@ -266,6 +266,7 @@ export default function FacebookCoverPage() {
           </label>
 
           <div
+            ref={coverRef}
             className="relative w-[1640px] h-[624px] overflow-hidden border border-amber-500/40 bg-[#0a0704] text-amber-100"
             style={previewBackgroundStyle}
           >
@@ -334,6 +335,7 @@ export default function FacebookCoverPage() {
           </label>
 
           <div
+            ref={postRef}
             className="relative w-[1080px] h-[1080px] overflow-hidden border border-amber-500/40 bg-[#0a0704] text-amber-100"
             style={previewBackgroundStyle}
           >
