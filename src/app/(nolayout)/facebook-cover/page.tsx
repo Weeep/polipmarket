@@ -20,6 +20,28 @@ export default function FacebookCoverPage() {
   const coverRef = useRef<HTMLDivElement>(null);
   const postRef = useRef<HTMLDivElement>(null);
 
+  const copyComputedStyles = (source: Element, target: Element) => {
+    const computedStyles = window.getComputedStyle(source);
+    const inlineStyles = Array.from(computedStyles)
+      .map((property) => `${property}:${computedStyles.getPropertyValue(property)};`)
+      .join("");
+
+    target.setAttribute("style", inlineStyles);
+
+    const sourceChildren = Array.from(source.children);
+    const targetChildren = Array.from(target.children);
+
+    sourceChildren.forEach((sourceChild, index) => {
+      const targetChild = targetChildren[index];
+
+      if (!targetChild) {
+        return;
+      }
+
+      copyComputedStyles(sourceChild, targetChild);
+    });
+  };
+
   const exportCurrentAsPng = async () => {
     const target = mode === "cover" ? coverRef.current : postRef.current;
 
@@ -35,6 +57,7 @@ export default function FacebookCoverPage() {
       const clonedNode = target.cloneNode(true) as HTMLElement;
 
       clonedNode.style.margin = "0";
+      copyComputedStyles(target, clonedNode);
 
       const wrapper = document.createElement("div");
       wrapper.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
