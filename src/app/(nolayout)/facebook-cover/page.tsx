@@ -20,25 +20,34 @@ export default function FacebookCoverPage() {
   const coverRef = useRef<HTMLDivElement>(null);
   const postRef = useRef<HTMLDivElement>(null);
 
-  const getDocumentStyles = () => {
-    const styleTexts: string[] = [];
+  const inlineComputedStyles = (source: Element, target: Element) => {
+    const sourceStyles = window.getComputedStyle(source);
+    const targetElement = target as HTMLElement;
 
-    for (const stylesheet of Array.from(document.styleSheets)) {
-      try {
-        const rules = stylesheet.cssRules;
-        const cssText = Array.from(rules)
-          .map((rule) => rule.cssText)
-          .join("\n");
+    targetElement.style.cssText = sourceStyles.cssText;
 
-        if (cssText) {
-          styleTexts.push(cssText);
-        }
-      } catch {
-        // Ignore stylesheets that cannot be inspected (e.g. browser extensions).
-      }
+    if (!targetElement.style.cssText) {
+      Array.from(sourceStyles).forEach((property) => {
+        targetElement.style.setProperty(
+          property,
+          sourceStyles.getPropertyValue(property),
+          sourceStyles.getPropertyPriority(property),
+        );
+      });
     }
 
-    return styleTexts.join("\n");
+    const sourceChildren = Array.from(source.children);
+    const targetChildren = Array.from(target.children);
+
+    sourceChildren.forEach((sourceChild, index) => {
+      const targetChild = targetChildren[index];
+
+      if (!targetChild) {
+        return;
+      }
+
+      inlineComputedStyles(sourceChild, targetChild);
+    });
   };
 
   const exportCurrentAsPng = async () => {
@@ -54,31 +63,26 @@ export default function FacebookCoverPage() {
       const width = target.clientWidth;
       const height = target.clientHeight;
       const clonedNode = target.cloneNode(true) as HTMLElement;
-      const styleTag = document.createElement("style");
 
       clonedNode.style.margin = "0";
-      styleTag.textContent = getDocumentStyles();
+      inlineComputedStyles(target, clonedNode);
 
       const wrapper = document.createElement("div");
       wrapper.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
       wrapper.style.width = `${width}px`;
       wrapper.style.height = `${height}px`;
-      wrapper.appendChild(styleTag);
       wrapper.appendChild(clonedNode);
 
       const serialized = new XMLSerializer().serializeToString(wrapper);
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="100%" height="100%">${serialized}</foreignObject></svg>`;
-      const svgBlob = new Blob([svg], {
-        type: "image/svg+xml;charset=utf-8",
-      });
-      const url = URL.createObjectURL(svgBlob);
+      const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 
       const image = await new Promise<HTMLImageElement>((resolve, reject) => {
         const img = new Image();
 
         img.onload = () => resolve(img);
         img.onerror = () => reject(new Error("Nem sikerült a kép renderelése."));
-        img.src = url;
+        img.src = svgDataUrl;
       });
 
       const canvas = document.createElement("canvas");
@@ -92,7 +96,6 @@ export default function FacebookCoverPage() {
       }
 
       context.drawImage(image, 0, 0, width, height);
-      URL.revokeObjectURL(url);
 
       const dataUrl = canvas.toDataURL("image/png");
       const link = document.createElement("a");
