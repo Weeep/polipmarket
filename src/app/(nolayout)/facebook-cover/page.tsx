@@ -20,26 +20,25 @@ export default function FacebookCoverPage() {
   const coverRef = useRef<HTMLDivElement>(null);
   const postRef = useRef<HTMLDivElement>(null);
 
-  const copyComputedStyles = (source: Element, target: Element) => {
-    const computedStyles = window.getComputedStyle(source);
-    const inlineStyles = Array.from(computedStyles)
-      .map((property) => `${property}:${computedStyles.getPropertyValue(property)};`)
-      .join("");
+  const getDocumentStyles = () => {
+    const styleTexts: string[] = [];
 
-    target.setAttribute("style", inlineStyles);
+    for (const stylesheet of Array.from(document.styleSheets)) {
+      try {
+        const rules = stylesheet.cssRules;
+        const cssText = Array.from(rules)
+          .map((rule) => rule.cssText)
+          .join("\n");
 
-    const sourceChildren = Array.from(source.children);
-    const targetChildren = Array.from(target.children);
-
-    sourceChildren.forEach((sourceChild, index) => {
-      const targetChild = targetChildren[index];
-
-      if (!targetChild) {
-        return;
+        if (cssText) {
+          styleTexts.push(cssText);
+        }
+      } catch {
+        // Ignore stylesheets that cannot be inspected (e.g. browser extensions).
       }
+    }
 
-      copyComputedStyles(sourceChild, targetChild);
-    });
+    return styleTexts.join("\n");
   };
 
   const exportCurrentAsPng = async () => {
@@ -55,14 +54,16 @@ export default function FacebookCoverPage() {
       const width = target.clientWidth;
       const height = target.clientHeight;
       const clonedNode = target.cloneNode(true) as HTMLElement;
+      const styleTag = document.createElement("style");
 
       clonedNode.style.margin = "0";
-      copyComputedStyles(target, clonedNode);
+      styleTag.textContent = getDocumentStyles();
 
       const wrapper = document.createElement("div");
       wrapper.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
       wrapper.style.width = `${width}px`;
       wrapper.style.height = `${height}px`;
+      wrapper.appendChild(styleTag);
       wrapper.appendChild(clonedNode);
 
       const serialized = new XMLSerializer().serializeToString(wrapper);
