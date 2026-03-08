@@ -80,176 +80,91 @@ export default function FacebookCoverPage() {
     [solidBackground, useGradientBackground],
   );
 
-  const exportCurrentAsPng = () => {
+  const coverRef = useRef<HTMLDivElement>(null);
+  const postRef = useRef<HTMLDivElement>(null);
+
+  const inlineComputedStyles = (source: Element, target: Element) => {
+    const sourceStyles = window.getComputedStyle(source);
+    const targetElement = target as HTMLElement;
+
+    targetElement.style.cssText = sourceStyles.cssText;
+
+    if (!targetElement.style.cssText) {
+      Array.from(sourceStyles).forEach((property) => {
+        targetElement.style.setProperty(
+          property,
+          sourceStyles.getPropertyValue(property),
+          sourceStyles.getPropertyPriority(property),
+        );
+      });
+    }
+
+    const sourceChildren = Array.from(source.children);
+    const targetChildren = Array.from(target.children);
+
+    sourceChildren.forEach((sourceChild, index) => {
+      const targetChild = targetChildren[index];
+
+      if (!targetChild) {
+        return;
+      }
+
+      inlineComputedStyles(sourceChild, targetChild);
+    });
+  };
+
+  const exportCurrentAsPng = async () => {
+    const target = mode === "cover" ? coverRef.current : postRef.current;
+
+    if (!target) {
+      return;
+    }
+
     setIsExporting(true);
 
     try {
-      if (mode === "cover") {
-        const width = 1640;
-        const height = 624;
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) throw new Error("Canvas context hiba");
+      const width = target.clientWidth;
+      const height = target.clientHeight;
+      const clonedNode = target.cloneNode(true) as HTMLElement;
 
-        if (useGradientBackground) {
-          const bg = ctx.createLinearGradient(0, 0, width, height);
-          bg.addColorStop(0, "#0d0804");
-          bg.addColorStop(0.55, "#2e1b0a");
-          bg.addColorStop(1, "#100a05");
-          ctx.fillStyle = bg;
-          ctx.fillRect(0, 0, width, height);
+      clonedNode.style.margin = "0";
+      inlineComputedStyles(target, clonedNode);
 
-          const glow = ctx.createRadialGradient(
-            width * 0.5,
-            height * 0.22,
-            20,
-            width * 0.5,
-            height * 0.22,
-            400,
-          );
-          glow.addColorStop(0, "rgba(255,184,77,0.25)");
-          glow.addColorStop(1, "rgba(255,184,77,0)");
-          ctx.fillStyle = glow;
-          ctx.fillRect(0, 0, width, height);
-        } else {
-          ctx.fillStyle = solidBackground;
-          ctx.fillRect(0, 0, width, height);
-        }
+      const wrapper = document.createElement("div");
+      wrapper.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+      wrapper.style.width = `${width}px`;
+      wrapper.style.height = `${height}px`;
+      wrapper.appendChild(clonedNode);
 
-        ctx.strokeStyle = "rgba(245,180,80,0.2)";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(120, 200, 180, 0, Math.PI * 2);
-        ctx.stroke();
+      const serialized = new XMLSerializer().serializeToString(wrapper);
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="100%" height="100%">${serialized}</foreignObject></svg>`;
+      const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 
-        if (!isOctopusForeground) {
-          ctx.font =
-            "300px Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif";
-          ctx.fillStyle = "rgba(245,170,90,0.14)";
-          ctx.fillText("🐙", 20, 500);
-        }
+      const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new Image();
 
-        ctx.textAlign = "center";
-        ctx.fillStyle = "#f4c46f";
-        ctx.font = "900 120px Inter, Arial, sans-serif";
-        ctx.fillText("POLIPMARKET", width / 2, 185);
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error("Nem sikerült a kép renderelése."));
+        img.src = svgDataUrl;
+      });
 
-        ctx.fillStyle = "#f4d493";
-        ctx.font = "600 56px Inter, Arial, sans-serif";
-        ctx.fillText("Magyar fogadási piac játékpénzzel", width / 2, 255);
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
 
-        const boxX = width / 2 - 360;
-        const boxY = 300;
-        const boxW = 720;
-        const boxH = 130;
-        ctx.fillStyle = "rgba(0,0,0,0.35)";
-        ctx.strokeStyle = "rgba(245,180,80,0.6)";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.roundRect(boxX, boxY, boxW, boxH, 24);
-        ctx.fill();
-        ctx.stroke();
+      const context = canvas.getContext("2d");
 
-        outcomes.forEach((option, index) => {
-          const cardW = 320;
-          const cardH = 92;
-          const gap = 24;
-          const x = boxX + 24 + index * (cardW + gap);
-          const y = boxY + 19;
-
-          ctx.fillStyle = "#1c140d";
-          ctx.strokeStyle = "rgba(245,180,80,0.55)";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.roundRect(x, y, cardW, cardH, 18);
-          ctx.fill();
-          ctx.stroke();
-
-          ctx.textAlign = "left";
-          ctx.fillStyle = "#f4c46f";
-          ctx.font = "800 60px Inter, Arial, sans-serif";
-          ctx.fillText(option.label, x + 36, y + 66);
-          ctx.font = "500 58px Inter, Arial, sans-serif";
-          ctx.fillStyle = "#f2d9a7";
-          ctx.fillText(option.value, x + 190, y + 66);
-        });
-
-        ctx.textAlign = "center";
-        ctx.fillStyle = "rgba(245,220,170,0.95)";
-        ctx.font = "600 56px Inter, Arial, sans-serif";
-        ctx.fillText("Fogadás • Piac • Stratégia", width / 2, 530);
-
-        if (isOctopusForeground) {
-          ctx.font =
-            "330px Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif";
-          ctx.fillStyle = "#eab86d";
-          ctx.fillText("🐙", 35, 500);
-        }
-
-        downloadCanvas(canvas, "polipmarket-cover.png");
-      } else {
-        const width = 1080;
-        const height = 1080;
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) throw new Error("Canvas context hiba");
-
-        if (useGradientBackground) {
-          const bg = ctx.createLinearGradient(0, 0, width, height);
-          bg.addColorStop(0, "#0d0804");
-          bg.addColorStop(0.58, "#2d1c0d");
-          bg.addColorStop(1, "#100a05");
-          ctx.fillStyle = bg;
-          ctx.fillRect(0, 0, width, height);
-
-          const glow = ctx.createRadialGradient(
-            width * 0.5,
-            height * 0.2,
-            20,
-            width * 0.5,
-            height * 0.2,
-            360,
-          );
-          glow.addColorStop(0, "rgba(255,184,77,0.22)");
-          glow.addColorStop(1, "rgba(255,184,77,0)");
-          ctx.fillStyle = glow;
-          ctx.fillRect(0, 0, width, height);
-        } else {
-          ctx.fillStyle = solidBackground;
-          ctx.fillRect(0, 0, width, height);
-        }
-
-        ctx.font =
-          "320px Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif";
-        ctx.fillStyle = "rgba(245,170,90,0.16)";
-        ctx.fillText("🐙", 20, 640);
-
-        ctx.textAlign = "center";
-        ctx.fillStyle = "#eab308";
-        ctx.font = "800 70px Inter, Arial, sans-serif";
-        drawWrappedText(ctx, postText, width / 2, 560, 860, 92);
-
-        const bottomGradient = ctx.createLinearGradient(0, 820, 0, height);
-        bottomGradient.addColorStop(0, "rgba(10,7,4,0)");
-        bottomGradient.addColorStop(0.35, "rgba(10,7,4,0.9)");
-        bottomGradient.addColorStop(1, "rgba(10,7,4,1)");
-        ctx.fillStyle = bottomGradient;
-        ctx.fillRect(0, 780, width, 300);
-
-        ctx.fillStyle = "rgba(244,210,145,0.82)";
-        ctx.font = "900 66px Inter, Arial, sans-serif";
-        ctx.fillText("POLIPMARKET", width / 2, 942);
-
-        ctx.fillStyle = "rgba(244,210,145,0.65)";
-        ctx.font = "600 42px Inter, Arial, sans-serif";
-        ctx.fillText("Fogadás • Piac • Stratégia • Játék", width / 2, 992);
-
-        downloadCanvas(canvas, "polipmarket-post.png");
+      if (!context) {
+        throw new Error("A böngésző nem támogatja a canvas exportot.");
       }
+
+      context.drawImage(image, 0, 0, width, height);
+
+      const dataUrl = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = `polipmarket-${mode}.png`;
+      link.click();
     } catch (error) {
       console.error(error);
       window.alert("Az export nem sikerült ebben a böngészőben.");
