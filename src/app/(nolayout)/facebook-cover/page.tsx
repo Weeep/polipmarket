@@ -7,7 +7,13 @@ const outcomes = [
   { label: "NEM", value: "0.19" },
 ];
 
-const solidBackgrounds = ["#120a04", "#1a0f06", "#261507", "#2f1908"];
+const solidBackgrounds = [
+  "#120a04",
+  "#1a0f06",
+  "#261507",
+  "#2f1908",
+  "#000000",
+];
 
 type Mode = "cover" | "post";
 
@@ -119,7 +125,8 @@ export default function FacebookCoverPage() {
         ctx.stroke();
 
         if (!isOctopusForeground) {
-          ctx.font = "300px Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif";
+          ctx.font =
+            "300px Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif";
           ctx.fillStyle = "rgba(245,170,90,0.14)";
           ctx.fillText("🐙", 20, 500);
         }
@@ -175,7 +182,8 @@ export default function FacebookCoverPage() {
         ctx.fillText("Fogadás • Piac • Stratégia", width / 2, 530);
 
         if (isOctopusForeground) {
-          ctx.font = "330px Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif";
+          ctx.font =
+            "330px Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif";
           ctx.fillStyle = "#eab86d";
           ctx.fillText("🐙", 35, 500);
         }
@@ -215,12 +223,13 @@ export default function FacebookCoverPage() {
           ctx.fillRect(0, 0, width, height);
         }
 
-        ctx.font = "320px Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif";
+        ctx.font =
+          "320px Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif";
         ctx.fillStyle = "rgba(245,170,90,0.16)";
         ctx.fillText("🐙", 20, 640);
 
         ctx.textAlign = "center";
-        ctx.fillStyle = "#f7e7c3";
+        ctx.fillStyle = "#eab308";
         ctx.font = "800 70px Inter, Arial, sans-serif";
         drawWrappedText(ctx, postText, width / 2, 560, 860, 92);
 
@@ -237,7 +246,7 @@ export default function FacebookCoverPage() {
 
         ctx.fillStyle = "rgba(244,210,145,0.65)";
         ctx.font = "600 42px Inter, Arial, sans-serif";
-        ctx.fillText("Fogadás • Piac • Stratégia", width / 2, 992);
+        ctx.fillText("Fogadás • Piac • Stratégia • Játék", width / 2, 992);
 
         downloadCanvas(canvas, "polipmarket-post.png");
       }
@@ -341,7 +350,10 @@ export default function FacebookCoverPage() {
             </button>
           </label>
 
-          <div className="relative w-[1640px] h-[624px] overflow-hidden border border-amber-500/40 bg-[#0a0704] text-amber-100" style={previewBackgroundStyle}>
+          <div
+            className="relative w-[1640px] h-[624px] overflow-hidden border border-amber-500/40 bg-[#0a0704] text-amber-100"
+            style={previewBackgroundStyle}
+          >
             {useGradientBackground && (
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,rgba(255,184,77,0.24),transparent_56%),linear-gradient(140deg,#0d0804_0%,#2e1b0a_55%,#100a05_100%)]" />
             )}
@@ -406,7 +418,10 @@ export default function FacebookCoverPage() {
             />
           </label>
 
-          <div className="relative w-[1080px] h-[1080px] overflow-hidden border border-amber-500/40 bg-[#0a0704] text-amber-100" style={previewBackgroundStyle}>
+          <div
+            className="relative w-[1080px] h-[1080px] overflow-hidden border border-amber-500/40 bg-[#0a0704] text-amber-100"
+            style={previewBackgroundStyle}
+          >
             {useGradientBackground && (
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,184,77,0.22),transparent_50%),linear-gradient(145deg,#0d0804_0%,#2d1c0d_58%,#100a05_100%)]" />
             )}
@@ -416,7 +431,7 @@ export default function FacebookCoverPage() {
             </div>
 
             <div className="relative z-10 flex h-full flex-col items-center justify-center px-24 text-center">
-              <p className="max-w-[860px] text-[66px] font-bold leading-tight text-amber-100">
+              <p className="max-w-[860px] text-[66px] font-bold leading-tight text-yellow-500">
                 {postText}
               </p>
             </div>
@@ -426,7 +441,7 @@ export default function FacebookCoverPage() {
                 POLIPMARKET
               </p>
               <p className="mt-1 text-[25px] font-semibold text-amber-200/60">
-                Fogadás • Piac • Stratégia
+                Fogadás • Piac • Stratégia • Játék
               </p>
             </div>
           </div>
