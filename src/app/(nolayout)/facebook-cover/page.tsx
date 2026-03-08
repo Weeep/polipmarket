@@ -1,13 +1,66 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 const outcomes = [
   { label: "IGEN", value: "0.81" },
   { label: "NEM", value: "0.19" },
 ];
 
+const solidBackgrounds = [
+  "#120a04",
+  "#1a0f06",
+  "#261507",
+  "#2f1908",
+  "#000000",
+];
+
 type Mode = "cover" | "post";
+
+function drawWrappedText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+) {
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let current = "";
+
+  for (const word of words) {
+    const test = current ? `${current} ${word}` : word;
+    if (ctx.measureText(test).width > maxWidth && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = test;
+    }
+  }
+  if (current) lines.push(current);
+
+  const startY = y - ((lines.length - 1) * lineHeight) / 2;
+  lines.forEach((line, index) => {
+    ctx.fillText(line, x, startY + index * lineHeight);
+  });
+}
+
+function downloadCanvas(canvas: HTMLCanvasElement, fileName: string) {
+  canvas.toBlob((blob) => {
+    if (!blob) {
+      window.alert("Az export nem sikerült ebben a böngészőben.");
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, "image/png");
+}
 
 export default function FacebookCoverPage() {
   const [mode, setMode] = useState<Mode>("cover");
@@ -16,6 +69,16 @@ export default function FacebookCoverPage() {
     "Szerinted mi fog történni a magyar politikában?",
   );
   const [isExporting, setIsExporting] = useState(false);
+  const [useGradientBackground, setUseGradientBackground] = useState(true);
+  const [solidBackground, setSolidBackground] = useState(solidBackgrounds[1]);
+
+  const previewBackgroundStyle = useMemo(
+    () =>
+      useGradientBackground
+        ? undefined
+        : { backgroundColor: solidBackground, backgroundImage: "none" },
+    [solidBackground, useGradientBackground],
+  );
 
   const coverRef = useRef<HTMLDivElement>(null);
   const postRef = useRef<HTMLDivElement>(null);
@@ -137,6 +200,37 @@ export default function FacebookCoverPage() {
         </button>
       </div>
 
+      <div className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-amber-400/40 bg-black/35 px-4 py-3">
+        <label className="inline-flex items-center gap-2 text-amber-200 text-sm font-semibold">
+          <input
+            type="checkbox"
+            checked={useGradientBackground}
+            onChange={(event) => setUseGradientBackground(event.target.checked)}
+            className="h-4 w-4 accent-amber-400"
+          />
+          Gradient háttér
+        </label>
+
+        {!useGradientBackground && (
+          <div className="inline-flex items-center gap-2">
+            {solidBackgrounds.map((color) => (
+              <button
+                key={color}
+                type="button"
+                onClick={() => setSolidBackground(color)}
+                className={`h-7 w-7 rounded-full border ${
+                  solidBackground === color
+                    ? "border-amber-200"
+                    : "border-amber-700/60"
+                }`}
+                style={{ backgroundColor: color }}
+                title={`Háttérszín: ${color}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
       <button
         type="button"
         onClick={exportCurrentAsPng}
@@ -172,10 +266,12 @@ export default function FacebookCoverPage() {
           </label>
 
           <div
-            ref={coverRef}
             className="relative w-[1640px] h-[624px] overflow-hidden border border-amber-500/40 bg-[#0a0704] text-amber-100"
+            style={previewBackgroundStyle}
           >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,rgba(255,184,77,0.24),transparent_56%),linear-gradient(140deg,#0d0804_0%,#2e1b0a_55%,#100a05_100%)]" />
+            {useGradientBackground && (
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,rgba(255,184,77,0.24),transparent_56%),linear-gradient(140deg,#0d0804_0%,#2e1b0a_55%,#100a05_100%)]" />
+            )}
 
             <div className="absolute -left-10 top-20 h-[420px] w-[420px] rounded-full border border-amber-600/15" />
             <div className="absolute right-[-120px] bottom-[-100px] h-[340px] w-[640px] rounded-[50%] border border-amber-500/15" />
@@ -238,17 +334,19 @@ export default function FacebookCoverPage() {
           </label>
 
           <div
-            ref={postRef}
             className="relative w-[1080px] h-[1080px] overflow-hidden border border-amber-500/40 bg-[#0a0704] text-amber-100"
+            style={previewBackgroundStyle}
           >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,184,77,0.22),transparent_50%),linear-gradient(145deg,#0d0804_0%,#2d1c0d_58%,#100a05_100%)]" />
+            {useGradientBackground && (
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,184,77,0.22),transparent_50%),linear-gradient(145deg,#0d0804_0%,#2d1c0d_58%,#100a05_100%)]" />
+            )}
 
             <div className="absolute -left-14 top-[286px] text-[330px] font-bold leading-none text-amber-500/16 select-none">
               🐙
             </div>
 
             <div className="relative z-10 flex h-full flex-col items-center justify-center px-24 text-center">
-              <p className="max-w-[860px] text-[66px] font-bold leading-tight text-amber-100">
+              <p className="max-w-[860px] text-[66px] font-bold leading-tight text-yellow-500">
                 {postText}
               </p>
             </div>
@@ -258,7 +356,7 @@ export default function FacebookCoverPage() {
                 POLIPMARKET
               </p>
               <p className="mt-1 text-[25px] font-semibold text-amber-200/60">
-                Fogadás • Piac • Stratégia
+                Fogadás • Piac • Stratégia • Játék
               </p>
             </div>
           </div>
