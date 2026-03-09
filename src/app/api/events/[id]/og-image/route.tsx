@@ -22,7 +22,15 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const shareData = await getEventShareData(id);
+
+  let shareData: Awaited<ReturnType<typeof getEventShareData>> = null;
+
+  try {
+    shareData = await getEventShareData(id);
+  } catch (error) {
+    console.error("[og-image] Failed to fetch event share data", error);
+  }
+
   const title = shareData ? truncateQuestion(shareData.question) : "Esemény nem található";
 
   return new ImageResponse(
@@ -50,15 +58,74 @@ export async function GET(
           <div
             style={{
               position: "absolute",
-              left: "110px",
-              top: "560px",
-              fontSize: 640,
-              lineHeight: 1,
-              color: "rgba(245, 158, 11, 0.18)",
-              userSelect: "none",
+              left: "88px",
+              top: "548px",
+              width: "620px",
+              height: "520px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              opacity: 0.2,
             }}
           >
-            🐙
+            <div
+              style={{
+                width: "360px",
+                height: "260px",
+                borderTopLeftRadius: "190px",
+                borderTopRightRadius: "190px",
+                borderBottomLeftRadius: "130px",
+                borderBottomRightRadius: "130px",
+                background: "#f59e0b",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "0 72px",
+                marginBottom: "-28px",
+              }}
+            >
+              <div
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "999px",
+                  background: "#120808",
+                }}
+              />
+              <div
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "999px",
+                  background: "#120808",
+                }}
+              />
+            </div>
+
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+                gap: "-8px",
+              }}
+            >
+              {[0, 1, 2, 3].map((index) => (
+                <div
+                  key={index}
+                  style={{
+                    width: "136px",
+                    height: "126px",
+                    borderBottomLeftRadius: "80px",
+                    borderBottomRightRadius: "80px",
+                    borderTopLeftRadius: "70px",
+                    borderTopRightRadius: "70px",
+                    background: "#f59e0b",
+                    transform: index % 2 === 0 ? "rotate(-16deg)" : "rotate(16deg)",
+                  }}
+                />
+              ))}
+            </div>
           </div>
 
           <div
