@@ -10,11 +10,11 @@ const RENDER_WIDTH = OUTPUT_WIDTH * RENDER_SCALE;
 const RENDER_HEIGHT = OUTPUT_HEIGHT * RENDER_SCALE;
 
 function truncateQuestion(question: string): string {
-  if (question.length <= 110) {
+  if (question.length <= 84) {
     return question;
   }
 
-  return `${question.slice(0, 107)}...`;
+  return `${question.slice(0, 81)}...`;
 }
 
 export async function GET(
@@ -22,16 +22,22 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-
-  let shareData: Awaited<ReturnType<typeof getEventShareData>> = null;
-
-  try {
-    shareData = await getEventShareData(id);
-  } catch (error) {
-    console.error("[og-image] Failed to fetch event share data", error);
-  }
+  const shareData = await getEventShareData(id);
 
   const title = shareData ? truncateQuestion(shareData.question) : "Esemény nem található";
+  const closeAt = shareData?.bettingCloseLabel ?? "Nincs elérhető eseményadat";
+  const marketPreviews = shareData?.marketPreviews ?? [];
+  const visibleMarkets = (marketPreviews.length > 0
+    ? marketPreviews
+    : [
+        {
+          id: "fallback",
+          question: "Nincs aktív piac előnézet ehhez az eseményhez",
+          yesPriceLabel: "—",
+          noPriceLabel: "—",
+        },
+      ]
+  ).slice(0, 2);
 
   return new ImageResponse(
     (
@@ -41,7 +47,9 @@ export async function GET(
           height: `${OUTPUT_HEIGHT}px`,
           overflow: "hidden",
           display: "flex",
-          background: "#000000",
+          background: "#0f0f10",
+          color: "#f5f5f4",
+          fontFamily: "Inter, Segoe UI, Arial, sans-serif",
         }}
       >
         <div
@@ -49,103 +57,98 @@ export async function GET(
             width: `${RENDER_WIDTH}px`,
             height: `${RENDER_HEIGHT}px`,
             display: "flex",
-            position: "relative",
+            flexDirection: "column",
             transform: `scale(${1 / RENDER_SCALE})`,
             transformOrigin: "top left",
-            background: "#000000",
+            padding: "64px",
+            background: "#0f0f10",
+            gap: "36px",
           }}
         >
           <div
             style={{
-              position: "absolute",
-              left: "88px",
-              top: "548px",
-              width: "620px",
-              height: "520px",
               display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              opacity: 0.2,
+              fontSize: 102,
+              lineHeight: 1.08,
+              fontWeight: 700,
+              letterSpacing: -1.2,
+              color: "#f5f5f4",
             }}
           >
-            <div
-              style={{
-                width: "360px",
-                height: "260px",
-                borderTopLeftRadius: "190px",
-                borderTopRightRadius: "190px",
-                borderBottomLeftRadius: "130px",
-                borderBottomRightRadius: "130px",
-                background: "#f59e0b",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "0 72px",
-                marginBottom: "-28px",
-              }}
-            >
-              <div
-                style={{
-                  width: "42px",
-                  height: "42px",
-                  borderRadius: "999px",
-                  background: "#120808",
-                }}
-              />
-              <div
-                style={{
-                  width: "42px",
-                  height: "42px",
-                  borderRadius: "999px",
-                  background: "#120808",
-                }}
-              />
-            </div>
-
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-                gap: "-8px",
-              }}
-            >
-              {[0, 1, 2, 3].map((index) => (
-                <div
-                  key={index}
-                  style={{
-                    width: "136px",
-                    height: "126px",
-                    borderBottomLeftRadius: "80px",
-                    borderBottomRightRadius: "80px",
-                    borderTopLeftRadius: "70px",
-                    borderTopRightRadius: "70px",
-                    background: "#f59e0b",
-                    transform: index % 2 === 0 ? "rotate(-16deg)" : "rotate(16deg)",
-                  }}
-                />
-              ))}
-            </div>
+            {title}
           </div>
 
           <div
             style={{
-              width: "100%",
-              height: "100%",
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "180px 220px",
-              textAlign: "center",
-              fontFamily: "Inter, Segoe UI, Arial, sans-serif",
-              color: "#facc15",
-              fontSize: 132,
-              fontWeight: 800,
-              lineHeight: 1.12,
-              letterSpacing: -1.1,
+              flexDirection: "column",
+              gap: "18px",
+              marginTop: "4px",
             }}
           >
-            {title}
+            {visibleMarkets.map((market) => (
+              <div
+                key={market.id}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "20px 24px",
+                  background: "#18181b",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    fontSize: 40,
+                    fontWeight: 600,
+                    maxWidth: "62%",
+                    color: "#f5f5f4",
+                  }}
+                >
+                  {market.question}
+                </div>
+                <div style={{ display: "flex", gap: "12px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      background: "#1e3a8a",
+                      padding: "16px 22px",
+                      fontSize: 34,
+                      fontWeight: 700,
+                      color: "#dbeafe",
+                    }}
+                  >
+                    IGEN ({market.yesPriceLabel})
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      background: "#1e3a8a",
+                      padding: "16px 22px",
+                      fontSize: 34,
+                      fontWeight: 700,
+                      color: "#dbeafe",
+                    }}
+                  >
+                    NEM ({market.noPriceLabel})
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              fontSize: 32,
+              color: "#d6d3d1",
+              marginTop: "auto",
+            }}
+          >
+            <div style={{ display: "flex" }}>Fogadás zár: {closeAt}</div>
+            <div style={{ display: "flex", color: "#a8a29e" }}>polipmarket.hu</div>
           </div>
         </div>
       </div>
