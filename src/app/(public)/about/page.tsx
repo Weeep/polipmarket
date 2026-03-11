@@ -58,11 +58,27 @@ export default function AboutPage() {
             Kezdd el pár kattintással.
           </p>
           <button
+            type="button"
             disabled={!acceptedLegal}
             onClick={handleGoogleSignIn}
-            className="button-gold w-full disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Sign in with Google
+            <span
+              className="
+      flex h-14 w-full items-center justify-center gap-3
+      rounded-xl border border-black/70 bg-white
+      px-4 text-[15px] font-medium text-[#1f1f1f]
+      shadow-[0_1px_2px_rgba(0,0,0,0.08)]
+      transition hover:bg-[#f8f8f8]
+    "
+            >
+              <img
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                alt="Google"
+                className="h-5 w-5"
+              />
+              <span>Bejelentkezés Google fiókkal</span>
+            </span>
           </button>
           <label className="mt-4 flex items-start gap-3 text-left text-sm text-stone-300">
             <input
