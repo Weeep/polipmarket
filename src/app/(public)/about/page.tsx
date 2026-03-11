@@ -5,7 +5,8 @@ import { signIn } from "next-auth/react";
 
 export default function AboutPage() {
   const handleGoogleSignIn = () => {
-    document.cookie = "pm_auto_legal_accept=1; Path=/; Max-Age=600; SameSite=Lax";
+    document.cookie =
+      "pm_auto_legal_accept=1; Path=/; Max-Age=600; SameSite=Lax";
 
     void signIn("google", { callbackUrl: "/" });
   };
@@ -47,18 +48,19 @@ export default function AboutPage() {
       </section>
 
       <aside className="flex w-full items-center justify-center md:w-1/3">
-        <div className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900/70 p-8 text-center shadow-xl shadow-black/20">
-          <h2 className="text-4xl font-semibold text-stone-100">Regisztráció</h2>
-          <p className="mt-3 text-base text-stone-300">Már van fiókod? Jelentkezz be.</p>
+        <div className="w-full max-w-sm border border-zinc-800 bg-zinc-950 p-8 text-center shadow-xl shadow-black/20">
+          <h2 className="text-4xl font-semibold text-stone-100">
+            Bejelentkezés
+          </h2>
           <button
             type="button"
             onClick={handleGoogleSignIn}
             className="mt-8 w-full"
           >
             <span
-              className="
+              className="cursor-pointer
       flex h-14 w-full items-center justify-center gap-3
-      rounded-xl border border-black/50 bg-white
+      border border-black/50 bg-white
       px-4 text-[15px] font-medium text-[#1f1f1f]
       shadow-[0_1px_2px_rgba(0,0,0,0.08)]
       transition hover:bg-[#f8f8f8]
@@ -72,11 +74,11 @@ export default function AboutPage() {
               <span>Bejelentkezés Google fiókkal</span>
             </span>
           </button>
-          <p className="mt-6 text-left text-sm leading-relaxed text-stone-300">
-            A belépéssel elfogadod az{" "}
+          <p className="mt-6 text-left text-xs leading-relaxed text-stone-300">
+            * A belépéssel elfogadod az{" "}
             <span className="inline">
               <Link
-                href="/assets/aszf_v1.1.pdf"
+                href="/assets/aszf.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-amber-300 underline hover:text-amber-200"
@@ -85,12 +87,12 @@ export default function AboutPage() {
               </Link>{" "}
               és az{" "}
               <Link
-                href="/assets/adatkezelesi_tajekoztato_v1.1.pdf"
+                href="/assets/adatkezelesi_tajekoztato.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-amber-300 underline hover:text-amber-200"
               >
-                adatkezelési tájékoztatót
+                Adatkezelési Tájékoztatót
               </Link>
               .
             </span>
