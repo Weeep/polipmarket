@@ -16,50 +16,51 @@ const solidBackgrounds = [
 ];
 
 type Mode = "cover" | "post";
+type ExportFormat = "png" | "jpeg" | "bmp";
 
-function drawWrappedText(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  x: number,
-  y: number,
-  maxWidth: number,
-  lineHeight: number,
-) {
-  const words = text.split(" ");
-  const lines: string[] = [];
-  let current = "";
+function imageDataToBmpBlob(imageData: ImageData): Blob {
+  const { width, height, data } = imageData;
+  const rowSize = Math.floor((24 * width + 31) / 32) * 4;
+  const pixelArraySize = rowSize * height;
+  const fileSize = 54 + pixelArraySize;
+  const buffer = new ArrayBuffer(fileSize);
+  const view = new DataView(buffer);
 
-  for (const word of words) {
-    const test = current ? `${current} ${word}` : word;
-    if (ctx.measureText(test).width > maxWidth && current) {
-      lines.push(current);
-      current = word;
-    } else {
-      current = test;
+  view.setUint8(0, 0x42);
+  view.setUint8(1, 0x4d);
+  view.setUint32(2, fileSize, true);
+  view.setUint32(10, 54, true);
+
+  view.setUint32(14, 40, true);
+  view.setInt32(18, width, true);
+  view.setInt32(22, height, true);
+  view.setUint16(26, 1, true);
+  view.setUint16(28, 24, true);
+  view.setUint32(30, 0, true);
+  view.setUint32(34, pixelArraySize, true);
+  view.setInt32(38, 2835, true);
+  view.setInt32(42, 2835, true);
+
+  let offset = 54;
+  const padding = rowSize - width * 3;
+
+  for (let y = height - 1; y >= 0; y -= 1) {
+    for (let x = 0; x < width; x += 1) {
+      const index = (y * width + x) * 4;
+
+      view.setUint8(offset, data[index + 2]);
+      view.setUint8(offset + 1, data[index + 1]);
+      view.setUint8(offset + 2, data[index]);
+      offset += 3;
+    }
+
+    for (let p = 0; p < padding; p += 1) {
+      view.setUint8(offset, 0);
+      offset += 1;
     }
   }
-  if (current) lines.push(current);
 
-  const startY = y - ((lines.length - 1) * lineHeight) / 2;
-  lines.forEach((line, index) => {
-    ctx.fillText(line, x, startY + index * lineHeight);
-  });
-}
-
-function downloadCanvas(canvas: HTMLCanvasElement, fileName: string) {
-  canvas.toBlob((blob) => {
-    if (!blob) {
-      window.alert("Az export nem sikerült ebben a böngészőben.");
-      return;
-    }
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = fileName;
-    link.click();
-    URL.revokeObjectURL(url);
-  }, "image/png");
+  return new Blob([buffer], { type: "image/bmp" });
 }
 
 export default function FacebookCoverPage() {
@@ -69,6 +70,8 @@ export default function FacebookCoverPage() {
     "Szerinted mi fog történni a magyar politikában?",
   );
   const [isExporting, setIsExporting] = useState(false);
+  const [exportScale, setExportScale] = useState(2);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>("png");
   const [useGradientBackground, setUseGradientBackground] = useState(true);
   const [solidBackground, setSolidBackground] = useState(solidBackgrounds[1]);
 
@@ -113,7 +116,7 @@ export default function FacebookCoverPage() {
     });
   };
 
-  const exportCurrentAsPng = async () => {
+  const exportCurrentImage = async () => {
     const target = mode === "cover" ? coverRef.current : postRef.current;
 
     if (!target) {
@@ -148,9 +151,11 @@ export default function FacebookCoverPage() {
         img.src = svgDataUrl;
       });
 
+      const scaledWidth = width * exportScale;
+      const scaledHeight = height * exportScale;
       const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = scaledWidth;
+      canvas.height = scaledHeight;
 
       const context = canvas.getContext("2d");
 
@@ -158,13 +163,36 @@ export default function FacebookCoverPage() {
         throw new Error("A böngésző nem támogatja a canvas exportot.");
       }
 
-      context.drawImage(image, 0, 0, width, height);
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+      context.drawImage(image, 0, 0, scaledWidth, scaledHeight);
 
-      const dataUrl = canvas.toDataURL("image/png");
+      const blob =
+        exportFormat === "bmp"
+          ? imageDataToBmpBlob(
+              context.getImageData(0, 0, scaledWidth, scaledHeight),
+            )
+          : await new Promise<Blob>((resolve, reject) => {
+              canvas.toBlob(
+                (generatedBlob) => {
+                  if (!generatedBlob) {
+                    reject(new Error("Nem sikerült a kép exportálása."));
+                    return;
+                  }
+
+                  resolve(generatedBlob);
+                },
+                `image/${exportFormat}`,
+                exportFormat === "jpeg" ? 0.96 : undefined,
+              );
+            });
+
+      const dataUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = dataUrl;
-      link.download = `polipmarket-${mode}.png`;
+      link.download = `polipmarket-${mode}-${scaledWidth}x${scaledHeight}.${exportFormat === "jpeg" ? "jpg" : exportFormat}`;
       link.click();
+      URL.revokeObjectURL(dataUrl);
     } catch (error) {
       console.error(error);
       window.alert("Az export nem sikerült ebben a böngészőben.");
@@ -233,12 +261,42 @@ export default function FacebookCoverPage() {
 
       <button
         type="button"
-        onClick={exportCurrentAsPng}
+        onClick={exportCurrentImage}
         disabled={isExporting}
         className="rounded-full border border-amber-400/70 bg-amber-500/20 px-5 py-2 text-sm font-semibold text-amber-100 transition hover:bg-amber-500/30 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {isExporting ? "Export folyamatban..." : "Export PNG"}
+        {isExporting
+          ? "Export folyamatban..."
+          : `Export ${exportFormat.toUpperCase()} (${exportScale}x)`}
       </button>
+
+      <div className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-amber-400/40 bg-black/35 px-4 py-3">
+        <label className="inline-flex items-center gap-2 text-sm font-semibold text-amber-200">
+          Felbontás
+          <select
+            value={exportScale}
+            onChange={(event) => setExportScale(Number(event.target.value))}
+            className="rounded-lg border border-amber-500/50 bg-zinc-950/70 px-2 py-1 text-amber-100"
+          >
+            <option value={1}>1x (alap)</option>
+            <option value={2}>2x (ajánlott Facebookhoz)</option>
+            <option value={3}>3x (max minőség)</option>
+          </select>
+        </label>
+
+        <label className="inline-flex items-center gap-2 text-sm font-semibold text-amber-200">
+          Formátum
+          <select
+            value={exportFormat}
+            onChange={(event) => setExportFormat(event.target.value as ExportFormat)}
+            className="rounded-lg border border-amber-500/50 bg-zinc-950/70 px-2 py-1 text-amber-100"
+          >
+            <option value="png">PNG</option>
+            <option value="jpeg">JPG</option>
+            <option value="bmp">BMP</option>
+          </select>
+        </label>
+      </div>
 
       {mode === "cover" ? (
         <>
