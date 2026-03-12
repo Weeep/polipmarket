@@ -18,7 +18,7 @@ Jelen tájékoztató bemutatja, hogy a Polipmarket szolgáltatás használata so
 
 ## 3. A szolgáltatás rövid leírása
 
-A Polipmarket közösségi előrejelző és közvéleménykutató platform, ahol a felhasználók valós események kimenetelére adhatnak le tippet ("IGEN" / "NEM"). A bejelentkezés Google-fiókon keresztül történik.
+A Polipmarket közösségi előrejelző és közvéleménykutató platform, ahol a felhasználók valós események kimenetelére adhatnak le tippet ("IGEN" / "NEM"). A bejelentkezés Google- vagy Facebook-fiókon keresztül történik.
 
 A jogi dokumentumok (ÁSZF, adatkezelési tájékoztató) verziózottak. A felhasználó számára kötelezően elfogadandó, aktuális verzió a rendszerben publikált PDF dokumentum; ezek minősülnek a joghatályos szövegnek.
 
@@ -26,9 +26,14 @@ A jogi dokumentumok (ÁSZF, adatkezelési tájékoztató) verziózottak. A felha
 
 ### 4.1. Kötelezően kezelt adatok
 
-- e-mail cím,
-- Google felhasználónév,
-- Google profilkép.
+- Google belépés esetén:
+  - e-mail cím,
+  - Google felhasználónév,
+  - Google profilkép.
+- Facebook belépés esetén:
+  - Facebook profilazonosító (provider azonosító),
+  - Facebook felhasználónév,
+  - Facebook profilkép.
 
 ### 4.2. Jogi dokumentumok elfogadásához kapcsolódó adatok
 
@@ -43,7 +48,9 @@ A jogi dokumentumok (ÁSZF, adatkezelési tájékoztató) verziózottak. A felha
 ### 5.1. Fiókkezelés és felhasználói azonosítás
 
 - **Cél:** felhasználói fiók létrehozása, azonosítása és kezelése.
-- **Kezelt adatok:** e-mail cím, felhasználónév, profilkép.
+- **Kezelt adatok:**
+  - Google belépés esetén: e-mail cím, Google felhasználónév, Google profilkép,
+  - Facebook belépés esetén: Facebook profilazonosító (provider azonosító), Facebook felhasználónév, Facebook profilkép.
 - **Jogalap:** GDPR 6. cikk (1) b) pont (szerződés teljesítése).
 - **Megőrzési idő:** a felhasználói fiók fennállásáig, majd törlést követően a jogi igényérvényesítési határidő végéig.
 

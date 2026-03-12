@@ -105,7 +105,7 @@ export default function AboutPage() {
             * A belépéssel elfogadod az{" "}
             <span className="inline">
               <Link
-                href="/assets/aszf.pdf"
+                href="/assets/aszf_v1.1.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-amber-300 underline hover:text-amber-200"
@@ -114,7 +114,7 @@ export default function AboutPage() {
               </Link>{" "}
               és az{" "}
               <Link
-                href="/assets/adatkezelesi_tajekoztato.pdf"
+                href="/assets/adatkezelesi_tajekoztato_v1.1.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-amber-300 underline hover:text-amber-200"

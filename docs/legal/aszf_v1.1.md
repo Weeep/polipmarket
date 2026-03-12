@@ -27,7 +27,7 @@ A Polipmarket közösségi előrejelző és közvéleménykutató platform, amel
 
 ## 4. Regisztráció és felhasználói fiók
 
-- A bejelentkezés Google-fiókkal történik.
+- A bejelentkezés Google- vagy Facebook-fiókkal történik.
 - A felhasználó köteles valós és saját adatait használni.
 - A felhasználó felel a fiókjához kapcsolódó tevékenységekért.
 
