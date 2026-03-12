@@ -16,6 +16,10 @@ type AppSessionUser = {
   sessionVersion?: number;
 };
 
+function getScopedUserId(provider: string, providerAccountId: string) {
+  return `${provider}:${providerAccountId}`;
+}
+
 export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
@@ -36,11 +40,13 @@ export const authOptions: AuthOptions = {
     async signIn({ user, account }) {
       if (!account?.providerAccountId) return false;
 
-      const userId = account.providerAccountId;
       const isGoogle = account.provider === "google";
       const isFacebook = account.provider === "facebook";
 
+      const userId = getScopedUserId(account.provider, account.providerAccountId);
+
       if (!isGoogle && !isFacebook) return true;
+      if (isGoogle && !user.email) return false;
 
       const existingUser = await prisma.user.findUnique({
         where: { id: userId },
@@ -91,10 +97,11 @@ export const authOptions: AuthOptions = {
       const appToken = token as AppToken;
 
       if (account?.providerAccountId) {
-        appToken.sub = account.providerAccountId;
+        const userId = getScopedUserId(account.provider, account.providerAccountId);
+        appToken.sub = userId;
 
         const dbUser = await prisma.user.findUnique({
-          where: { id: account.providerAccountId },
+          where: { id: userId },
           select: { sessionVersion: true },
         });
 
