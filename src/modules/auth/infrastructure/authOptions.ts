@@ -1,4 +1,5 @@
 import { AuthOptions } from "next-auth";
+import FacebookProvider from "next-auth/providers/facebook";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 import { evaluateAchievementsForUser } from "@/modules/achievement/application/evaluateAchievementsForUser";
@@ -21,6 +22,10 @@ export const authOptions: AuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID!,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
+    }),
   ],
 
   session: {
@@ -29,13 +34,16 @@ export const authOptions: AuthOptions = {
 
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider !== "google") return true;
+      if (!account?.providerAccountId) return false;
 
-      const googleId = account.providerAccountId;
-      if (!googleId) return false;
+      const userId = account.providerAccountId;
+      const isGoogle = account.provider === "google";
+      const isFacebook = account.provider === "facebook";
+
+      if (!isGoogle && !isFacebook) return true;
 
       const existingUser = await prisma.user.findUnique({
-        where: { id: googleId },
+        where: { id: userId },
         select: { deletedAt: true },
       });
 
@@ -43,19 +51,19 @@ export const authOptions: AuthOptions = {
         return false;
       }
 
-      const email = user.email ?? undefined;
-
       await prisma.$transaction(async (tx) => {
         const dbUser = await tx.user.upsert({
-          where: { id: googleId },
+          where: { id: userId },
           update: {
             name: user.name,
             image: user.image,
-            email,
+            email: isGoogle ? user.email ?? null : null,
+            fbProfile: isFacebook ? account.providerAccountId : null,
           },
           create: {
-            id: googleId,
-            email: email!,
+            id: userId,
+            email: isGoogle ? user.email ?? null : null,
+            fbProfile: isFacebook ? account.providerAccountId : null,
             name: user.name,
             image: user.image,
           },
@@ -82,7 +90,7 @@ export const authOptions: AuthOptions = {
     async jwt({ token, account, trigger, session }) {
       const appToken = token as AppToken;
 
-      if (account?.provider === "google") {
+      if (account?.providerAccountId) {
         appToken.sub = account.providerAccountId;
 
         const dbUser = await prisma.user.findUnique({
