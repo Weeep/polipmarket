@@ -15,6 +15,10 @@ type AppSessionUser = {
   sessionVersion?: number;
 };
 
+function getGoogleLegacyScopedId(googleId: string) {
+  return `google:${googleId}`;
+}
+
 export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
@@ -34,27 +38,36 @@ export const authOptions: AuthOptions = {
       const googleId = account.providerAccountId;
       if (!googleId) return false;
 
-      const existingUser = await prisma.user.findUnique({
-        where: { id: googleId },
-        select: { deletedAt: true },
+      const legacyScopedGoogleId = getGoogleLegacyScopedId(googleId);
+
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          OR: [{ id: googleId }, { id: legacyScopedGoogleId }],
+        },
+        select: { id: true, deletedAt: true },
       });
 
       if (existingUser?.deletedAt) {
         return false;
       }
 
+      const userId = existingUser?.id ?? googleId;
       const email = user.email ?? undefined;
+
+      if (!existingUser && !email) {
+        return false;
+      }
 
       await prisma.$transaction(async (tx) => {
         const dbUser = await tx.user.upsert({
-          where: { id: googleId },
+          where: { id: userId },
           update: {
             name: user.name,
             image: user.image,
             email,
           },
           create: {
-            id: googleId,
+            id: userId,
             email: email!,
             name: user.name,
             image: user.image,
@@ -82,14 +95,18 @@ export const authOptions: AuthOptions = {
     async jwt({ token, account, trigger, session }) {
       const appToken = token as AppToken;
 
-      if (account?.provider === "google") {
-        appToken.sub = account.providerAccountId;
+      if (account?.provider === "google" && account.providerAccountId) {
+        const googleId = account.providerAccountId;
+        const legacyScopedGoogleId = getGoogleLegacyScopedId(googleId);
 
-        const dbUser = await prisma.user.findUnique({
-          where: { id: account.providerAccountId },
-          select: { sessionVersion: true },
+        const dbUser = await prisma.user.findFirst({
+          where: {
+            OR: [{ id: googleId }, { id: legacyScopedGoogleId }],
+          },
+          select: { id: true, sessionVersion: true },
         });
 
+        appToken.sub = dbUser?.id ?? googleId;
         appToken.sessionVersion = dbUser?.sessionVersion ?? 0;
       }
 
