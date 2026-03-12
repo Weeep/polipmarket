@@ -2,7 +2,7 @@ import { UserRole } from "./UserRole";
 
 export type UserProps = {
   id: string;
-  email: string | null;
+  email: string;
   name?: string | null;
   image?: string | null;
   role: UserRole;
@@ -11,7 +11,7 @@ export type UserProps = {
 };
 
 export type CreateUserProps = {
-  email: string | null;
+  email: string;
   name?: string;
   image?: string | null;
   role?: UserRole;

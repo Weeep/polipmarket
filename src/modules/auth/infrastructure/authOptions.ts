@@ -1,5 +1,4 @@
 import { AuthOptions } from "next-auth";
-import FacebookProvider from "next-auth/providers/facebook";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 import { evaluateAchievementsForUser } from "@/modules/achievement/application/evaluateAchievementsForUser";
@@ -16,8 +15,8 @@ type AppSessionUser = {
   sessionVersion?: number;
 };
 
-function getScopedUserId(provider: string, providerAccountId: string) {
-  return `${provider}:${providerAccountId}`;
+function getGoogleLegacyScopedId(googleId: string) {
+  return `google:${googleId}`;
 }
 
 export const authOptions: AuthOptions = {
@@ -25,15 +24,6 @@ export const authOptions: AuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID!,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          scope: "public_profile",
-        },
-      },
     }),
   ],
 
@@ -43,22 +33,28 @@ export const authOptions: AuthOptions = {
 
   callbacks: {
     async signIn({ user, account }) {
-      if (!account?.providerAccountId) return false;
+      if (account?.provider !== "google") return true;
 
-      const isGoogle = account.provider === "google";
-      const isFacebook = account.provider === "facebook";
+      const googleId = account.providerAccountId;
+      if (!googleId) return false;
 
-      const userId = getScopedUserId(account.provider, account.providerAccountId);
+      const legacyScopedGoogleId = getGoogleLegacyScopedId(googleId);
 
-      if (!isGoogle && !isFacebook) return true;
-      if (isGoogle && !user.email) return false;
-
-      const existingUser = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { deletedAt: true },
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          OR: [{ id: googleId }, { id: legacyScopedGoogleId }],
+        },
+        select: { id: true, deletedAt: true },
       });
 
       if (existingUser?.deletedAt) {
+        return false;
+      }
+
+      const userId = existingUser?.id ?? googleId;
+      const email = user.email ?? undefined;
+
+      if (!existingUser && !email) {
         return false;
       }
 
@@ -68,13 +64,11 @@ export const authOptions: AuthOptions = {
           update: {
             name: user.name,
             image: user.image,
-            email: isGoogle ? user.email ?? null : null,
-            fbProfile: isFacebook ? account.providerAccountId : null,
+            email,
           },
           create: {
             id: userId,
-            email: isGoogle ? user.email ?? null : null,
-            fbProfile: isFacebook ? account.providerAccountId : null,
+            email: email!,
             name: user.name,
             image: user.image,
           },
@@ -101,15 +95,18 @@ export const authOptions: AuthOptions = {
     async jwt({ token, account, trigger, session }) {
       const appToken = token as AppToken;
 
-      if (account?.providerAccountId) {
-        const userId = getScopedUserId(account.provider, account.providerAccountId);
-        appToken.sub = userId;
+      if (account?.provider === "google" && account.providerAccountId) {
+        const googleId = account.providerAccountId;
+        const legacyScopedGoogleId = getGoogleLegacyScopedId(googleId);
 
-        const dbUser = await prisma.user.findUnique({
-          where: { id: userId },
-          select: { sessionVersion: true },
+        const dbUser = await prisma.user.findFirst({
+          where: {
+            OR: [{ id: googleId }, { id: legacyScopedGoogleId }],
+          },
+          select: { id: true, sessionVersion: true },
         });
 
+        appToken.sub = dbUser?.id ?? googleId;
         appToken.sessionVersion = dbUser?.sessionVersion ?? 0;
       }
 
