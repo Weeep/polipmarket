@@ -4,10 +4,18 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 
 export default function AboutPage() {
-  const handleGoogleSignIn = () => {
+  const setAutoLegalAcceptCookie = () => {
     document.cookie =
       "pm_auto_legal_accept=1; Path=/; Max-Age=600; SameSite=Lax";
+  };
 
+  const handleFacebookSignIn = () => {
+    setAutoLegalAcceptCookie();
+    void signIn("facebook", { callbackUrl: "/" });
+  };
+
+  const handleGoogleSignIn = () => {
+    setAutoLegalAcceptCookie();
     void signIn("google", { callbackUrl: "/" });
   };
 
@@ -36,8 +44,8 @@ export default function AboutPage() {
             tippelsz, növelheted az egyenlegedet.
           </p>
           <p>
-            A bejelentkezés Google-fiókkal történik, így gyorsan és
-            biztonságosan tudsz csatlakozni. Belépés után azonnal láthatod az
+            A bejelentkezés Google- vagy Facebook-fiókkal történik, így gyorsan
+            és biztonságosan tudsz csatlakozni. Belépés után azonnal láthatod az
             aktív eseményeket és leadhatod az első tippedet.
           </p>
           <p className="font-semibold text-amber-200">
@@ -54,8 +62,27 @@ export default function AboutPage() {
           </h2>
           <button
             type="button"
-            onClick={handleGoogleSignIn}
+            onClick={handleFacebookSignIn}
             className="mt-8 w-full"
+          >
+            <span
+              className="cursor-pointer
+      flex h-14 w-full items-center justify-center gap-3
+      border border-[#0f5bd3] bg-[#1877f2]
+      px-4 text-[15px] font-medium text-white
+      shadow-[0_1px_2px_rgba(0,0,0,0.2)]
+      transition hover:bg-[#166fe5]
+    "
+            >
+              <span className="text-lg font-bold leading-none">f</span>
+              <span>Facebookkal</span>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            className="mt-3 w-full"
           >
             <span
               className="cursor-pointer
@@ -71,7 +98,7 @@ export default function AboutPage() {
                 alt="Google"
                 className="h-5 w-5"
               />
-              <span>Bejelentkezés Google fiókkal</span>
+              <span>Google fiókkal</span>
             </span>
           </button>
           <p className="mt-6 text-left text-xs leading-relaxed text-stone-300">
