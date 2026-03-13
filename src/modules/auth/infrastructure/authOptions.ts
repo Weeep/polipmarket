@@ -87,10 +87,13 @@ export const authOptions: AuthOptions = {
           const keyHash = getGuestRecoveryKeyHash(recoveryKey);
 
           const created = await prisma.$transaction(async (tx) => {
+            const userRowCount = await tx.user.count();
+            const guestSequence = String(userRowCount + 1).padStart(4, "0");
+
             const dbUser = await tx.user.create({
               data: {
                 email: `guest+${randomUUID()}@guest.polipmarket.local`,
-                name: "Vendég",
+                name: `Vendég ${guestSequence}`,
                 authType: "GUEST",
                 guestKeyHash: keyHash,
                 guestKeyAcknowledgedAt: null,
