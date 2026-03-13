@@ -38,9 +38,22 @@ function getCurrentGuestRecoveryKeySecret() {
   return process.env.GUEST_RECOVERY_KEY_SECRET ?? "polipmarket-guest-recovery-v1";
 }
 
-function getLegacyGuestRecoveryKeySecret() {
-  const legacyFromAuthSecret = process.env.NEXTAUTH_SECRET;
-  return legacyFromAuthSecret ?? "polipmarket-guest-pepper";
+function getLegacyGuestRecoveryKeySecrets() {
+  const configuredLegacySecrets = process.env.GUEST_RECOVERY_KEY_LEGACY_SECRETS
+    ?.split(",")
+    .map((secret) => secret.trim())
+    .filter(Boolean);
+
+  if (configuredLegacySecrets && configuredLegacySecrets.length > 0) {
+    return configuredLegacySecrets;
+  }
+
+  const nextAuthLegacySecret = process.env.NEXTAUTH_SECRET;
+  if (nextAuthLegacySecret) {
+    return [nextAuthLegacySecret];
+  }
+
+  return ["polipmarket-guest-pepper"];
 }
 
 function getGuestRecoveryKeyHash(recoveryKey: string) {
@@ -52,12 +65,11 @@ function getGuestRecoveryKeyHash(recoveryKey: string) {
 
 function getGuestRecoveryKeyHashCandidates(recoveryKey: string) {
   const currentSecret = getCurrentGuestRecoveryKeySecret();
-  const legacySecret = getLegacyGuestRecoveryKeySecret();
+  const legacySecrets = getLegacyGuestRecoveryKeySecrets();
 
-  const hashes = [
-    hashGuestRecoveryKeyWithSecret(recoveryKey, currentSecret),
-    hashGuestRecoveryKeyWithSecret(recoveryKey, legacySecret),
-  ];
+  const hashes = [currentSecret, ...legacySecrets].map((secret) =>
+    hashGuestRecoveryKeyWithSecret(recoveryKey, secret),
+  );
 
   return Array.from(new Set(hashes));
 }
