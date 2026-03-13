@@ -11,6 +11,7 @@ import Link from "next/link";
 import { CollapsibleInfoText } from "./CollapsibleInfoText";
 import { toHun } from "@/lib/logger";
 import { getCategoryByValue } from "@/modules/event/domain/eventCategoryMeta";
+import { LegalAcceptanceNotice } from "./LegalAcceptanceNotice";
 
 type Props = {
   event: EventSummary;
@@ -179,18 +180,23 @@ export function EventCard({ event }: Props) {
       setSuccess(null);
 
       if (!me) {
-        document.cookie =
-          "pm_auto_legal_accept=1; Path=/; Max-Age=600; SameSite=Lax";
-
         const signInResult = await signIn("guest", {
           mode: "create",
-          callbackUrl: window.location.href,
           redirect: false,
         });
 
         if (!signInResult || signInResult.error) {
           throw new Error("A vendég belépés sikertelen. Próbáld újra.");
         }
+
+        await apiFetch("/api/legal/accept", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            acceptTerms: true,
+            acceptPrivacy: true,
+          }),
+        });
 
         await refreshMe();
       }
@@ -495,6 +501,12 @@ export function EventCard({ event }: Props) {
                 </button>
               )}
             </div>
+            {!me && (
+              <LegalAcceptanceNotice
+                triggerText="MEHET gomb megnyovásával"
+                className="mt-4 text-left text-xs leading-relaxed text-stone-300"
+              />
+            )}
           </div>
         </div>
       )}
