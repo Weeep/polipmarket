@@ -8,6 +8,7 @@ export default function AboutPage() {
   const [recoveryKey, setRecoveryKey] = useState("");
   const [recoverError, setRecoverError] = useState<string | null>(null);
   const [isRecoverSubmitting, setIsRecoverSubmitting] = useState(false);
+  const [isRecoveryOpen, setIsRecoveryOpen] = useState(false);
 
   function setAutoLegalAcceptCookie() {
     document.cookie =
@@ -109,46 +110,66 @@ export default function AboutPage() {
                 alt="Google"
                 className="h-5 w-5"
               />
-              <span>Bejelentkezés Google fiókkal</span>
+              <span>Google fiókkal</span>
             </span>
           </button>
 
           <button
             type="button"
             onClick={handleGuestCreate}
-            className="mt-3 w-full rounded-md border border-amber-500/70 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-200 transition hover:bg-amber-500/20"
+            className="mt-3 w-full"
           >
-            Belépés vendégként
+            <span
+              className="cursor-pointer
+      flex h-14 w-full items-center justify-center gap-3
+      border border-black/50 bg-white
+      px-4 text-[15px] font-medium text-[#1f1f1f]
+      shadow-[0_1px_2px_rgba(0,0,0,0.08)]
+      transition hover:bg-[#f8f8f8]
+    "
+            >
+              <span className="text-lg leading-none" aria-hidden="true">
+                🐙
+              </span>
+              <span>Vendégként</span>
+            </span>
           </button>
 
-          <form onSubmit={handleGuestRecovery} className="mt-5 space-y-2 text-left">
-            <label
-              htmlFor="guest-recovery-key"
-              className="block text-xs font-semibold uppercase tracking-wide text-stone-400"
+          <div className="mt-5 text-left">
+            <button
+              type="button"
+              onClick={() => setIsRecoveryOpen((previous) => !previous)}
+              aria-expanded={isRecoveryOpen}
+              className="text-sm font-medium text-amber-300 underline underline-offset-2 transition hover:text-amber-200"
             >
               Már van vendég kulcsom
-            </label>
-            <input
-              id="guest-recovery-key"
-              type="text"
-              value={recoveryKey}
-              onChange={(event) => setRecoveryKey(event.target.value)}
-              placeholder="pmkt_..."
-              className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-stone-100 placeholder:text-stone-500 focus:border-amber-400 focus:outline-none"
-            />
-            {recoverError && (
-              <p className="text-xs text-rose-300">{recoverError}</p>
-            )}
-            <button
-              type="submit"
-              disabled={isRecoverSubmitting}
-              className="w-full rounded-md border border-zinc-600 px-3 py-2 text-sm font-medium text-stone-200 transition hover:bg-zinc-800 disabled:opacity-60"
-            >
-              {isRecoverSubmitting
-                ? "Beléptetés folyamatban..."
-                : "Belépés vendég kulccsal"}
             </button>
-          </form>
+
+            {isRecoveryOpen && (
+              <form onSubmit={handleGuestRecovery} className="mt-3 space-y-2">
+                <input
+                  id="guest-recovery-key"
+                  type="text"
+                  value={recoveryKey}
+                  onChange={(event) => setRecoveryKey(event.target.value)}
+                  placeholder="pmkt_..."
+                  className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-stone-100 placeholder:text-stone-500 focus:border-amber-400 focus:outline-none"
+                />
+                {recoverError && (
+                  <p className="text-xs text-rose-300">{recoverError}</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={isRecoverSubmitting}
+                  className="w-full rounded-md border border-zinc-600 px-3 py-2 text-sm font-medium text-stone-200 transition hover:bg-zinc-800 disabled:opacity-60"
+                >
+                  {isRecoverSubmitting
+                    ? "Beléptetés folyamatban..."
+                    : "Belépés vendég kulccsal"}
+                </button>
+              </form>
+            )}
+          </div>
 
           <LegalAcceptanceNotice
             triggerText="belépéssel"
