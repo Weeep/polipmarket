@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { apiFetch } from "@/lib/apiFetch";
 import { useMe } from "@/context/MeContext";
 import { QuoteOrderResult } from "@/modules/order/application/quoteOrder";
@@ -176,6 +177,23 @@ export function EventCard({ event }: Props) {
       setSubmitting(true);
       setError(null);
       setSuccess(null);
+
+      if (!me) {
+        document.cookie =
+          "pm_auto_legal_accept=1; Path=/; Max-Age=600; SameSite=Lax";
+
+        const signInResult = await signIn("guest", {
+          mode: "create",
+          callbackUrl: window.location.href,
+          redirect: false,
+        });
+
+        if (!signInResult || signInResult.error) {
+          throw new Error("A vendég belépés sikertelen. Próbáld újra.");
+        }
+
+        await refreshMe();
+      }
 
       await apiFetch("/api/orders", {
         method: "POST",
@@ -466,7 +484,7 @@ export function EventCard({ event }: Props) {
                 >
                   Betöltés...
                 </button>
-              ) : me ? (
+              ) : (
                 <button
                   type="button"
                   onClick={placeOrder}
@@ -474,16 +492,6 @@ export function EventCard({ event }: Props) {
                   className="button-gold disabled:opacity-50"
                 >
                   {submitting ? "Folyamatban..." : "MEHET"}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    window.location.href = "/about";
-                  }}
-                  className="button-gold"
-                >
-                  A fogadáshoz be kell jelentkezni
                 </button>
               )}
             </div>
