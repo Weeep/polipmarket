@@ -30,9 +30,36 @@ function getGoogleLegacyScopedId(googleId: string) {
   return `google:${googleId}`;
 }
 
-function hashGuestRecoveryKey(recoveryKey: string) {
-  const pepper = process.env.NEXTAUTH_SECRET ?? "polipmarket-guest-pepper";
-  return createHash("sha256").update(`${pepper}:${recoveryKey}`).digest("hex");
+function hashGuestRecoveryKeyWithSecret(recoveryKey: string, secret: string) {
+  return createHash("sha256").update(`${secret}:${recoveryKey}`).digest("hex");
+}
+
+function getCurrentGuestRecoveryKeySecret() {
+  return process.env.GUEST_RECOVERY_KEY_SECRET ?? "polipmarket-guest-recovery-v1";
+}
+
+function getLegacyGuestRecoveryKeySecret() {
+  const legacyFromAuthSecret = process.env.NEXTAUTH_SECRET;
+  return legacyFromAuthSecret ?? "polipmarket-guest-pepper";
+}
+
+function getGuestRecoveryKeyHash(recoveryKey: string) {
+  return hashGuestRecoveryKeyWithSecret(
+    recoveryKey,
+    getCurrentGuestRecoveryKeySecret(),
+  );
+}
+
+function getGuestRecoveryKeyHashCandidates(recoveryKey: string) {
+  const currentSecret = getCurrentGuestRecoveryKeySecret();
+  const legacySecret = getLegacyGuestRecoveryKeySecret();
+
+  const hashes = [
+    hashGuestRecoveryKeyWithSecret(recoveryKey, currentSecret),
+    hashGuestRecoveryKeyWithSecret(recoveryKey, legacySecret),
+  ];
+
+  return Array.from(new Set(hashes));
 }
 
 function createGuestRecoveryKey() {
@@ -57,7 +84,7 @@ export const authOptions: AuthOptions = {
 
         if (mode === "create") {
           const recoveryKey = createGuestRecoveryKey();
-          const keyHash = hashGuestRecoveryKey(recoveryKey);
+          const keyHash = getGuestRecoveryKeyHash(recoveryKey);
 
           const created = await prisma.$transaction(async (tx) => {
             const dbUser = await tx.user.create({
@@ -98,18 +125,27 @@ export const authOptions: AuthOptions = {
             return null;
           }
 
-          const keyHash = hashGuestRecoveryKey(recoveryKey);
+          const keyHashCandidates = getGuestRecoveryKeyHashCandidates(recoveryKey);
           const dbUser = await prisma.user.findFirst({
             where: {
               authType: "GUEST",
-              guestKeyHash: keyHash,
+              guestKeyHash: { in: keyHashCandidates },
               deletedAt: null,
             },
-            select: { id: true },
+            select: { id: true, guestKeyHash: true },
           });
 
           if (!dbUser) {
             return null;
+          }
+
+          const currentKeyHash = keyHashCandidates[0];
+
+          if (dbUser.guestKeyHash !== currentKeyHash) {
+            await prisma.user.update({
+              where: { id: dbUser.id },
+              data: { guestKeyHash: currentKeyHash },
+            });
           }
 
           return { id: dbUser.id };
