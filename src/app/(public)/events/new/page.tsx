@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { apiFetch } from "@/lib/apiFetch";
 import { useMe } from "@/context/MeContext";
 import { DEFAULT_AMM_FEE_BPS } from "@/config/economy";
 import { LegalAcceptanceNotice } from "@/components/LegalAcceptanceNotice";
+import { ensureGuestWithLegalAcceptance } from "@/lib/ensureGuestWithLegalAcceptance";
 import { EventCategory } from "@/modules/event/domain/Event";
 import {
   EVENT_CATEGORY_OPTIONS,
@@ -80,27 +80,10 @@ export default function NewEventPage() {
     setLoading(true);
 
     try {
-      if (!me) {
-        const signInResult = await signIn("guest", {
-          mode: "create",
-          redirect: false,
-        });
-
-        if (!signInResult || signInResult.error) {
-          throw new Error("A vendég belépés sikertelen. Próbáld újra.");
-        }
-
-        await apiFetch("/api/legal/accept", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            acceptTerms: true,
-            acceptPrivacy: true,
-          }),
-        });
-
-        await refreshMe();
-      }
+      await ensureGuestWithLegalAcceptance({
+        me,
+        refreshMe,
+      });
 
       const payloadMarkets = markets
         .map((market) => ({
@@ -117,7 +100,7 @@ export default function NewEventPage() {
         throw new Error("Category is required");
       }
 
-      const res = await apiFetch("/api/events", {
+      await apiFetch("/api/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -129,11 +112,6 @@ export default function NewEventPage() {
           markets: payloadMarkets,
         }),
       });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error ?? "Failed to create event");
-      }
 
       router.push("/events");
     } catch (err: unknown) {

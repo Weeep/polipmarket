@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { apiFetch } from "@/lib/apiFetch";
 import { useMe } from "@/context/MeContext";
 import { QuoteOrderResult } from "@/modules/order/application/quoteOrder";
@@ -12,6 +11,7 @@ import { CollapsibleInfoText } from "./CollapsibleInfoText";
 import { toHun } from "@/lib/logger";
 import { getCategoryByValue } from "@/modules/event/domain/eventCategoryMeta";
 import { LegalAcceptanceNotice } from "./LegalAcceptanceNotice";
+import { ensureGuestWithLegalAcceptance } from "@/lib/ensureGuestWithLegalAcceptance";
 
 type Props = {
   event: EventSummary;
@@ -179,27 +179,10 @@ export function EventCard({ event }: Props) {
       setError(null);
       setSuccess(null);
 
-      if (!me) {
-        const signInResult = await signIn("guest", {
-          mode: "create",
-          redirect: false,
-        });
-
-        if (!signInResult || signInResult.error) {
-          throw new Error("A vendég belépés sikertelen. Próbáld újra.");
-        }
-
-        await apiFetch("/api/legal/accept", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            acceptTerms: true,
-            acceptPrivacy: true,
-          }),
-        });
-
-        await refreshMe();
-      }
+      await ensureGuestWithLegalAcceptance({
+        me,
+        refreshMe,
+      });
 
       await apiFetch("/api/orders", {
         method: "POST",

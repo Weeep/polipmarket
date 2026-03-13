@@ -59,24 +59,44 @@ function EventsPageContent() {
   }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams();
+    let isCancelled = false;
 
-    if (hasValidQuery) {
-      params.set("q", query);
+    async function loadEvents() {
+      setLoading(true);
+
+      const params = new URLSearchParams();
+
+      if (hasValidQuery) {
+        params.set("q", query);
+      }
+
+      if (selectedCategory) {
+        params.set("category", selectedCategory);
+      }
+
+      const endpoint = params.toString()
+        ? `/api/events?${params.toString()}`
+        : "/api/events";
+
+      try {
+        const res = await apiFetch(endpoint);
+        const data = (await res.json()) as EventSummary[];
+
+        if (!isCancelled) {
+          setEvents(data);
+        }
+      } finally {
+        if (!isCancelled) {
+          setLoading(false);
+        }
+      }
     }
 
-    if (selectedCategory) {
-      params.set("category", selectedCategory);
-    }
+    void loadEvents();
 
-    const endpoint = params.toString()
-      ? `/api/events?${params.toString()}`
-      : "/api/events";
-
-    apiFetch(endpoint)
-      .then((res) => res.json())
-      .then((data) => setEvents(data as EventSummary[]))
-      .finally(() => setLoading(false));
+    return () => {
+      isCancelled = true;
+    };
   }, [hasValidQuery, query, selectedCategory]);
 
   if (loading) return <p>Loading events…</p>;
