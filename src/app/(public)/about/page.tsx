@@ -1,15 +1,55 @@
 "use client";
 
 import Link from "next/link";
+import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 
 export default function AboutPage() {
-  const handleGoogleSignIn = () => {
+  const [recoveryKey, setRecoveryKey] = useState("");
+  const [recoverError, setRecoverError] = useState<string | null>(null);
+  const [isRecoverSubmitting, setIsRecoverSubmitting] = useState(false);
+
+  function setAutoLegalAcceptCookie() {
     document.cookie =
       "pm_auto_legal_accept=1; Path=/; Max-Age=600; SameSite=Lax";
+  }
 
+  const handleGoogleSignIn = () => {
+    setAutoLegalAcceptCookie();
     void signIn("google", { callbackUrl: "/" });
   };
+
+  const handleGuestCreate = () => {
+    setAutoLegalAcceptCookie();
+    void signIn("guest", { mode: "create", callbackUrl: "/" });
+  };
+
+  async function handleGuestRecovery(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setRecoverError(null);
+    setIsRecoverSubmitting(true);
+
+    try {
+      setAutoLegalAcceptCookie();
+      const result = await signIn("guest", {
+        mode: "recover",
+        recoveryKey: recoveryKey.trim(),
+        callbackUrl: "/",
+        redirect: false,
+      });
+
+      if (!result || result.error) {
+        setRecoverError("A megadott kulcs érvénytelen.");
+        return;
+      }
+
+      window.location.href = result.url || "/";
+    } catch {
+      setRecoverError("A belépés sikertelen. Próbáld újra.");
+    } finally {
+      setIsRecoverSubmitting(false);
+    }
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-10 md:min-h-[calc(100vh-9rem)] md:flex-row md:items-center md:gap-16">
@@ -36,9 +76,9 @@ export default function AboutPage() {
             tippelsz, növelheted az egyenlegedet.
           </p>
           <p>
-            A bejelentkezés Google-fiókkal történik, így gyorsan és
-            biztonságosan tudsz csatlakozni. Belépés után azonnal láthatod az
-            aktív eseményeket és leadhatod az első tippedet.
+            Beléphetsz Google-fiókkal, vagy választhatod a vendég módot is.
+            Vendégként egy visszaállító kulcsot kapsz, amivel később másik
+            eszközről is beléphetsz.
           </p>
           <p className="font-semibold text-amber-200">
             A Polipmarketet kizárólag 18 éven felüliek használhatják. Ha még nem
@@ -49,9 +89,7 @@ export default function AboutPage() {
 
       <aside className="flex w-full items-center justify-center md:w-1/3">
         <div className="w-full max-w-sm border border-zinc-800 bg-zinc-950 p-8 text-center shadow-xl shadow-black/20">
-          <h2 className="text-4xl font-semibold text-stone-100">
-            Bejelentkezés
-          </h2>
+          <h2 className="text-4xl font-semibold text-stone-100">Belépés</h2>
           <button
             type="button"
             onClick={handleGoogleSignIn}
@@ -74,6 +112,44 @@ export default function AboutPage() {
               <span>Bejelentkezés Google fiókkal</span>
             </span>
           </button>
+
+          <button
+            type="button"
+            onClick={handleGuestCreate}
+            className="mt-3 w-full rounded-md border border-amber-500/70 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-200 transition hover:bg-amber-500/20"
+          >
+            Belépés vendégként
+          </button>
+
+          <form onSubmit={handleGuestRecovery} className="mt-5 space-y-2 text-left">
+            <label
+              htmlFor="guest-recovery-key"
+              className="block text-xs font-semibold uppercase tracking-wide text-stone-400"
+            >
+              Már van vendég kulcsom
+            </label>
+            <input
+              id="guest-recovery-key"
+              type="text"
+              value={recoveryKey}
+              onChange={(event) => setRecoveryKey(event.target.value)}
+              placeholder="pmkt_..."
+              className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-stone-100 placeholder:text-stone-500 focus:border-amber-400 focus:outline-none"
+            />
+            {recoverError && (
+              <p className="text-xs text-rose-300">{recoverError}</p>
+            )}
+            <button
+              type="submit"
+              disabled={isRecoverSubmitting}
+              className="w-full rounded-md border border-zinc-600 px-3 py-2 text-sm font-medium text-stone-200 transition hover:bg-zinc-800 disabled:opacity-60"
+            >
+              {isRecoverSubmitting
+                ? "Beléptetés folyamatban..."
+                : "Belépés vendég kulccsal"}
+            </button>
+          </form>
+
           <p className="mt-6 text-left text-xs leading-relaxed text-stone-300">
             * A belépéssel elfogadod az{" "}
             <span className="inline">

@@ -1,5 +1,7 @@
 import { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { createHash, randomBytes, randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { evaluateAchievementsForUser } from "@/modules/achievement/application/evaluateAchievementsForUser";
 
@@ -7,16 +9,61 @@ type AppToken = {
   sub?: string;
   impersonatedUserId?: string | null;
   sessionVersion?: number;
+  isGuest?: boolean;
+  guestRecoveryKey?: string | null;
 };
 
 type AppSessionUser = {
   id?: string;
   impersonatedBy?: string | null;
   sessionVersion?: number;
+  isGuest?: boolean;
+  guestRecoveryKey?: string | null;
+};
+
+type AuthorizeResult = {
+  id: string;
+  guestRecoveryKey?: string;
 };
 
 function getGoogleLegacyScopedId(googleId: string) {
   return `google:${googleId}`;
+}
+
+function hashGuestRecoveryKeyWithSecret(recoveryKey: string, secret: string) {
+  return createHash("sha256").update(`${secret}:${recoveryKey}`).digest("hex");
+}
+
+function getCurrentGuestRecoveryKeySecret() {
+  return process.env.GUEST_RECOVERY_KEY_SECRET ?? "polipmarket-guest-recovery-v1";
+}
+
+function getLegacyGuestRecoveryKeySecret() {
+  const legacyFromAuthSecret = process.env.NEXTAUTH_SECRET;
+  return legacyFromAuthSecret ?? "polipmarket-guest-pepper";
+}
+
+function getGuestRecoveryKeyHash(recoveryKey: string) {
+  return hashGuestRecoveryKeyWithSecret(
+    recoveryKey,
+    getCurrentGuestRecoveryKeySecret(),
+  );
+}
+
+function getGuestRecoveryKeyHashCandidates(recoveryKey: string) {
+  const currentSecret = getCurrentGuestRecoveryKeySecret();
+  const legacySecret = getLegacyGuestRecoveryKeySecret();
+
+  const hashes = [
+    hashGuestRecoveryKeyWithSecret(recoveryKey, currentSecret),
+    hashGuestRecoveryKeyWithSecret(recoveryKey, legacySecret),
+  ];
+
+  return Array.from(new Set(hashes));
+}
+
+function createGuestRecoveryKey() {
+  return `pmkt_${randomBytes(18).toString("base64url")}`;
 }
 
 export const authOptions: AuthOptions = {
@@ -24,6 +71,91 @@ export const authOptions: AuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    CredentialsProvider({
+      id: "guest",
+      name: "Guest",
+      credentials: {
+        mode: { label: "Mode", type: "text" },
+        recoveryKey: { label: "Recovery key", type: "text" },
+      },
+      async authorize(credentials): Promise<AuthorizeResult | null> {
+        const mode = credentials?.mode;
+
+        if (mode === "create") {
+          const recoveryKey = createGuestRecoveryKey();
+          const keyHash = getGuestRecoveryKeyHash(recoveryKey);
+
+          const created = await prisma.$transaction(async (tx) => {
+            const userRowCount = await tx.user.count();
+            const guestSequence = String(userRowCount + 1).padStart(4, "0");
+
+            const dbUser = await tx.user.create({
+              data: {
+                email: `guest+${randomUUID()}@guest.polipmarket.local`,
+                name: `Vendég ${guestSequence}`,
+                authType: "GUEST",
+                guestKeyHash: keyHash,
+                guestKeyAcknowledgedAt: null,
+              },
+              select: { id: true },
+            });
+
+            await tx.wallet.create({
+              data: {
+                userId: dbUser.id,
+                balance: 1000,
+              },
+            });
+
+            await evaluateAchievementsForUser({
+              userId: dbUser.id,
+              tx,
+            });
+
+            return dbUser;
+          });
+
+          return {
+            id: created.id,
+            guestRecoveryKey: recoveryKey,
+          };
+        }
+
+        if (mode === "recover") {
+          const recoveryKey = credentials?.recoveryKey?.trim();
+          if (!recoveryKey?.startsWith("pmkt_")) {
+            return null;
+          }
+
+          const keyHashCandidates = getGuestRecoveryKeyHashCandidates(recoveryKey);
+          const dbUser = await prisma.user.findFirst({
+            where: {
+              authType: "GUEST",
+              guestKeyHash: { in: keyHashCandidates },
+              deletedAt: null,
+            },
+            select: { id: true, guestKeyHash: true },
+          });
+
+          if (!dbUser) {
+            return null;
+          }
+
+          const currentKeyHash = keyHashCandidates[0];
+
+          if (dbUser.guestKeyHash !== currentKeyHash) {
+            await prisma.user.update({
+              where: { id: dbUser.id },
+              data: { guestKeyHash: currentKeyHash },
+            });
+          }
+
+          return { id: dbUser.id };
+        }
+
+        return null;
+      },
     }),
   ],
 
@@ -65,12 +197,16 @@ export const authOptions: AuthOptions = {
             name: user.name,
             image: user.image,
             email,
+            authType: "GOOGLE",
+            guestKeyHash: null,
+            guestKeyAcknowledgedAt: null,
           },
           create: {
             id: userId,
             email: email!,
             name: user.name,
             image: user.image,
+            authType: "GOOGLE",
           },
         });
 
@@ -92,7 +228,7 @@ export const authOptions: AuthOptions = {
       return true;
     },
 
-    async jwt({ token, account, trigger, session }) {
+    async jwt({ token, account, trigger, session, user }) {
       const appToken = token as AppToken;
 
       if (account?.provider === "google" && account.providerAccountId) {
@@ -103,15 +239,43 @@ export const authOptions: AuthOptions = {
           where: {
             OR: [{ id: googleId }, { id: legacyScopedGoogleId }],
           },
-          select: { id: true, sessionVersion: true },
+          select: { id: true, sessionVersion: true, authType: true },
         });
 
         appToken.sub = dbUser?.id ?? googleId;
         appToken.sessionVersion = dbUser?.sessionVersion ?? 0;
+        appToken.isGuest = dbUser?.authType === "GUEST";
+        appToken.guestRecoveryKey = null;
       }
 
-      if (trigger === "update" && session?.impersonatedUserId !== undefined) {
-        appToken.impersonatedUserId = session.impersonatedUserId ?? null;
+      if (account?.provider === "guest" && user?.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { sessionVersion: true, authType: true, guestKeyAcknowledgedAt: true },
+        });
+
+        appToken.sub = user.id;
+        appToken.sessionVersion = dbUser?.sessionVersion ?? 0;
+        appToken.isGuest = dbUser?.authType === "GUEST";
+        appToken.guestRecoveryKey =
+          "guestRecoveryKey" in user &&
+          typeof user.guestRecoveryKey === "string" &&
+          !dbUser?.guestKeyAcknowledgedAt
+            ? user.guestRecoveryKey
+            : null;
+      }
+
+      const updatedSession = (session ?? {}) as {
+        impersonatedUserId?: string | null;
+        guestRecoveryKey?: string | null;
+      };
+
+      if (trigger === "update" && updatedSession.impersonatedUserId !== undefined) {
+        appToken.impersonatedUserId = updatedSession.impersonatedUserId ?? null;
+      }
+
+      if (trigger === "update" && updatedSession.guestRecoveryKey !== undefined) {
+        appToken.guestRecoveryKey = updatedSession.guestRecoveryKey ?? null;
       }
 
       return token;
@@ -144,6 +308,8 @@ export const authOptions: AuthOptions = {
         sessionUser.id = actingUserId;
         sessionUser.impersonatedBy = appToken.impersonatedUserId ? token.sub : null;
         sessionUser.sessionVersion = appToken.sessionVersion ?? 0;
+        sessionUser.isGuest = appToken.isGuest ?? false;
+        sessionUser.guestRecoveryKey = appToken.guestRecoveryKey ?? null;
       }
 
       return session;

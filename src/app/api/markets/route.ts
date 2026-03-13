@@ -188,7 +188,7 @@ export async function GET(req: Request) {
     );
 
     const creatorIds = Array.from(new Set(marketsWithExtras.map((market) => market.createdBy)));
-    const creators = await prisma.user.findMany({
+    const creators: Array<{ id: string; name: string | null }> = await prisma.user.findMany({
       where: { id: { in: creatorIds } },
       select: { id: true, name: true },
     });

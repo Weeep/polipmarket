@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/lib/apiFetch";
 import { getRemainingTimeInfo } from "@/lib/remainingTime";
+import { useMe } from "@/context/MeContext";
 import { EVENT_CATEGORY_OPTIONS } from "@/modules/event/domain/eventCategoryMeta";
 import type { EventSummary } from "@/modules/event/domain/Event";
 import type { EventCategory } from "@/modules/event/domain/Event";
@@ -19,10 +20,18 @@ function formatVolume(value?: number) {
 }
 
 export function ActiveEventsTabsTable() {
-  const [activeSort, setActiveSort] = useState<ActiveEventsSort>("created_desc");
-  const [activeCategory, setActiveCategory] = useState<EventCategory | null>(null);
+  const { me, refreshMe } = useMe();
+  const [activeSort, setActiveSort] =
+    useState<ActiveEventsSort>("created_desc");
+  const [activeCategory, setActiveCategory] = useState<EventCategory | null>(
+    null,
+  );
   const [events, setEvents] = useState<EventSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isEditingNickname, setIsEditingNickname] = useState(false);
+  const [nicknameValue, setNicknameValue] = useState("");
+  const [isSavingNickname, setIsSavingNickname] = useState(false);
+  const [nicknameError, setNicknameError] = useState<string | null>(null);
 
   const query = useMemo(() => {
     const params = new URLSearchParams({
@@ -64,12 +73,127 @@ export function ActiveEventsTabsTable() {
     setActiveCategory(category);
   }
 
+  function startNicknameEdit() {
+    if (me?.nickname) {
+      return;
+    }
+
+    setNicknameValue("");
+    setNicknameError(null);
+    setIsEditingNickname(true);
+  }
+
+  function stopNicknameEdit() {
+    setIsEditingNickname(false);
+    setNicknameValue("");
+    setNicknameError(null);
+  }
+
+  async function saveNickname(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const normalized = nicknameValue.trim();
+
+    if (!normalized) {
+      setNicknameError("Adj meg egy becenevet.");
+      return;
+    }
+
+    try {
+      setIsSavingNickname(true);
+      setNicknameError(null);
+
+      await apiFetch("/api/me/nickname", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nickname: normalized }),
+      });
+
+      await refreshMe();
+      setIsEditingNickname(false);
+      setNicknameValue("");
+    } catch (error) {
+      setNicknameError(
+        error instanceof Error ? error.message : "A mentés nem sikerült.",
+      );
+    } finally {
+      setIsSavingNickname(false);
+    }
+  }
+
+  function handleNicknameInputKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      stopNicknameEdit();
+    }
+  }
+
+  const baseName = me?.name?.trim() || "Felhasználó";
+
   return (
     <section className="marketcard-base space-y-4">
-      <p className="text-sm text-stone-400">
-        Üdv! Itt láthatsz pár eseményt, csak kattints a neked szimpatikus
-        esemény sorára és már fogadhatsz is!
-      </p>
+      <div className="text-sm text-stone-400">
+        {!me ? (
+          <p>
+            Üdv! Itt láthatsz pár eseményt, csak kattints a neked szimpatikus
+            esemény sorára és már fogadhatsz is!
+          </p>
+        ) : me.nickname ? (
+          <p>
+            Üdv{" "}
+            <span className="text-stone-100 font-bold text-base">
+              {me.nickname}
+            </span>
+            ! Itt láthatsz pár eseményt, csak kattints a neked szimpatikus
+            esemény sorára és már fogadhatsz is!
+          </p>
+        ) : isEditingNickname ? (
+          <form
+            onSubmit={saveNickname}
+            className="flex flex-wrap items-center gap-2"
+          >
+            <span>Üdv</span>
+            <input
+              autoFocus
+              type="text"
+              value={nicknameValue}
+              onChange={(event) => setNicknameValue(event.target.value)}
+              onKeyDown={handleNicknameInputKeyDown}
+              maxLength={40}
+              className="rounded-md border border-amber-400/60 bg-zinc-900 px-2 py-1 text-sm text-amber-100 placeholder:text-stone-500 focus:border-amber-300 focus:outline-none"
+              placeholder="becenév"
+              disabled={isSavingNickname}
+              aria-label="Nickname"
+            />
+            <span>! Itt láthatsz pár eseményt...</span>
+            {nicknameError && (
+              <span className="text-rose-300">{nicknameError}</span>
+            )}
+          </form>
+        ) : (
+          <p className="flex flex-wrap items-center gap-1.5">
+            <span>
+              Üdv{" "}
+              <span className="text-stone-100 font-bold text-base">
+                {baseName}
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={startNicknameEdit}
+              className="rounded border border-zinc-600 px-1.5 py-0.5 text-xs text-stone-300 transition hover:border-amber-300 hover:text-amber-200"
+              aria-label="Nickname szerkesztése"
+              title="Nickname szerkesztése"
+            >
+              ✏️
+            </button>
+            <span>
+              ! Itt láthatsz pár eseményt, csak kattints a neked szimpatikus
+              esemény sorára és már fogadhatsz is!
+            </span>
+          </p>
+        )}
+      </div>
       <h2 className="text-lg font-bold text-stone-100">Fogadható események</h2>
 
       <div className="flex flex-wrap gap-4 justify-center">
@@ -124,7 +248,11 @@ export function ActiveEventsTabsTable() {
               <th className="py-2 pr-4">
                 <button
                   type="button"
-                  className={activeSort === "volume_desc" ? "text-amber-300" : "hover:text-stone-200"}
+                  className={
+                    activeSort === "volume_desc"
+                      ? "text-amber-300"
+                      : "hover:text-stone-200"
+                  }
                   onClick={() => handleSortChange("volume_desc")}
                 >
                   Összes tét
@@ -133,7 +261,11 @@ export function ActiveEventsTabsTable() {
               <th className="py-2 pr-4">
                 <button
                   type="button"
-                  className={activeSort === "betting_close_asc" ? "text-amber-300" : "hover:text-stone-200"}
+                  className={
+                    activeSort === "betting_close_asc"
+                      ? "text-amber-300"
+                      : "hover:text-stone-200"
+                  }
                   onClick={() => handleSortChange("betting_close_asc")}
                 >
                   Fogadás zárás
@@ -142,7 +274,11 @@ export function ActiveEventsTabsTable() {
               <th className="py-2">
                 <button
                   type="button"
-                  className={activeSort === "event_close_asc" ? "text-amber-300" : "hover:text-stone-200"}
+                  className={
+                    activeSort === "event_close_asc"
+                      ? "text-amber-300"
+                      : "hover:text-stone-200"
+                  }
                   onClick={() => handleSortChange("event_close_asc")}
                 >
                   Esemény zárás

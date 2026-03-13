@@ -11,6 +11,7 @@ export const GET = withAuth(async (user) => {
         id: true,
         email: true,
         name: true,
+        nickname: true,
         image: true,
         role: true,
         wallet: {
@@ -33,6 +34,7 @@ export const GET = withAuth(async (user) => {
       id: prismaUser.id,
       email: prismaUser.email,
       name: prismaUser.name,
+      nickname: prismaUser.nickname,
       image: prismaUser.image,
       role: prismaUser.role,
       balance: prismaUser.wallet.balance,
