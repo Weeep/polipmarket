@@ -21,8 +21,11 @@ function formatVolume(value?: number) {
 
 export function ActiveEventsTabsTable() {
   const { me, refreshMe } = useMe();
-  const [activeSort, setActiveSort] = useState<ActiveEventsSort>("created_desc");
-  const [activeCategory, setActiveCategory] = useState<EventCategory | null>(null);
+  const [activeSort, setActiveSort] =
+    useState<ActiveEventsSort>("created_desc");
+  const [activeCategory, setActiveCategory] = useState<EventCategory | null>(
+    null,
+  );
   const [events, setEvents] = useState<EventSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditingNickname, setIsEditingNickname] = useState(false);
@@ -137,11 +140,18 @@ export function ActiveEventsTabsTable() {
           </p>
         ) : me.nickname ? (
           <p>
-            Üdv {me.nickname}! Itt láthatsz pár eseményt, csak kattints a neked
-            szimpatikus esemény sorára és már fogadhatsz is!
+            Üdv{" "}
+            <span className="text-stone-100 font-bold text-base">
+              {me.nickname}
+            </span>
+            ! Itt láthatsz pár eseményt, csak kattints a neked szimpatikus
+            esemény sorára és már fogadhatsz is!
           </p>
         ) : isEditingNickname ? (
-          <form onSubmit={saveNickname} className="flex flex-wrap items-center gap-2">
+          <form
+            onSubmit={saveNickname}
+            className="flex flex-wrap items-center gap-2"
+          >
             <span>Üdv</span>
             <input
               autoFocus
@@ -156,11 +166,18 @@ export function ActiveEventsTabsTable() {
               aria-label="Nickname"
             />
             <span>! Itt láthatsz pár eseményt...</span>
-            {nicknameError && <span className="text-rose-300">{nicknameError}</span>}
+            {nicknameError && (
+              <span className="text-rose-300">{nicknameError}</span>
+            )}
           </form>
         ) : (
           <p className="flex flex-wrap items-center gap-1.5">
-            <span>Üdv {baseName}</span>
+            <span>
+              Üdv{" "}
+              <span className="text-stone-100 font-bold text-base">
+                {baseName}
+              </span>
+            </span>
             <button
               type="button"
               onClick={startNicknameEdit}
@@ -231,7 +248,11 @@ export function ActiveEventsTabsTable() {
               <th className="py-2 pr-4">
                 <button
                   type="button"
-                  className={activeSort === "volume_desc" ? "text-amber-300" : "hover:text-stone-200"}
+                  className={
+                    activeSort === "volume_desc"
+                      ? "text-amber-300"
+                      : "hover:text-stone-200"
+                  }
                   onClick={() => handleSortChange("volume_desc")}
                 >
                   Összes tét
@@ -240,7 +261,11 @@ export function ActiveEventsTabsTable() {
               <th className="py-2 pr-4">
                 <button
                   type="button"
-                  className={activeSort === "betting_close_asc" ? "text-amber-300" : "hover:text-stone-200"}
+                  className={
+                    activeSort === "betting_close_asc"
+                      ? "text-amber-300"
+                      : "hover:text-stone-200"
+                  }
                   onClick={() => handleSortChange("betting_close_asc")}
                 >
                   Fogadás zárás
@@ -249,7 +274,11 @@ export function ActiveEventsTabsTable() {
               <th className="py-2">
                 <button
                   type="button"
-                  className={activeSort === "event_close_asc" ? "text-amber-300" : "hover:text-stone-200"}
+                  className={
+                    activeSort === "event_close_asc"
+                      ? "text-amber-300"
+                      : "hover:text-stone-200"
+                  }
                   onClick={() => handleSortChange("event_close_asc")}
                 >
                   Esemény zárás
