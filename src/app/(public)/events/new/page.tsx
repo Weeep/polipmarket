@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
+import { useMe } from "@/context/MeContext";
 import { DEFAULT_AMM_FEE_BPS } from "@/config/economy";
+import { LegalAcceptanceNotice } from "@/components/LegalAcceptanceNotice";
+import { ensureGuestWithLegalAcceptance } from "@/lib/ensureGuestWithLegalAcceptance";
 import { EventCategory } from "@/modules/event/domain/Event";
 import {
   EVENT_CATEGORY_OPTIONS,
@@ -51,6 +54,7 @@ export default function NewEventPage() {
   const [markets, setMarkets] = useState<DraftMarket[]>([createMarket()]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { me, refreshMe } = useMe();
 
   useEffect(() => {
     apiFetch("/api/categories")
@@ -76,6 +80,11 @@ export default function NewEventPage() {
     setLoading(true);
 
     try {
+      await ensureGuestWithLegalAcceptance({
+        me,
+        refreshMe,
+      });
+
       const payloadMarkets = markets
         .map((market) => ({
           name: market.name.trim(),
@@ -91,7 +100,7 @@ export default function NewEventPage() {
         throw new Error("Category is required");
       }
 
-      const res = await apiFetch("/api/events", {
+      await apiFetch("/api/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -103,11 +112,6 @@ export default function NewEventPage() {
           markets: payloadMarkets,
         }),
       });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error ?? "Failed to create event");
-      }
 
       router.push("/events");
     } catch (err: unknown) {
@@ -321,8 +325,15 @@ export default function NewEventPage() {
           {error && <p style={{ color: "red" }}>{error}</p>}
 
           <button className="button-gold" type="submit" disabled={loading}>
-            {loading ? "Készül…" : "Mehet"}
+            {loading ? "Készül…" : "MEHET"}
           </button>
+
+          {!me && (
+            <LegalAcceptanceNotice
+              triggerText="MEHET gomb megnyovásával"
+              className="text-left text-xs leading-relaxed text-stone-300"
+            />
+          )}
         </form>
       </div>
     </div>

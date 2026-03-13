@@ -10,6 +10,8 @@ import Link from "next/link";
 import { CollapsibleInfoText } from "./CollapsibleInfoText";
 import { toHun } from "@/lib/logger";
 import { getCategoryByValue } from "@/modules/event/domain/eventCategoryMeta";
+import { LegalAcceptanceNotice } from "./LegalAcceptanceNotice";
+import { ensureGuestWithLegalAcceptance } from "@/lib/ensureGuestWithLegalAcceptance";
 
 type Props = {
   event: EventSummary;
@@ -176,6 +178,11 @@ export function EventCard({ event }: Props) {
       setSubmitting(true);
       setError(null);
       setSuccess(null);
+
+      await ensureGuestWithLegalAcceptance({
+        me,
+        refreshMe,
+      });
 
       await apiFetch("/api/orders", {
         method: "POST",
@@ -466,7 +473,7 @@ export function EventCard({ event }: Props) {
                 >
                   Betöltés...
                 </button>
-              ) : me ? (
+              ) : (
                 <button
                   type="button"
                   onClick={placeOrder}
@@ -475,18 +482,14 @@ export function EventCard({ event }: Props) {
                 >
                   {submitting ? "Folyamatban..." : "MEHET"}
                 </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    window.location.href = "/about";
-                  }}
-                  className="button-gold"
-                >
-                  A fogadáshoz be kell jelentkezni
-                </button>
               )}
             </div>
+            {!me && (
+              <LegalAcceptanceNotice
+                triggerText="MEHET gomb megnyovásával"
+                className="mt-4 text-left text-xs leading-relaxed text-stone-300"
+              />
+            )}
           </div>
         </div>
       )}

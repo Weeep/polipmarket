@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
+import { LegalAcceptanceNotice } from "@/components/LegalAcceptanceNotice";
 
 export default function AboutPage() {
   const [recoveryKey, setRecoveryKey] = useState("");
@@ -150,29 +150,10 @@ export default function AboutPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-left text-xs leading-relaxed text-stone-300">
-            * A belépéssel elfogadod az{" "}
-            <span className="inline">
-              <Link
-                href="/assets/aszf.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-amber-300 underline hover:text-amber-200"
-              >
-                Általános Szerződési Feltételeket
-              </Link>{" "}
-              és az{" "}
-              <Link
-                href="/assets/adatkezelesi_tajekoztato.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-amber-300 underline hover:text-amber-200"
-              >
-                Adatkezelési Tájékoztatót
-              </Link>
-              .
-            </span>
-          </p>
+          <LegalAcceptanceNotice
+            triggerText="belépéssel"
+            className="mt-6 text-left text-xs leading-relaxed text-stone-300"
+          />
         </div>
       </aside>
     </main>

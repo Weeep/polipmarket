@@ -5,7 +5,6 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
 import { EventCard } from "@/components/EventCard";
-import { useMe } from "@/context/MeContext";
 import { EventCategory, EventSummary } from "@/modules/event/domain/Event";
 import {
   EVENT_CATEGORY_OPTIONS,
@@ -24,7 +23,6 @@ function EventsPageContent() {
   const [availableCategories, setAvailableCategories] = useState<
     EventCategory[]
   >([]);
-  const { me, isMeResolved } = useMe();
 
   const query = normalizeSearchTerm(searchParams.get("q"));
   const hasValidQuery = query.length >= 2;
@@ -61,25 +59,44 @@ function EventsPageContent() {
   }, []);
 
   useEffect(() => {
-    setLoading(true);
-    const params = new URLSearchParams();
+    let isCancelled = false;
 
-    if (hasValidQuery) {
-      params.set("q", query);
+    async function loadEvents() {
+      setLoading(true);
+
+      const params = new URLSearchParams();
+
+      if (hasValidQuery) {
+        params.set("q", query);
+      }
+
+      if (selectedCategory) {
+        params.set("category", selectedCategory);
+      }
+
+      const endpoint = params.toString()
+        ? `/api/events?${params.toString()}`
+        : "/api/events";
+
+      try {
+        const res = await apiFetch(endpoint);
+        const data = (await res.json()) as EventSummary[];
+
+        if (!isCancelled) {
+          setEvents(data);
+        }
+      } finally {
+        if (!isCancelled) {
+          setLoading(false);
+        }
+      }
     }
 
-    if (selectedCategory) {
-      params.set("category", selectedCategory);
-    }
+    void loadEvents();
 
-    const endpoint = params.toString()
-      ? `/api/events?${params.toString()}`
-      : "/api/events";
-
-    apiFetch(endpoint)
-      .then((res) => res.json())
-      .then((data) => setEvents(data as EventSummary[]))
-      .finally(() => setLoading(false));
+    return () => {
+      isCancelled = true;
+    };
   }, [hasValidQuery, query, selectedCategory]);
 
   if (loading) return <p>Loading events…</p>;
@@ -89,24 +106,12 @@ function EventsPageContent() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-stone-100">Események</h1>
 
-        {me ? (
-          <Link href="/events/new" className="button-gold">
-            Új
-          </Link>
-        ) : (
-          <button
-            type="button"
-            disabled
-            title={
-              isMeResolved
-                ? "Új esemény létrehozásához be kell jelentkezned."
-                : "Felhasználói állapot betöltése..."
-            }
-            className="button-gold cursor-not-allowed opacity-50"
-          >
-            Új
-          </button>
-        )}
+        <Link
+          href="/events/new"
+          className="text-yellow-500 font-semibold hover:text-yellow-400 hover:underline"
+        >
+          Én is létrehozok egy eseményt!
+        </Link>
       </div>
 
       {/*TODO: Remove later */}
