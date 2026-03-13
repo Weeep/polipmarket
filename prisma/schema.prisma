@@ -14,6 +14,11 @@ enum UserRole {
   ADMIN
 }
 
+enum UserAuthType {
+  GOOGLE
+  GUEST
+}
+
 enum MarketType {
   BINARY
 }
@@ -76,6 +81,9 @@ model User {
   name           String?
   image          String?
   role           UserRole  @default(USER)
+  authType       UserAuthType @default(GOOGLE)
+  guestKeyHash   String?   @unique
+  guestKeyAcknowledgedAt DateTime?
   deletedAt      DateTime?
   sessionVersion Int       @default(0)
 

@@ -32,6 +32,8 @@ export function Header() {
   const [deleteReason, setDeleteReason] = useState("");
   const [searchValue, setSearchValue] = useState(currentQuery);
   const [isCategoryPanelOpen, setIsCategoryPanelOpen] = useState(false);
+  const [isGuestKeyAckSubmitting, setIsGuestKeyAckSubmitting] = useState(false);
+  const [guestKeyAckError, setGuestKeyAckError] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { me } = useMe();
@@ -43,6 +45,9 @@ export function Header() {
 
   const isImpersonating = Boolean(session?.user?.impersonatedBy);
   const isAdmin = me?.role === "ADMIN";
+  const guestRecoveryKey = session?.user?.guestRecoveryKey;
+  const shouldShowGuestRecoveryBanner =
+    Boolean(me) && Boolean(session?.user?.isGuest) && Boolean(guestRecoveryKey);
 
   useEffect(() => {
     if (!me) {
@@ -94,6 +99,32 @@ export function Header() {
 
   async function handleLogout() {
     await signOut({ callbackUrl: "/" });
+  }
+
+
+  async function handleGuestRecoveryAcknowledge() {
+    if (!guestRecoveryKey) {
+      return;
+    }
+
+    try {
+      setIsGuestKeyAckSubmitting(true);
+      setGuestKeyAckError(null);
+
+      await apiFetch("/api/auth/guest/recovery-key/ack", {
+        method: "POST",
+      });
+
+      await update({ guestRecoveryKey: null });
+    } catch (error) {
+      setGuestKeyAckError(
+        error instanceof Error
+          ? error.message
+          : "A visszaállító kulcs mentése nem sikerült.",
+      );
+    } finally {
+      setIsGuestKeyAckSubmitting(false);
+    }
   }
 
   async function handleDeleteAccount() {
@@ -260,6 +291,40 @@ export function Header() {
           )}
         </div>
       </div>
+
+
+      {shouldShowGuestRecoveryBanner && (
+        <div className="mt-2 rounded-lg border border-amber-400/40 bg-amber-500/10 px-3 py-3 text-amber-100">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-amber-200">
+                Vendég fiók visszaállító kulcs
+              </p>
+              <p className="text-sm">
+                Mentsd el ezt a kulcsot, ezzel tudsz belépni másik eszközről:
+                <span className="ml-2 rounded bg-black/30 px-2 py-1 font-mono text-xs sm:text-sm">
+                  {guestRecoveryKey}
+                </span>
+              </p>
+              <p className="text-xs text-amber-200/90">
+                A csík addig marad itt, amíg az Elmentettem gombra nem nyomsz.
+              </p>
+              {guestKeyAckError && (
+                <p className="text-xs text-rose-300">{guestKeyAckError}</p>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleGuestRecoveryAcknowledge}
+              disabled={isGuestKeyAckSubmitting}
+              className="self-start rounded-md border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-100 transition hover:bg-amber-400/20 disabled:opacity-60 md:self-auto"
+            >
+              {isGuestKeyAckSubmitting ? "Mentés..." : "Elmentettem"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {me && isDeleteDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
