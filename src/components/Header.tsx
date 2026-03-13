@@ -330,7 +330,7 @@ export function Header() {
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="space-y-1">
               <p className="text-sm">
-                Mentsd el ezt a kulcsot, ezzel tudsz belépni másik eszközről:
+                Mentsd el ezt a kulcsot, ezzel tudsz újra vagy másik eszközről belépni:
                 <span className="ml-2 rounded bg-black/30 px-2 py-1 font-mono text-xs sm:text-sm">
                   {guestRecoveryKey}
                 </span>

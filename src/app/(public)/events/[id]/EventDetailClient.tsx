@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { EventCard } from "@/components/EventCard";
 import { apiFetch } from "@/lib/apiFetch";
 import { EventSummary } from "@/modules/event/domain/Event";
@@ -43,6 +44,14 @@ export function EventDetailClient({ id }: { id: string }) {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="mb-3 flex justify-end">
+        <Link
+          href="/events/new"
+          className="text-yellow-500 font-semibold hover:text-yellow-400 hover:underline"
+        >
+          Én is létrehozok egy eseményt!
+        </Link>
+      </div>
       <EventCard event={event} />
     </div>
   );
