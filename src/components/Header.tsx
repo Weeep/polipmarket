@@ -34,7 +34,9 @@ export function Header() {
   const [isCategoryPanelOpen, setIsCategoryPanelOpen] = useState(false);
   const [isGuestKeyAckSubmitting, setIsGuestKeyAckSubmitting] = useState(false);
   const [guestKeyAckError, setGuestKeyAckError] = useState<string | null>(null);
+  const [isGuestRecoveryKeyCopied, setIsGuestRecoveryKeyCopied] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const guestRecoveryCopyResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { me } = useMe();
   const previousAmountsRef = useRef<{ balance: number; locked: number } | null>(
@@ -92,6 +94,15 @@ export function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(
+    () => () => {
+      if (guestRecoveryCopyResetTimerRef.current) {
+        clearTimeout(guestRecoveryCopyResetTimerRef.current);
+      }
+    },
+    [],
+  );
+
   async function stopImpersonation() {
     await update({ impersonatedUserId: null });
     window.location.href = "/";
@@ -124,6 +135,27 @@ export function Header() {
       );
     } finally {
       setIsGuestKeyAckSubmitting(false);
+    }
+  }
+
+  async function handleGuestRecoveryKeyCopy() {
+    if (!guestRecoveryKey) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(guestRecoveryKey);
+      setIsGuestRecoveryKeyCopied(true);
+
+      if (guestRecoveryCopyResetTimerRef.current) {
+        clearTimeout(guestRecoveryCopyResetTimerRef.current);
+      }
+
+      guestRecoveryCopyResetTimerRef.current = setTimeout(() => {
+        setIsGuestRecoveryKeyCopied(false);
+      }, 2500);
+    } catch {
+      setGuestKeyAckError("A kulcs másolása nem sikerült.");
     }
   }
 
@@ -297,17 +329,25 @@ export function Header() {
         <div className="mt-2 rounded-lg border border-amber-400/40 bg-amber-500/10 px-3 py-3 text-amber-100">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wide text-amber-200">
-                Vendég fiók visszaállító kulcs
-              </p>
               <p className="text-sm">
                 Mentsd el ezt a kulcsot, ezzel tudsz belépni másik eszközről:
                 <span className="ml-2 rounded bg-black/30 px-2 py-1 font-mono text-xs sm:text-sm">
                   {guestRecoveryKey}
                 </span>
-              </p>
-              <p className="text-xs text-amber-200/90">
-                A csík addig marad itt, amíg az Elmentettem gombra nem nyomsz.
+                <button
+                  type="button"
+                  onClick={handleGuestRecoveryKeyCopy}
+                  className="ml-2 inline-flex items-center gap-1 rounded px-1 py-0.5 align-middle text-base leading-none transition hover:bg-amber-300/20"
+                  aria-label="Visszaállító kulcs másolása"
+                  title="Kulcs másolása"
+                >
+                  <span aria-hidden="true">📋</span>
+                  {isGuestRecoveryKeyCopied && (
+                    <span className="text-emerald-300" aria-hidden="true">
+                      ✅
+                    </span>
+                  )}
+                </button>
               </p>
               {guestKeyAckError && (
                 <p className="text-xs text-rose-300">{guestKeyAckError}</p>
