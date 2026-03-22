@@ -3,16 +3,25 @@ import { ImpersonateButton } from "@/components/ImpersonateButton";
 import { LegalDocumentsAdminForm } from "@/components/LegalDocumentsAdminForm";
 import { MarketAdminPanel } from "@/components/MarketAdminPanel";
 import { StopImpersonationButton } from "@/components/StopImpersonationButton";
+import { TrackedPagesAdminPanel } from "@/components/TrackedPagesAdminPanel";
 import { ensureAdmin } from "@/modules/auth/application/ensureAdmin";
 import { listPublicAssetPdfFileNames } from "@/modules/legal/application/publicLegalAssets";
 import { listUsers } from "@/modules/user/application/listUsers";
+import { listTrackedPages } from "@/modules/tracked-page/application/listTrackedPages";
 import Link from "next/link";
 
-export default async function AdminPage() {
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   await ensureAdmin();
-  const [users, availableDocuments] = await Promise.all([
+  const resolvedSearchParams = (await searchParams) ?? {};
+
+  const [users, availableDocuments, trackedPages] = await Promise.all([
     listUsers(),
     listPublicAssetPdfFileNames(),
+    listTrackedPages(),
   ]);
 
   return (
@@ -94,6 +103,14 @@ export default async function AdminPage() {
 
       <section className="rounded-xl border border-stone-700/70 bg-stone-900/70 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
         <LegalDocumentsAdminForm availableDocuments={availableDocuments} />
+      </section>
+
+      <section className="rounded-xl border border-stone-700/70 bg-stone-900/70 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
+        <TrackedPagesAdminPanel
+          pages={trackedPages}
+          feedbackStatus={typeof resolvedSearchParams.trackedPages === "string" ? resolvedSearchParams.trackedPages : undefined}
+          feedbackMessage={typeof resolvedSearchParams.message === "string" ? resolvedSearchParams.message : undefined}
+        />
       </section>
 
       <p className="text-sm text-stone-300">
