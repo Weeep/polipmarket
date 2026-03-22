@@ -56,6 +56,17 @@ enum LegalDocumentType {
   PRIVACY_NOTICE
 }
 
+enum TrackedPagePlatform {
+  FACEBOOK
+}
+
+enum TrackedPageStatus {
+  ACTIVE
+  PAUSED
+  BROKEN
+  ARCHIVED
+}
+
 model Event {
   id             String        @id @default(cuid())
   question       String
@@ -103,6 +114,30 @@ model User {
   updatedAt DateTime @updatedAt
 
   @@index([deletedAt])
+}
+
+model TrackedPage {
+  id             String              @id @default(cuid())
+  slug           String              @unique
+  displayName    String
+  platform       TrackedPagePlatform @default(FACEBOOK)
+  sourceUrl      String              @unique
+  canonicalUrl   String?             @unique
+  status         TrackedPageStatus   @default(ACTIVE)
+  scrapeEnabled  Boolean             @default(true)
+  loginRequired  Boolean             @default(true)
+  country        String?
+  party          String?
+  role           String?
+  tags           String[]            @default([])
+  scrapeNotes    String?
+  lastVerifiedAt DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@index([status, scrapeEnabled])
+  @@index([country])
+  @@index([party])
 }
 
 model LegalDocumentVersion {
